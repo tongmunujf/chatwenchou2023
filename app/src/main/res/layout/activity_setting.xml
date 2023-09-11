@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/set_voice"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray5"
+    android:orientation="vertical">
+
+    <!--最简单的加载下拉数组：entries，内容定义在string-array中-->
+    <ImageView
+        android:id="@+id/im_back"
+        android:layout_width="25dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"
+        android:src="@mipmap/back"/>
+    <TextView
+        android:id="@+id/file_number2"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:singleLine="true"
+        android:text=""
+        android:textColor="@color/gray0"
+        android:textSize="15sp"
+        android:textStyle="bold"/>
+
+    <LinearLayout
+        android:id="@+id/file_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray4"
+        android:paddingTop="20dp"
+        android:paddingRight="3dp"
+        >
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_settings_file"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:text="@string/max_file_number"
+                android:textColor="@color/gray0"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_margin="20dp"
+            android:dropDownVerticalOffset="40dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="5dp">
+
+    </TextView>
+    <LinearLayout
+        android:id="@+id/file_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray4"
+        android:paddingTop="20dp"
+        android:paddingRight="3dp"
+        >
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_settings_file"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/text_file_path"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:text="@string/default_file_receiving_path"
+                android:textColor="@color/gray0"
+                android:textSize="15sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="5dp">
+
+    </TextView>
+    <LinearLayout
+        android:id="@+id/file_quick_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray4"
+        android:paddingTop="20dp"
+        android:paddingRight="3dp"
+        >
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_settings_file"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/quick_path"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:singleLine="false"
+                android:text="@string/Shortcut_file_sending_path"
+                android:textColor="@color/gray0"
+                android:textSize="15sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="5dp">
+
+    </TextView>
+    <LinearLayout
+        android:id="@+id/password_change4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray4"
+        android:paddingTop="20dp"
+        android:paddingRight="3dp"
+        >
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_settings_file"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/file_history_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:text="@string/maximum_retention_time_of_historical_files"
+                android:textColor="@color/gray0"
+                android:textSize="15sp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+        <Spinner
+            android:id="@+id/spinner2"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_margin="20dp"
+            android:dropDownVerticalOffset="40dp" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="5dp">
+
+    </TextView>
+    <LinearLayout
+        android:id="@+id/password_change5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray4"
+        android:paddingTop="20dp"
+        android:paddingRight="3dp"
+        >
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_settings_file"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/ciucle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:text="TryMaxLinkTimes"
+                android:textColor="@color/gray0"
+                android:textSize="15sp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+        <Spinner
+            android:id="@+id/spinner3"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_margin="20dp"
+            android:dropDownVerticalOffset="40dp" />
+    </LinearLayout>
+    <!--    <LinearLayout-->
+    <!--        android:id="@+id/voice_layout"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="50dp"-->
+    <!--        android:background="@color/gray4"-->
+    <!--        android:paddingTop="20dp"-->
+    <!--        android:paddingRight="3dp"-->
+    <!--        >-->
+    <!--        <ImageView-->
+    <!--            android:layout_width="20dp"-->
+    <!--            android:layout_height="20dp"-->
+    <!--            android:layout_marginLeft="16dp"-->
+    <!--            android:layout_marginRight="16dp"-->
+    <!--            android:scaleType="centerCrop"-->
+    <!--            android:src="@drawable/audio_animation_list_left_3"/>-->
+    <!--        <LinearLayout-->
+    <!--            android:layout_width="0dp"-->
+    <!--            android:layout_height="70dp"-->
+    <!--            android:layout_weight="1"-->
+    <!--            android:orientation="vertical">-->
+    <!--            <TextView-->
+    <!--                android:id="@+id/voice"-->
+    <!--                android:layout_width="wrap_content"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:singleLine="true"-->
+    <!--                android:text="语音声音"-->
+    <!--                android:textColor="@color/gray0"-->
+    <!--                android:textSize="15sp"-->
+    <!--                android:textStyle="bold"/>-->
+
+    <!--        </LinearLayout>-->
+    <!--        <ImageView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_marginTop="5dp"-->
+    <!--            android:layout_marginRight="20dp"-->
+    <!--            android:src="@drawable/ic_right_90" />-->
+    <!--    </LinearLayout>-->
+    <!--    <FrameLayout-->
+    <!--        android:id="@+id/fl_container"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        />-->
+</LinearLayout>

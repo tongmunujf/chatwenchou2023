@@ -1,0 +1,7 @@
+include ':orbotservice'
+include ':mp3recorder'
+include ':sounchtouch'
+include ':susindexbar'
+include ':app'
+rootProject.name = "Chat"
+include ':playcompute'

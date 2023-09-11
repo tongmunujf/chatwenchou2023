@@ -1,0 +1,77 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion '30.0.3'
+
+    defaultConfig {
+        applicationId "com.ucas.chat"
+        minSdkVersion 23
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'armeabi', 'armeabi-v7a', 'mips', 'x86'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs=['libs']
+            jni.srcDirs = []
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    ndkVersion '21.3.6528147'
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'com.android.support:recyclerview-v7:29.0.3'
+    implementation 'com.android.support:design:29.0.3'
+
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation files('libs\\commons-codec-1.15.jar')
+    implementation project(path: ':playcompute')
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation project(path: ':susindexbar')
+    implementation project(path: ':sounchtouch')
+    implementation project(path: ':orbotservice')
+
+    /*okhttp*/
+    implementation 'com.squareup.okio:okio:1.5.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.2.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    /*gson*/
+    implementation 'com.google.code.gson:gson:2.8.2'
+    /*圆角图片*/
+    implementation 'com.joooonho:selectableroundedimageview:1.0.1'
+    /*相册  implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.2.3'*/
+    implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.2.3'
+    /*图片缩放*/
+    implementation 'com.bm.photoview:library:1.4.1'
+
+    // 文件选择
+    implementation 'com.github.ZLYang110:FileSelector:2.1.1'
+    implementation 'com.github.ZLYang110:UpperDialog:1.4.1'
+    //消息传递
+    implementation 'org.greenrobot:eventbus:3.2.0'
+    // 文件下载
+    implementation 'com.arialyy.aria:core:3.8.12'
+    annotationProcessor 'com.arialyy.aria:compiler:3.8.12'
+    implementation 'com.github.imcloudfloating:ProgressBar:1.1'
+    api 'com.tencent.tbs.tbssdk:sdk:43939'
+    implementation 'org.litepal.android:core:1.4.0'
+
+    implementation 'com.github.chrisbanes:PhotoView:2.0.0'
+
+//    implementation 'com.jelly:mango:1.1.1'//会和com.zlylib.fileselectorlib冲突，导致选文件时，图片类的会闪退！！！
+}

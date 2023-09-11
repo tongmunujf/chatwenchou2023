@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.ucas.chat">
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:configChanges="keyboardHidden|orientation|locale"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/calculatorpic"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:resizeableActivity="true"
+        android:roundIcon="@mipmap/calculatorpic"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity android:name=".ui.home.chat.PreviewPicturesActivity"></activity>
+        <activity android:name=".ui.camera.adapter.DataPictureActivity" />
+        <activity android:name=".ui.camera.ShowMultiImageActivity" />
+        <activity android:name=".ui.camera.MyCameraActivity" /> <!-- android:name=".ui.login.LoginActivity" -->
+        <!-- TODO: 2021/10/25 增加掩护功能，从这个界面启动" -->
+        <activity
+            android:name="com.example.android_play.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity> <!-- TODO: 2021/10/25 增加掩护功能。跳转方法参考：https://blog.51cto.com/u_15072644/2757305" -->
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <!-- 下面这几行也必须得设置 -->
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="main"
+                    android:path="/mainDetail"
+                    android:scheme="scheme" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.home.HomeActivity" />
+        <activity android:name=".ui.register.RegisterActivity" />
+        <activity android:name=".ui.home.set.SettingActivity" />
+        <activity
+            android:name=".ui.home.chat.P2PChatActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".ui.home.chat.ShowVideoActivity" />
+        <activity android:name=".ui.home.chat.ShowImageActivity" />
+        <activity android:name=".ui.download.DownloadActivity" />
+        <activity
+            android:name=".ui.home.chat.ShowImageActivity"
+            tools:ignore="DuplicateActivity" />
+        <activity
+            android:name=".ui.ChangePasswordActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".ui.home.PersonalDetailsActivity" />
+        <activity android:name=".ui.home.set.LanguageActivity" />
+
+        <receiver
+            android:name=".broadcast.TorBroadCastReceiver"
+            android:permission="true">
+            <intent-filter>
+                <action android:name="TorReceiver" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".ui.login.LoginActivity$ProgressReceiver"
+            android:permission="true">
+            <intent-filter>
+                <action android:name="log" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".ui.home.NewsFragment$ProgressReceiver"
+            android:permission="true">
+            <intent-filter>
+                <action android:name="log" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.tencent.smtt.export.external.DexClassLoaderProviderService"
+            android:label="dexopt"
+            android:process=":dexopt" /> <!-- 注意是$符号，表示内部类 -->
+        <service
+            android:name="org.torproject.android.service.OrbotService"
+            android:enabled="true"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+    </application>
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" /> <!-- 外置存储存取权限 -->
+    <uses-feature android:name="android.hardware.camera" />
+
+    <uses-feature android:name="android.hardware.camera.autofocus" /> <!-- 多媒体相关 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 自动聚焦权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Android11额外添加 -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- 广播 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+</manifest>

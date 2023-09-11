@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android_custom="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@mipmap/bg">
+
+    <TextView
+        android:id="@+id/tv_head_line"
+        style="@style/HeadlineStyle"
+        android:text="@string/login"
+        android:layout_marginTop="50dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="80dp"
+        android:paddingBottom="30dp"
+        android:background="@drawable/bg_rect_white">
+
+        <LinearLayout
+            style="@style/BaseStyle"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="30dp"
+            android:paddingLeft="30dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv1"
+                style="@style/TextStyle1"
+                android:text="@string/user_name"
+                android:layout_gravity="left"/>
+
+            <EditText
+                android:id="@+id/ed_user_name"
+                style="@style/EditTextStyle1"
+                android:layout_marginTop="10dp"
+                android:hint="@string/input_uesr_name" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp"/>
+        <LinearLayout
+            style="@style/BaseStyle"
+            android:layout_marginTop="30dp"
+            android:paddingLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv2"
+                style="@style/TextStyle1"
+                android:layout_gravity="left"
+                android:text="@string/set_password" />
+            <EditText
+                android:id="@+id/ed_pass_word"
+                style="@style/EditTextStyle1"
+                android:hint="@string/input_password"
+                android:text=""
+                android:layout_marginTop="10dp" />
+            <TextView
+                android:id="@+id/tv_forget_password"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:visibility="gone"
+                android:text="@string/forget_password"
+                android:gravity="center_vertical"
+                android:layout_gravity="right"/>
+
+        </LinearLayout>
+        <Button
+            android:id="@+id/butt_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="35dp"
+            android:text="@string/login"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_login_button">
+        </Button>
+
+    </LinearLayout>
+    <TextView
+        android:id="@+id/tv_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="没有账号？点此注册"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:textColor="@color/blue4"
+        android:visibility="gone"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wait_login"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="15dp"
+        android:textColor="@color/red6"
+        android:textSize="12sp"/>
+
+
+    <TextView
+        android:id="@+id/tv_show_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:gravity="center_horizontal"
+        android:layout_marginTop="25dp"
+        android:textColor="@color/gray14"
+        android:textSize="30sp"/>
+
+</LinearLayout>

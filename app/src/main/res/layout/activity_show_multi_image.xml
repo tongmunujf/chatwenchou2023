@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.camera.ShowMultiImageActivity">
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/take_photo_again"
+            android:text="@string/again"
+            android:layout_width="wrap_content"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/button_drawable2"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_f0"/>
+
+        <Button
+            android:id="@+id/finish"
+            android:layout_marginRight="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_drawable2"
+            android:text="@string/send"
+            android:textColor="@color/color_f0"/>
+
+
+        <Button
+            android:id="@+id/save"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_drawable2"
+            android:text="@string/save"
+            android:textColor="@color/color_f0"/>
+
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

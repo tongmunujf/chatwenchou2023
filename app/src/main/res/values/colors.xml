@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#f2ffffff</color>
+    <color name="white_95">#f2ffffff</color>
+    <color name="line">#E5E5E5</color>
+    <color name="primary_background">#EDEDED</color>
+
+    <color name="gray0">#464646</color>
+    <color name="gray2">#969696</color>
+    <color name="gray4">#F5F5F5</color>
+    <color name="gray5">#EDEDED</color>
+    <color name="gray12">#828282</color>
+    <color name="gray14">#F7F7F7</color>
+    <color name="gray15">#585858</color>
+    <color name="gray20">#E5E5E5</color>
+
+    <color name="red6">#D54A47</color>
+    <color name="red8">#FF3E3E</color>
+
+    <color name="green3">#1AAD19</color>
+    <color name="green4">#35D96C</color>
+
+    <color name="blue2">#3E65E4</color>
+    <color name="blue4">#1460EA</color>
+    <color name="blue5">#E600D7FF</color>
+    <color name="blue6">#92C7FF</color>
+
+    <color name="black1">#1D1D1D</color>
+    <color name="black6">#666666</color>
+
+    <!--遮盖层颜色-->
+
+    <!--快速索引bar颜色-->
+
+    <color name="colorPrimary">#1296db</color>
+    <color name="white_color">#ffffff</color>
+    <color name="app_black_color">#616060</color>
+    <color name="app_blue_color">#1296db</color>
+    <color name="tr_black_color">#77616060</color>
+    <color name="default_back_color">#fAfAfA</color>
+    <color name="light_gray_color">#f7f7f7</color>
+    <color name="stroke_color">#e9e5e5</color>
+    <color name="dialog_back_color">#aab7b5b5</color>
+    <color name="partTranslucent">#39000000</color>
+    <color name="bg_color">#f3f3f3</color>
+</resources>

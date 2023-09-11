@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">聊天</string>
+    <string name="news">消息</string>
+    <string name="mail_list">通讯录</string>
+    <string name="me">我</string>
+    <string name="registered_user">用户注册</string>
+    <string name="user_name">用  户  名</string>
+    <string name="set_password">密码</string>
+    <string name="input_password">请输入密码</string>
+    <string name="input_password_again">请再次输入密码</string>
+    <string name="input_uesr_name">请输入用户名</string>
+    <string name="confirm_password">确认密码</string>
+    <string name="register_login">注册并登陆</string>
+    <string name="login">用户登陆</string>
+    <string name="change_password">修改密码</string>
+    <string name="get_user_name">获取用户名?</string>
+    <string name="forget_password">忘记密码？</string>
+    <string name="tip_uesr_name">请填写用户名</string>
+    <string name="tip_pass_word">请填写密码</string>
+    <string name="error_user_name">用户名不存在</string>
+    <string name="tip_confirm_pass_word">请确认两次密码是否一样</string>
+    <string name="tip_login_error">账号或密码不正确</string>
+    <string name="on_line">在线</string>
+    <string name="ok">确认</string>
+    <string name="cancel">取消</string>
+    <string-array name="effect">
+        <item>原声</item>
+        <item>萝莉</item>
+        <item>大叔</item>
+        <item>惊悚</item>
+        <item>搞怪</item>
+        <item>蜗牛</item>
+    </string-array>
+    <string name="record_down_shuohua">按住说话</string>
+    <string name="audio_fail">录音失败</string>
+    <string name="audio_cancel">取消录音</string>
+    <string name="audio_short">录音太短</string>
+    <string name="press_record">按住 说话</string>
+    <string name="text_send">发送</string>
+    <string name="tv_image">图片</string>
+    <string name="tv_camera">相机</string>
+    <string name="video">视频</string>
+    <string name="file">文件</string>
+    <string name="release_end">松开 发送</string>
+    <string name="release_cancel">松开手指 取消发送</string>
+    <string name="move_up_cancel">手指上滑 取消发送</string>
+    <string name="record_to_short">说话时间过短</string>
+    <string name="contact_list">通讯录</string>
+    <string name="delete_talk">确定删除此对话？</string>
+    <string name="send_message">发消息</string>
+    <string name="input">请输入</string>
+    <string name="input_remark">请输入备注</string>
+    <string name="add_success">添加成功</string>
+    <string name="Account_Password">账号密码</string>
+    <string name="change_language">更换语言</string>
+    <string name="set">设置</string>
+    <string name="quit">退出登录</string>
+    <string name="max_file_number">最大文件并发数:</string>
+    <string name="Shortcut_file_sending_path">快捷文件发送路径:</string>
+    <string name="default_file_receiving_path">默认文件接收路径:</string>
+    <string name="maximum_retention_time_of_historical_files">历史文件最长保存时间:</string>
+    <string name="ch">简体中文</string>
+    <string name="ch_hk">中文繁体</string>
+    <string name="en">英文</string>
+    <string name="language_tip">温馨提示：选择语言将会导致重新登录</string>
+    <string name="remarks">修改备注</string>
+    <string name="protocol_failure">好友连接失败</string>
+    <string name="wait_login">登录可能需要花点时间，请耐心等待</string>
+    <string name="off_line">离线</string>
+    <string name="content_file">[文件]</string>
+    <string name="content_im">[图片]</string>
+</resources>

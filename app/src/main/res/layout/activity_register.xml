@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@mipmap/bg">
+    <ImageView
+        android:id="@+id/im_back"
+        android:layout_width="25dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"
+        android:src="@mipmap/back_white"/>
+
+    <TextView
+        android:id="@+id/tv_head_line"
+        style="@style/HeadlineStyle"
+        android:text="@string/registered_user"
+        android:layout_marginTop="40dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="60dp"
+        android:paddingTop="30dp"
+        android:paddingBottom="30dp"
+        android:background="@drawable/bg_rect_white">
+
+        <LinearLayout
+            style="@style/BaseStyle"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="30dp"
+            android:paddingLeft="30dp">
+
+            <TextView
+                android:id="@+id/tv1"
+                style="@style/TextStyle1"
+                android:text="@string/user_name"
+                android:layout_gravity="left"/>
+
+            <EditText
+                android:id="@+id/ed_user_name"
+                style="@style/EditTextStyle1"
+                android:layout_marginTop="10dp"
+                android:hint="@string/input_uesr_name" />
+        </LinearLayout>
+        <LinearLayout
+            style="@style/BaseStyle"
+            android:layout_marginTop="20dp"
+            android:paddingLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:orientation="vertical">
+            <TextView
+                style="@style/TextStyle1"
+                android:layout_gravity="left"
+                android:text="@string/set_password" />
+            <EditText
+                android:id="@+id/ed_pass_word"
+                style="@style/EditTextStyle1"
+                android:hint="@string/input_password"
+                android:text=""
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/BaseStyle"
+            android:layout_marginTop="20dp"
+            android:paddingLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:orientation="vertical">
+            <TextView
+                style="@style/TextStyle1"
+                android:layout_gravity="left"
+                android:text="@string/confirm_password" />
+            <EditText
+                android:id="@+id/ed_pass_word_again"
+                style="@style/EditTextStyle1"
+                android:hint="@string/input_password_again"
+                android:text=""
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/butt_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="35dp"
+            android:text="@string/register_login"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_login_button">
+        </Button>
+
+    </LinearLayout>
+
+
+</LinearLayout>

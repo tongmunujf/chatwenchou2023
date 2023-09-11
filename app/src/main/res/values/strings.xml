@@ -1,0 +1,88 @@
+<resources>
+    <string name="app_name">Chat</string>
+    <string name="news">News</string>
+    <string name="mail_list">Mail List</string>
+    <string name="me">Me</string>
+    <string name="registered_user">Registered User</string>
+    <string name="user_name">User Name</string>
+    <string name="set_password">Password</string>
+    <string name="input_password">Please input a password</string>
+    <string name="input_password_again">Please enter the password again</string>
+    <string name="input_uesr_name">Input users name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="register_login">Register and log in</string>
+    <string name="login">Login</string>
+    <string name="change_password">Change Password</string>
+    <string name="get_user_name">Get user name?</string>
+    <string name="forget_password">Forget the password？</string>
+    <string name="tip_uesr_name">Please fill in the user name</string>
+    <string name="tip_pass_word">Please fill in the password</string>
+    <string name="error_user_name">user name does not exist</string>
+    <string name="tip_confirm_pass_word">Please confirm whether the password is the same twice</string>
+    <string name="tip_login_error">Wrong password</string>
+    <string name="on_line">on-line</string>
+    <string name="ok">confirm</string>
+    <string name="cancel">cancel</string>
+    <string name="record_down_shuohua">Hold to talk</string>
+    <string name="audio_fail">Recording failed</string>
+    <string name="audio_cancel">cancel recording</string>
+    <string name="audio_short">The recording is too short</string>
+    <string name="press_record">Hold to talk</string>
+    <string name="text_send">send</string>
+    <string name="tv_image">picture</string>
+    <string name="tv_camera">camera</string>
+    <string name="video">video</string>
+    <string name="file">file</string>
+    <string name="release_end">Release send</string>
+    <string name="release_cancel">Release the finger to cancel the transmission</string>
+    <string name="move_up_cancel">Finger up to cancel sending</string>
+    <string name="record_to_short">The speaking time is too short</string>
+    <string name="contact_list">mail list</string>
+    <string name="delete_talk">Delete this conversation?</string>
+    <string name="send_message">Send a message</string>
+    <string name="clean_chat_data"> clean chat data</string>
+    <string name="input">Please input</string>
+    <string name="input_remark">Please enter your comments</string>
+    <string name="add_success">Added successfully</string>
+    <string name="Account_Password">Account and Password</string>
+    <string name="change_language">Change Language</string>
+    <string name="set">Settings</string>
+    <string name="quit">Quit</string>
+    <string name="max_file_number">Maximum number of concurrent files:</string>
+    <string name="Shortcut_file_sending_path">Shortcut file sending path:</string>
+    <string name="default_file_receiving_path">Default file receiving path:</string>
+    <string name="maximum_retention_time_of_historical_files">Maximum retention time of historical files:</string>
+    <string name="ch">Simplified Chinese</string>
+    <string name="ch_hk">Traditional Chinese</string>
+    <string name="en">English</string>
+
+    <string name="lack_encyptal_file">lack of encyptal files, please contact creator</string>
+    <string name="language_tip">Warm tip: choosing a language will cause the app to log in again</string>
+    <string name="remarks">Modify remarks: </string>
+    <string name="protocol_failure">Failed to connect friends</string>
+    <string name="wait_login">Login may take some time, please be patient</string>
+    <string name="off_line">off line</string>
+    <string name="content_file">[File]</string>
+    <string name="content_im">[Image]</string>
+
+    <string name="camera">camera</string>
+
+
+    <string name="again">again</string>
+    <string name="send">send</string>
+    <string name="save">save</string>
+
+<!--    <string name="cancel">cancel</string>-->
+
+
+
+
+    <string-array name="effect">
+        <item>Original sound</item>
+        <item>lolita</item>
+        <item>uncle</item>
+        <item>Thriller</item>
+        <item>Funny</item>
+        <item>snail</item>
+    </string-array>
+</resources>
