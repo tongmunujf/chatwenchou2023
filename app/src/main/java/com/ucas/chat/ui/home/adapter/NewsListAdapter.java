@@ -37,6 +37,11 @@ public class NewsListAdapter extends BaseAdapter {
         this.newsList = list;
     }
 
+    public void notifyData(List<MsgListBean> list){
+        this.newsList = list;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return newsList.size();
@@ -70,17 +75,11 @@ public class NewsListAdapter extends BaseAdapter {
             viewHolder=(ViewHolder)view.getTag();
         }
         MsgListBean newsBean = newsList.get(position);
-        UserBean mUserBean = SharedPreferencesUtil.getUserBeanSharedPreferences(getContext());
-
-//        if(!newsBean.getFrom().equals(mUserBean.getUserId())){
-//            viewHolder.tv_friend_name.setText(newsBean.getFrom());
-//        }else {
-//            viewHolder.tv_friend_name.setText(newsBean.getTo());
-//        }
-
+        LogUtils.d(TAG, " getView:: newsBean = " + newsBean);
 
         MailListSQLiteHelper mailListSQLiteHelper = MailListSQLiteHelper.getInstance(getContext());
         List<ContactsBean> contactsBeans = mailListSQLiteHelper.queryAll();// TODO: 2022/3/23 获取全部的好友信息
+        LogUtils.d(TAG, " getView:: contactsBeans = " + contactsBeans.toString());
 
 
         String friendNickname = "";
@@ -89,6 +88,10 @@ public class NewsListAdapter extends BaseAdapter {
 
             String transformFriendOrionId = AesTools.getDecryptContent(newsBean.getFriendOrionid(), AesTools.AesKeyTypeEnum.COMMON_KEY);
             String transformOrionId = AesTools.getDecryptContent(contactsBeans.get(i).getOrionId(), AesTools.AesKeyTypeEnum.COMMON_KEY);
+
+            if (transformFriendOrionId == null || transformFriendOrionId.isEmpty()){
+                transformFriendOrionId = newsBean.getFriendOrionid();
+            }
 
             if(transformFriendOrionId.equals(transformOrionId)){
                 friendNickname = contactsBeans.get(i).getNickName();

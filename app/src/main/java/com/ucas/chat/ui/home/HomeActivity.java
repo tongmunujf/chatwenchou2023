@@ -26,6 +26,7 @@ import com.ucas.chat.utils.LogUtils;
 import com.ucas.chat.utils.SharedPreferencesUtil;
 
 import org.apaches.commons.codec.digest.DigestUtils;
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,8 @@ import java.util.List;
 public class HomeActivity extends BaseActivity implements ViewPager.OnPageChangeListener{
 
     public static final String TAG = ConstantValue.TAG_CHAT + "HomeActivity";
+
+    public static final String TAB_MESSAGE = "tab_message";
     private BottomNavigationView mBottomNavigationView;
     private ViewPagerFixed mContentViewPager;
     private SQLiteDatabase mDatabase;
@@ -100,6 +103,7 @@ public class HomeActivity extends BaseActivity implements ViewPager.OnPageChange
                     case R.id.contact:
                         mContentViewPager.setCurrentItem(0);
                         setTitle(getString(R.string.news));
+                        EventBus.getDefault().post(TAB_MESSAGE);
                     break;
 
                     case R.id.discovery:

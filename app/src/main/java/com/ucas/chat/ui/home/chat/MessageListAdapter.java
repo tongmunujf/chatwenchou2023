@@ -314,6 +314,7 @@ public class MessageListAdapter extends BaseAdapter {
         holder.rc_msg_iv_file_type_image.setImageResource(R.mipmap.rc_file_icon_file);//因为会复用上一消息的设计，这里要还原
 
         MsgListBean bean = mMessageList.get(position);
+        LogUtils.d(TAG, " handleGetFileL:: bean = " + bean.toString());
 
         String last_third = bean.getFilePath().substring(bean.getFilePath().length()-3,bean.getFilePath().length());// TODO: 2022/3/29 图片预览
         LogUtils.d("last_third", last_third);
@@ -372,7 +373,7 @@ public class MessageListAdapter extends BaseAdapter {
         }
 
         MsgListBean bean = mMessageList.get(position);
-
+        LogUtils.d(TAG, " handleGetFileR:: bean = " + bean.toString());
         holder.rc_msg_iv_file_type_image.setImageResource(R.mipmap.rc_file_icon_file);//因为会复用上一消息的设计，这里要还原
 
         String last_third = bean.getFilePath().substring(bean.getFilePath().length()-3,bean.getFilePath().length());// TODO: 2022/3/29 图片预览

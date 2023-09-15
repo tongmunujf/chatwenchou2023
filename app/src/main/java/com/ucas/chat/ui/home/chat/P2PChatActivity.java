@@ -1224,7 +1224,8 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
         values.put(ChatContract.MsgListEntry.FRIEND_ORIONID, mContactsBean.getOrionId());
         values.put(ChatContract.MsgListEntry.FRIEND_NICKNAME, mContactsBean.getNickName());
-
+        LogUtils.d(TAG, " sendFile:: orionId: " + mContactsBean.getOrionId());
+        LogUtils.d(TAG, " sendFile:: nickName: " + mContactsBean.getNickName());
 
         mHelper.insertData(getContext(),values);
 

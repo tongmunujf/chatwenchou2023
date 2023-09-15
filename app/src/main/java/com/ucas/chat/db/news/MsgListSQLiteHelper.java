@@ -86,7 +86,6 @@ public class MsgListSQLiteHelper extends SQLiteOpenHelper {
             database.insert(table_name, null, contentValues);
         }catch (Exception e){
             e.printStackTrace();
-//            ToastUtils.showMessage(context, "insert单条异常 "+ e.toString());
             LogUtils.e(TAG, "insert单条异常：" + e.toString());
         }finally {
             if (null != database) {
@@ -137,7 +136,7 @@ public class MsgListSQLiteHelper extends SQLiteOpenHelper {
 
         MailListSQLiteHelper mailListSQLiteHelper = MailListSQLiteHelper.getInstance(context);
         List<ContactsBean> contactsBeans = mailListSQLiteHelper.queryAll();// TODO: 2022/3/23 获取全部的好友信息
-        LogUtils.d(TAG, " queryLast:: 全部好友信息 转化前contactsBeans = " + contactsBeans.toString());
+        LogUtils.d(TAG, " queryLast:: 全部好友个人信息 转化前contactsBeans = " + contactsBeans.toString());
 
         if(cursor.moveToLast()){// TODO: 2022/3/22 目前就只得到最后一条
             do{
@@ -162,25 +161,30 @@ public class MsgListSQLiteHelper extends SQLiteOpenHelper {
                 if(contactsBeansSize>0) {
 
                     for (int i = 0; i < contactsBeansSize ; i++) {
-                        LogUtils.d(TAG, " queryLast:: 转化前orionId = " + contactsBeans.get(i).getOrionId());
-                        LogUtils.d(TAG, " queryLast:: 转化前friendOrionId = " + person.getFriendOrionid());
 
-                        String transformOrionId = AesTools.getDecryptContent(contactsBeans.get(i).getOrionId(), AesTools.AesKeyTypeEnum.COMMON_KEY);
-                        LogUtils.d(TAG, " queryLast:: 转化后orionId = " + transformOrionId );
+                        LogUtils.d(TAG, " queryLast:: 转化前orionId = " + contactsBeans.get(i).getOrionId());
+                        String transOrionId = AesTools.getDecryptContent(contactsBeans.get(i).getOrionId(), AesTools.AesKeyTypeEnum.COMMON_KEY);
+                        if (transOrionId == null || transOrionId.isEmpty()){
+                            transOrionId = contactsBeans.get(i).getOrionId();
+                        }
+                        LogUtils.d(TAG, " queryLast:: 转化后orionId = " + transOrionId);
+
+                        LogUtils.d(TAG, " queryLast:: 转化前friendOrionId = " + person.getFriendOrionid());
                         String transformFriendOrionId = AesTools.getDecryptContent(person.getFriendOrionid(), AesTools.AesKeyTypeEnum.COMMON_KEY);
+                        if (transformFriendOrionId == null || transformFriendOrionId.isEmpty()){
+                            transformFriendOrionId = person.getFriendOrionid();
+                        }
                         LogUtils.d(TAG, " queryLast:: 转化后friendOrionId = " + transformFriendOrionId);
-                        if (transformOrionId.equals(transformFriendOrionId)) {
+
+                        if (transOrionId.equals(transformFriendOrionId)) {
                             personList.add(person);
+                            LogUtils.d(TAG, " queryLast:: 转化后person = " + person.toString());
                             contactsBeans.remove(i);//找到了与这个好友最新发的一条信息后，下一次的遍历不在用它了
                             break;
                         }
-
                     }
                 }else
                     break;
-
-
-
             }
             while(cursor.moveToPrevious());// TODO: 2022/3/23 从后往前遍历
         }
@@ -265,9 +269,15 @@ public class MsgListSQLiteHelper extends SQLiteOpenHelper {
             Log.d(TAG, " queryFriendChatRecord:: 转换前friendOrionId = " + bean.getFriendOrionid());
 
             String fromId = AesTools.getDecryptContent(bean.getFrom(), AesTools.AesKeyTypeEnum.COMMON_KEY);
+            if (fromId == null || fromId.isEmpty()){
+                fromId = bean.getFrom();
+            }
             Log.d(TAG, " queryFriendChatRecord:: 转换后fromId = " + fromId);
 
             String friendOrionId = AesTools.getDecryptContent(bean.getFriendOrionid(), AesTools.AesKeyTypeEnum.COMMON_KEY);
+            if (friendOrionId == null || friendOrionId.isEmpty()){
+                friendOrionId = bean.getFriendOrionid();
+            }
             Log.d(TAG, " queryFriendChatRecord:: 转换后friendOrionId = " + friendOrionId);
 
 

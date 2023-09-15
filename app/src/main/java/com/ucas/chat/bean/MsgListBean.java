@@ -289,10 +289,12 @@ public class MsgListBean implements Serializable {
                 ", isAcked=" + isAcked +
                 ", fileProgress=" + fileProgress +
                 ", isState=" + isState +
-//                ", bitmap=" + bitmap.toString() +
-//                ", pictureSize=" + pictureSize +
-//                ", pictureProgress=" + pictureProgress +
-                ", messageID=" + messageID +
+                ", bitmap=" + bitmap +
+                ", pictureSize=" + pictureSize +
+                ", pictureProgress=" + pictureProgress +
+                ", messageID='" + messageID + '\'' +
+                ", friendOrionid='" + friendOrionid + '\'' +
+                ", friendNickname='" + friendNickname + '\'' +
                 '}';
     }
 }

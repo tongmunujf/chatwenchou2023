@@ -65,6 +65,10 @@ import static org.torproject.android.service.OrbotServiceAction.STATUSCHANGE_MES
 import static org.torproject.android.service.TorServiceConstants.LOCAL_ACTION_LOG;
 import static org.torproject.android.service.TorServiceConstants.LOCAL_EXTRA_LOG;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 /**
  * 消息
  */
@@ -116,9 +120,7 @@ public class NewsFragment extends BaseFragment {
         mLastNewsList = new ArrayList<>();
 
         mLastNewsList = mHelper.queryLast(getContext());// TODO: 2022/3/23 修改，获取不同人的最新一条的信息
-        
-        
-//        newsList.clear();
+
         LogUtils.d(TAG+ " onViewCreated:: mLastNewsList ——》", mLastNewsList.toString());
         mAdapter = new NewsListAdapter(getActivity(), mLastNewsList);
 
@@ -250,6 +252,9 @@ public class NewsFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         initData();
+        if (!EventBus.getDefault().isRegistered(this)){
+            EventBus.getDefault().register(this);
+        }
     }
 
     private void initListener() {
@@ -341,6 +346,14 @@ public class NewsFragment extends BaseFragment {
             }
         });
 
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(String event) {
+        mLastNewsList = mHelper.queryLast(getContext());
+        LogUtils.d(TAG+ " onMessageEvent:: mLastNewsList ——》", mLastNewsList.toString());
+        mAdapter.notifyData(mLastNewsList);
     }
 
     static Handler handler = new Handler(){
@@ -456,17 +469,8 @@ public class NewsFragment extends BaseFragment {
 
                     dialogAdapter.notifyDataSetChanged();
                     recyclerViewDialog.scrollToPosition(progressNodes.size() - 1);
-
                 }
-
-//                }
-
-
             }
-
-
-
-
         }
     }
 
@@ -508,96 +512,12 @@ public class NewsFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-//                progressNodes = new ArrayList<>();//还原
-//                dialogAdapter.notifyDataSetChanged();
-
             }
         });//取消弹出框
 
-
-
         dialog.create();
-//        dialog.show();//让该出现时再出现
-
-
-//        int gg = 16;//测试
-//
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//
-//                for(int i=0;i<gg;i++){
-//
-//                    ProgressNode progressNode = new ProgressNode(i+"","0");
-//                    progressNodes.add(progressNode);
-//
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        public void run() {
-//                            dialogAdapter.notifyDataSetChanged();
-//                            recyclerViewDialog.scrollToPosition(progressNodes.size()-1);
-//                        }
-//                    });
-//
-//
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                }
-//
-//
-//            }
-//        }).start();
-//
-//
-//
-//
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                try {
-//                    Thread.sleep(20000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//
-//
-//                for(int i=0;i<gg;i++){
-//
-//                    progressNodes.get(i).setLoadStatus("-1");
-//
-//                    final int finalI = i;
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        public void run() {
-//                            dialogAdapter.notifyItemChanged(finalI);
-//                            recyclerViewDialog.scrollToPosition(progressNodes.size()-1);
-//                        }
-//                    });
-//
-//
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//
-//                }
-//                dialog.cancel();
-//            }
-//        }).start();
-
-
-
-
-
 
     }
-
 
 
     @Override
@@ -608,6 +528,8 @@ public class NewsFragment extends BaseFragment {
             dialog.cancel();
             dialog=null;
         }
-//        stopTor(getContext());
+        if (EventBus.getDefault().isRegistered(this)){
+            EventBus.getDefault().unregister(this);
+        }
     }
 }
