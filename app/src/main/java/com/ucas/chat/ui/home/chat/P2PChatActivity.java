@@ -279,10 +279,10 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         //2021714 更新
         mServiceHelper = new ServiceInfoHelper(this);
         mDatabase = mServiceHelper.getReadableDatabase();
-        LogUtils.d(TAG, " initData:: 转化前getSecond: " + mServiceHelper.getSecond());
+        LogUtils.d(TAG, " initData:: codeOfflineServer: " + mServiceHelper.getSecond());
 
         String secondStr = AesTools.getDecryptContent(mServiceHelper.getSecond(), AesTools.AesKeyTypeEnum.COMMON_KEY);
-        LogUtils.d(TAG, " initData:: 转化前secondStr: " + secondStr);
+        LogUtils.d(TAG, " initData:: decOfflineServer: " + secondStr);
 
         getOfflineList getOfflineList =new getOfflineList(from, secondStr);
         getOfflineList.start();
@@ -338,7 +338,10 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     String from = DigestUtils.sha256Hex(mUserBean.getOnionName());
                     String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
 
-                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"file",audio.audio_url,mServiceHelper.getSecond(),messageID);//mp3、wav可以发
+                    String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                    Log.d(TAG, " initListener:: decOfflineServer = " + decOfflineServer);
+
+                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"file",audio.audio_url,decOfflineServer,messageID);//mp3、wav可以发
                     sendOfflineFile.start();
 
                 }
@@ -584,24 +587,24 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 }else{
                     sendTextMessage(1, messageID );
 
-                    LogUtils.d(TAG, " send_offline_text messageID = " + messageID);
+                    LogUtils.d(TAG, " onClick:: send_offline_text messageID = " + messageID);
 
                     String hostname = mUserBean.getOnionName();
-                    LogUtils.d(TAG, " send_offline_text hostname = " + hostname.trim());
+                    LogUtils.d(TAG, " onClick:: send_offline_text hostname = " + hostname.trim());
 //
                     String from =DigestUtils.sha256Hex(hostname.trim());
-                    LogUtils.d(TAG, " send_offline_text from = " + from);
+                    LogUtils.d(TAG, " onClick:: send_offline_text from = " + from);
 
-                    LogUtils.d(TAG, " send_offline_text to orionId = " + mContactsBean.getOrionId());
+                    LogUtils.d(TAG, " onClick:: send_offline_text to orionId = " + mContactsBean.getOrionId());
                     String to =DigestUtils.sha256Hex(mContactsBean.getOrionId());
-                    LogUtils.d(TAG, " send_offline_text to = " + to);
+                    LogUtils.d(TAG, " onClick:: send_offline_text to = " + to);
 
 
-                    LogUtils.d(TAG, " send_offline_text from = " + mUserBean.getOnionName() + " to =" + mContactsBean.getOrionId() );
-                    LogUtils.d(TAG, " send_offline_text textMessage = " + textMessage);
+                    LogUtils.d(TAG, " onClick:: send_offline_text from = " + mUserBean.getOnionName() + " to =" + mContactsBean.getOrionId() );
+                    LogUtils.d(TAG, " onClick:: send_offline_text textMessage = " + textMessage);
 
                     String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                    Log.d(TAG, " send_offline_text:: decOfflineServer = " + decOfflineServer);
+                    Log.d(TAG, " onClick:: send_offline_text decOfflineServer = " + decOfflineServer);
 
                     sendOfflineText sendOfflineText = new sendOfflineText(to, from, textMessage, decOfflineServer, messageID);
                     sendOfflineText.start();
@@ -668,18 +671,22 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 if (message.equals("错误")&&count!=2){
                     String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
                     String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,type,filepath,mServiceHelper.getSecond(),messageID);// TODO: 2021/8/7 为什么加ran.txt 删除了？
+
+                    String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                    Log.d(TAG, " onMoonEvent:: SEND_OFFLINE_FILE decOfflineServer = " + decOfflineServer);
+
+                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,type,filepath,decOfflineServer,messageID);// TODO: 2021/8/7 为什么加ran.txt 删除了？
                     sendOfflineFile.start();// TODO: 2021/8/7  //有时候对方会收到2个重复文件，会不会是这里重复发的问题
                     count++;
                 }else{
-                    System.out.println("我该显示100%了,"+count);
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE 我该显示100%了,"+count);
                     //为了获取离线文件名和文件传输速率对peerHostname做了修改
 
-                    System.out.println("messageID: " + messageID);
-                    System.out.println("speedOffline: " + speedOffline);
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE messageID: " + messageID);
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE speedOffline: " + speedOffline);
                     MsgListBean fileBean1 = null;
                     int updatePostion = -1;
-                    System.out.println("mMsgList!!!!!!" + mMsgList.toString());
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE mMsgList!!!!!!" + mMsgList.toString());
                     for (int i = 0; i < mMsgList.size(); i++) {
                         fileBean1 = mMsgList.get(i);
                         if ((fileBean1.getMessageID() != null) && (fileBean1.getMessageID().equals(messageID)) && (fileBean1.getFileProgress() != 100)) {
@@ -689,7 +696,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                             break;
                         }
                     }
-                    System.out.println("fileBean1:"+fileBean1);
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE fileBean1:"+fileBean1);
                     //文件进度和传输速度
                     MyAsyncTask asyncTask1 = new MyAsyncTask(mAdapter.getViewList(), updatePostion, true);
                     asyncTask1.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean1);
@@ -706,10 +713,10 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
 //                    String remoteOnion = Constant.REMOTE_ONION_NAME;
                     String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-                    LogUtils.d(TAG, " send offline text from = " + mUserBean.getOnionName() + " to =" + mContactsBean.getOrionId() + " text = " + textMessage);
+                    LogUtils.d(TAG, " onMoonEvent:: SEND_OFFLINE_TEXT from = " + mUserBean.getOnionName() + " to =" + mContactsBean.getOrionId() + " text = " + textMessage);
 
                     String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                    Log.d(TAG, " send_offline_text:: decOfflineServer = " + decOfflineServer);
+                    Log.d(TAG, " onMoonEvent:: SEND_OFFLINE_TEXT decOfflineServer = " + decOfflineServer);
                     sendOfflineText sendOfflineText = new sendOfflineText(from,to,messageSet, decOfflineServer,messageID4);
                     sendOfflineText.start();// TODO: 2021/8/10 这里可能导致发2次消息 
                     count++; 
@@ -728,15 +735,15 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 //                    count++;
 //                }else
                     {
-                    System.out.println("我该显示100%了,"+count);
+                    System.out.println(" nMoonEvent:: SEND_OFFLINE_PIC 我该显示100%了,"+count);
                     //为了获取离线文件名和文件传输速率对peerHostname做了修改
                     String messageID2 = peerHostname.split(",")[0];// TODO: 2021/8/9 得到该发送文件的标记
                     String speedOffline2 = peerHostname.split(",")[1];
-                    System.out.println("messageID: " + messageID2);
-                    System.out.println("speedOffline: " + speedOffline2);
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC messageID: " + messageID2);
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC speedOffline: " + speedOffline2);
                     MsgListBean fileBean1 = null;
                     int updatePostion = -1;
-                    System.out.println("mMsgList!!!!!!" + mMsgList.toString());
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC mMsgList!!!!!!" + mMsgList.toString());
                     for (int i = 0; i < mMsgList.size(); i++) {
                         fileBean1 = mMsgList.get(i);
                         if ((fileBean1.getMessageID() != null) && (fileBean1.getMessageID().equals(messageID2)) && (fileBean1.getFileProgress() != 100)) {
@@ -750,7 +757,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
 
 
-                        System.out.println("fileBean1:"+fileBean1);
+                        System.out.println(" nMoonEvent:: SEND_OFFLINE_PIC fileBean1:"+fileBean1);
                         //文件进度和传输速度
                         MyAsyncTask asyncTask1 = new MyAsyncTask(mAdapter.getViewList(), updatePostion, true);
                         asyncTask1.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean1);
@@ -767,14 +774,14 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
             case Event.GET_OFFLINE_LIST:
                 if(message==null)
                     return;
-                    LogUtils.d(TAG + " get_offline_list ","bus");
-                    LogUtils.d(TAG, " get_offline_list message: " + message);
+                    LogUtils.d(TAG + " nMoonEvent:: GET_OFFLINE_LIST ","bus");
+                    LogUtils.d(TAG, " nMoonEvent:: GET_OFFLINE_LIST message: " + message);
                     dataJsonAll = new JSONObject(message);
-                    LogUtils.d(" get_offline_list dataJsonAll",dataJsonAll);
+                    LogUtils.d(" nMoonEvent:: GET_OFFLINE_LIST dataJsonAll: ",dataJsonAll);
                     JSONObject json = dataJsonAll.getJSONObject("file");
-                    LogUtils.d(" get_offline_list dataJsonAll",json);
-                    JSONArray dataFileAll = json.getJSONArray("messages");
-                    LogUtils.d(" get_offline_list dataJsonAll",dataFileAll);
+                    LogUtils.d(" nMoonEvent:: GET_OFFLINE_LIST dataJsonAll: ",json);
+                    JSONArray dataFileAll = json.getJSONArray("messages: ");
+                    LogUtils.d(" nMoonEvent:: GET_OFFLINE_LIST dataJsonAll: ",dataFileAll);
                     for (int i =0;i<dataFileAll.length();i++){
                         JSONObject infoFile = dataFileAll.getJSONObject(i);
                         String Id = infoFile.getString("id");
@@ -784,19 +791,24 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                         UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
 //                        String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName()));
                         String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-                        LogUtils.d(" get_offline_list 发文件的from?????",from);
-                        getOfflineFile getOfflineFile = new getOfflineFile(from,Id,"/sdcard/Android/data/com.ucas.chat/files/" + infoFile.getString("abs"),mServiceHelper.getSecond(),name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
+                        LogUtils.d("  nMoonEvent:: GET_OFFLINE_LIST 发文件的from?????",from);
+
+                        String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                        Log.d(TAG, "  nMoonEvent:: GET_OFFLINE_LIST decOfflineServer = " + decOfflineServer);
+
+                        getOfflineFile getOfflineFile = new getOfflineFile(from,Id,"/sdcard/Android/data/com.ucas.chat/files/" + infoFile.getString("abs"),decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
                         getOfflineFile.start();
                         String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-                        sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,mServiceHelper.getSecond());
+
+                        sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
                         sendSentMessage.start();
                     }
                     dataJsonAll = new JSONObject(message);
-                    LogUtils.d(" get_offline_list dataJsonAllPic",dataJsonAll);
+                    LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST dataJsonAllPic: ",dataJsonAll);
                     JSONObject jsonPic = dataJsonAll.getJSONObject("pic");
-                    LogUtils.d(" get_offline_list dataJsonAll",jsonPic);
+                    LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST jsonPic: ",jsonPic);
                     JSONArray dataPicAll = jsonPic.getJSONArray("messages");
-                    LogUtils.d(" get_offline_list dataJsonAll",dataPicAll);
+                    LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST dataPicAll: ",dataPicAll);
                     for (int i = 0; i<dataPicAll.length();i++){
                         JSONObject infoPic = dataPicAll.getJSONObject(i);
                         String Id = infoPic.getString("id");
@@ -806,17 +818,21 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                         UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
                         String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
                         String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-                        getOfflinePic getOfflinePic = new getOfflinePic(from,Id,"/sdcard/Android/data/com.ucas.chat/files/"+name,mServiceHelper.getSecond(),name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
+
+                        String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                        Log.d(TAG, " MoonEvent:: GET_OFFLINE_LIST  decOfflineServer = " + decOfflineServer);
+
+                        getOfflinePic getOfflinePic = new getOfflinePic(from,Id,"/sdcard/Android/data/com.ucas.chat/files/"+name,decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
                         getOfflinePic.start();
-                        LogUtils.d(" get_offline_list from:!!!!!!!!!!!!!!!!!!",from);
-                        LogUtils.d(" get_offline_list to:!!!!!!!!!!!!!",to);
+                        LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST from:!!!!!!!!!!!!!!!!!!",from);
+                        LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST to:!!!!!!!!!!!!!",to);
 //                        from = "25b7d8a11bf3fe39452593b121c0435e8a4ca0f246f6c3601fd7ff9340031c9a";
 //                        to = "19720eaf21365c54e86714548a825e10cf975dd408c25cc23cf1eb1eaeeea082";
-                        sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,mServiceHelper.getSecond());
+                        sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
                         sendSentMessage.start();
                     }
 //                }
-                LogUtils.d(TAG, " get_offline_list test!!!DataJsonAll" + dataJsonAll );
+                LogUtils.d(TAG, " MoonEvent:: GET_OFFLINE_LIST test!!!DataJsonAll: " + dataJsonAll );
                 break;
 
 
@@ -851,14 +867,6 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
             case Event.GET_OFFLINE_TEXT://出错//本机收到离线文本
                 if(message==null)
                     return;
-//                    Thread.sleep(5000);
-//                    count++;
-//                    UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
-//                    String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName()));
-//                    LogUtils.d("from:::get",from);
-//                    getOfflineText getOfflineText = new getOfflineText(from,mServiceHelper.getSecond());
-//                    getOfflineText.start();
-
 
                         JSONObject dataJson = new JSONObject(message);//https://www.dazhuanlan.com/szm897394125/topics/1335731
                         LogUtils.d(TAG, " dataJson : " + dataJson );
@@ -882,7 +890,11 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                             values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID3);//改消息标记
                             String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
                             String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-                            sendSentMessage sendSentMessage = new sendSentMessage(to, from, messageID3,message_content,mServiceHelper.getSecond());
+
+                            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                            Log.d(TAG, " GET_OFFLINE_TEXT:: decOfflineServer = " + decOfflineServer);
+
+                            sendSentMessage sendSentMessage = new sendSentMessage(to, from, messageID3,message_content,decOfflineServer);
                             sendSentMessage.start();
                             mHelper.insertData(getContext(),values);
                             MsgListBean bean1 = new MsgListBean(message_content,mContactsBean.getUserId() ,mUserBean.getUserId() , 1,messageID3,mContactsBean.getOrionId(),mContactsBean.getNickName());
@@ -1107,11 +1119,11 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     mTvOnLineState.setText(R.string.off_line);
                     ServerMessageHandler handler = ServerMessageHandler.getInstance();
                     handler.setMySelfBean(mUserBean);
-                    LogUtils.d(TAG, " CREATE_CONNECTION_SUCCESS:: 转化前getSecond: " + mServiceHelper.getSecond());
+                    LogUtils.d(TAG, " CREATE_CONNECTION_SUCCESS:: 转化前OfflineServer: " + mServiceHelper.getSecond());
                     LogUtils.d(TAG, " CREATE_CONNECTION_SUCCESS:: peerHostname: " + peerHostname);
-                    String transformSecond = AesTools.getDecryptContent(mServiceHelper.getSecond(), AesTools.AesKeyTypeEnum.COMMON_KEY);
-                    LogUtils.d(TAG, " CREATE_CONNECTION_SUCCESS:: 转化后getSecond: " + mServiceHelper.getSecond());
-                    handler.processOfflineMessage(peerHostname,transformSecond, "messageID");// TODO: 2021/8/10 留后面改
+                    String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                    Log.d(TAG, " CREATE_CONNECTION_SUCCESS:: decOfflineServer = " + decOfflineServer);
+                    handler.processOfflineMessage(peerHostname,decOfflineServer, "messageID");// TODO: 2021/8/10 留后面改
 
                     mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为离线头像
                 }
@@ -1337,12 +1349,14 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                                 String from = DigestUtils.sha256Hex(mUserBean.getOnionName());
                                 String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
                                 String last_third = fileList.get(i).substring(fileList.get(i).length()-3,fileList.get(i).length());
-                                LogUtils.d("last_third", last_third);
+                                LogUtils.d(" onActivityResult:: REQUEST_CODE_FILE last_third = ", last_third);
+                                String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                                Log.d(TAG, " onActivityResult:: REQUEST_CODE_FILE decOfflineServer = " + decOfflineServer);
                                 if (!last_third.equals("png")&&!last_third.equals("peg")&&!last_third.equals("jpj")&&!last_third.equals("ico")){
-                                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"file",fileList.get(i),mServiceHelper.getSecond(),messageID);//jpg可以发
+                                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"file",fileList.get(i),decOfflineServer,messageID);//jpg可以发
                                     sendOfflineFile.start();
                                 }else{
-                                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"pic",fileList.get(i),mServiceHelper.getSecond(),messageID);
+                                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"pic",fileList.get(i),decOfflineServer,messageID);
                                     sendOfflineFile.start();
                                 }
 
@@ -1411,18 +1425,15 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
 //                                TorManager.interface_send_text(Arrays.toString(bitmapBytes).substring(0,400), mContactsBean.getOrionId(), getContext(),messageID);
                             }else {
-                                System.out.println("离线发图片");
+                                System.out.println("onActivityResult:: 离线发图片");
                                 String from = DigestUtils.sha256Hex(mUserBean.getOnionName());
                                 String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
 
-//                                sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"file",cameraFilePath,mServiceHelper.getSecond());
-//                                sendOfflineFile.start();
+                                String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                                Log.d(TAG, " onActivityResult:: onActivityResult 离线发图片 decOfflineServer = " + decOfflineServer);
 
-                                sendOfflinePic2 sendOfflinePic = new sendOfflinePic2(from,to,"file",bitmapBytes,mServiceHelper.getSecond(),messageID);
+                                sendOfflinePic2 sendOfflinePic = new sendOfflinePic2(from,to,"file",bitmapBytes,decOfflineServer,messageID);
                                 sendOfflinePic.start();
-//
-//                                sendOfflineText sendOfflineText = new sendOfflineText(to, from, Arrays.toString(fileBytes), mServiceHelper.getSecond());
-//                                sendOfflineText.start();
 
                             }
 
@@ -1486,7 +1497,10 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                             String from = DigestUtils.sha256Hex(mUserBean.getOnionName());
                             String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
 
-                            sendOfflinePic2 sendOfflinePic = new sendOfflinePic2(from,to,"pic",picByte,mServiceHelper.getSecond(),messageID);
+                            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                            Log.d(TAG, " onActivityResult:: 发送离线图片 decOfflineServer = " + decOfflineServer);
+
+                            sendOfflinePic2 sendOfflinePic = new sendOfflinePic2(from,to,"pic",picByte,decOfflineServer,messageID);
                             sendOfflinePic.start();
 
 
