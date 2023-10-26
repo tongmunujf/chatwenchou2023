@@ -1,5 +1,7 @@
 package com.ucas.chat.ui.home.InterfaceOffline;
 
+import android.util.Log;
+
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
 
@@ -29,6 +31,7 @@ public class sendOfflineText extends Thread {
         this.message = message;
         this.onion_name = onion_name;
         this.messageID = messageID;
+        Log.d(TAG, " sendOfflineText:: onion_name = " + this.onion_name);
     }
     /**
      * HttpURLConnection post请求通用函数

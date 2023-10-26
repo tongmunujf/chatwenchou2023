@@ -1437,7 +1437,8 @@ public class OrbotService extends VpnService implements TorServiceConstants, Orb
 //        extraLines.append("Socks5Proxy  47.243.253.113:21085").append('\n');//删除代理，用其他vpn来登陆就
        // extraLines.append("Socks5Proxy 119.13.77.50:29900").append('\n');//删除  代理，用其他vpn来登陆就
        // extraLines.append("Socks5Proxy 185.126.70.145:22009").append('\n');
-       extraLines.append("Socks5Proxy 185.126.70.145:22009").append('\n');
+       //extraLines.append("Socks5Proxy 185.126.70.145:22009").append('\n');
+        extraLines.append("Socks5Proxy 195.133.10.141:22005").append('\n');
 
         if (!useBridges) {
             extraLines.append("UseBridges 0").append('\n');

@@ -10,6 +10,16 @@ import com.ucas.chat.utils.AesTools;
 
 public class TestUserA {
     public static final String TAG = ConstantValue.TAG_CHAT + "TestUserA";
+
+    //离线服务器
+    public static void serverSecond(){
+        String value = "utye3rrlplncmnkogiecviv3c32q56pgy5wlrk2mimf6njqiv5pjuwyd.onion";
+        String encryptContent = getEncryptContent(value, AesTools.AesKeyTypeEnum.COMMON_KEY);
+        Log.e(TAG, " serverSecond:: contact.txt 加密onion：encryptContent = " + encryptContent);
+        String decryptContent = getDecryptContent(encryptContent, AesTools.AesKeyTypeEnum.COMMON_KEY);
+        Log.e(TAG, " serverSecond:: contact.txt 解密onion：decryptContent = " + decryptContent);
+    }
+
     /**
      * userinfor.txt
      * testA

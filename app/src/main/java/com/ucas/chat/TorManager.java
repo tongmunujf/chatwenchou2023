@@ -2,6 +2,7 @@ package com.ucas.chat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.android_play.MainActivity;
@@ -81,7 +82,9 @@ public class TorManager {
         ServerMessageHandler messageHandler =ServerMessageHandler.getInstance();
 
         ServiceInfoHelper mServiceHelper = new ServiceInfoHelper(context);
-        messageHandler.setChannelServer(mServiceHelper.getSecond());
+        String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+        Log.d(TAG, " interface_start_listen:: decOfflineServer = " + decOfflineServer);
+        messageHandler.setChannelServer(decOfflineServer);
         MySelfInfoHelper h= MySelfInfoHelper.getInstance(context);
         MyInforBean my=h.queryAll();
 

@@ -600,7 +600,10 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     LogUtils.d(TAG, " send_offline_text from = " + mUserBean.getOnionName() + " to =" + mContactsBean.getOrionId() );
                     LogUtils.d(TAG, " send_offline_text textMessage = " + textMessage);
 
-                    sendOfflineText sendOfflineText = new sendOfflineText(to, from, textMessage, mServiceHelper.getSecond(), messageID);
+                    String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                    Log.d(TAG, " send_offline_text:: decOfflineServer = " + decOfflineServer);
+
+                    sendOfflineText sendOfflineText = new sendOfflineText(to, from, textMessage, decOfflineServer, messageID);
                     sendOfflineText.start();
                 }
 
@@ -704,7 +707,10 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 //                    String remoteOnion = Constant.REMOTE_ONION_NAME;
                     String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
                     LogUtils.d(TAG, " send offline text from = " + mUserBean.getOnionName() + " to =" + mContactsBean.getOrionId() + " text = " + textMessage);
-                    sendOfflineText sendOfflineText = new sendOfflineText(from,to,messageSet,mServiceHelper.getSecond(),messageID4);
+
+                    String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                    Log.d(TAG, " send_offline_text:: decOfflineServer = " + decOfflineServer);
+                    sendOfflineText sendOfflineText = new sendOfflineText(from,to,messageSet, decOfflineServer,messageID4);
                     sendOfflineText.start();// TODO: 2021/8/10 这里可能导致发2次消息 
                     count++; 
                 }else{
