@@ -774,13 +774,13 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 if(message==null)
                     return;
                     LogUtils.d(TAG + " onMoonEvent:: GET_OFFLINE_LIST ","bus");
-                    LogUtils.d(TAG, " nMoonEvent:: GET_OFFLINE_LIST message: " + message);
+                    LogUtils.d(TAG, " nMoonEvent:: GET_OFFLINE_LIST message = " + message);
                     dataJsonAll = new JSONObject(message);
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonAll: " + dataJsonAll);
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonMessage = " + dataJsonAll);
                     JSONObject json = dataJsonAll.getJSONObject("file");
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonAll: " + json);
-                    JSONArray dataFileAll = json.getJSONArray("messages: ");
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonAll: " + dataFileAll);
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonFile = " + json);
+                    JSONArray dataFileAll = json.getJSONArray("messages");
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonFileMessage = " + dataFileAll);
                     for (int i =0;i<dataFileAll.length();i++){
                         JSONObject infoFile = dataFileAll.getJSONObject(i);
                         String Id = infoFile.getString("id");
