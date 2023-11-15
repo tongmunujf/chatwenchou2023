@@ -1,5 +1,7 @@
 package com.ucas.chat.ui.home.InterfaceOffline;
 
+import android.util.Log;
+
 import com.ucas.chat.eventbus.Event;
 
 import org.greenrobot.eventbus.EventBus;
@@ -16,7 +18,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class getOfflineText extends Thread {
-
+    static String TAG = "Chat_" + "getOfflineText";
     private String from;
     private String onion_name;//服务器的
     public getOfflineText(String from,String onion_name){
@@ -28,12 +30,12 @@ public class getOfflineText extends Thread {
      * HttpURLConnection post请求通用函数
      */
     public static String send_post(URL url, String body) {
+        Log.d(TAG, " send_post:: 请求地址 url = " + url);
         OutputStreamWriter out;
         String result = null;
         BufferedReader bufferedReader = null;
         StringBuffer buffer = new StringBuffer();
         Proxy proxy1 = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 9050));
-        System.out.println("请求地址：" + url);
         try {
             // http协议传输
             HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection(proxy1);
@@ -63,8 +65,8 @@ public class getOfflineText extends Thread {
                 inputStream.close();
                 httpUrlConn.disconnect();
             } else {
-                System.out.println("发生错误：" + httpUrlConn.getResponseMessage());
-                System.out.println("错误码：" + httpUrlConn.getResponseCode());
+                Log.d(TAG, " send_post:: 发生错误 ResponseMessage = " +  httpUrlConn.getResponseMessage());
+                Log.d(TAG, " send_post:: 错误码 ResponseCode = " +  httpUrlConn.getResponseCode());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(httpUrlConn.getErrorStream()));
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -92,6 +94,7 @@ public class getOfflineText extends Thread {
             String url1 = "http://"+onion_name+"/get_offline_text_message/";
             URL url = new URL(url1);
             result = send_post(url, body);
+            Log.d(TAG, " get_offline_text_message:: result = " + result.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }

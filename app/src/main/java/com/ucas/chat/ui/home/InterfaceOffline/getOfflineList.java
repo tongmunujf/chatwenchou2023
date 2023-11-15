@@ -2,7 +2,9 @@ package com.ucas.chat.ui.home.InterfaceOffline;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
+import com.google.android.material.tabs.TabLayout;
 import com.ucas.chat.db.ServiceInfoHelper;
 import com.ucas.chat.eventbus.Event;
 import com.ucas.chat.utils.LogUtils;
@@ -21,6 +23,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class getOfflineList extends Thread{
+    static String TAG = "Chat_" + "getOfflineList";
     private SQLiteDatabase mDatabase;
     private Context mContext;
     private ServiceInfoHelper mServiceHelper;
@@ -35,12 +38,13 @@ public class getOfflineList extends Thread{
      * HttpURLConnection post请求通用函数
      */
     public static String send_post(URL url, String body) {
+        Log.d(TAG, " send_post:: 请求地址url = " + url);
+        Log.d(TAG, " send_post:: body = " + body);
         OutputStreamWriter out;
         String result = null;
         BufferedReader bufferedReader = null;
         StringBuffer buffer = new StringBuffer();
         Proxy proxy1 = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 9050));
-        System.out.println("请求地址：" + url);
         try {
             // http协议传输
             HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection(proxy1);
@@ -58,10 +62,11 @@ public class getOfflineList extends Thread{
             out.flush();
             out.close();
 //            System.out.println("header:" + httpUrlConn.getHeaderFields());
+            Log.d(TAG, " send_post:: ResponseCode = " + httpUrlConn.getResponseCode());
             //3.获取数据
             // 将返回的输入流转换成字符串
             if (httpUrlConn.getResponseCode() == 200) {
-                System.out.println("getOfflineList发生正确：" + httpUrlConn.getResponseCode());
+                Log.d(TAG, " send_post:: getOfflineList发生正确 ResponseCode = " + httpUrlConn.getResponseCode());
                 InputStream inputStream = httpUrlConn.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "utf-8");
                 bufferedReader = new BufferedReader(inputStreamReader);
@@ -71,8 +76,7 @@ public class getOfflineList extends Thread{
                 inputStream.close();
 
             } else {
-                System.out.println("getOfflineList发生错误：" + httpUrlConn.getResponseMessage());
-                System.out.println("getOfflineList错误码：" + httpUrlConn.getResponseCode());
+                Log.d(TAG, " send_post:: getOfflineList发生错误 ResponseCode = " + httpUrlConn.getResponseCode());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(httpUrlConn.getErrorStream()));
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -83,7 +87,7 @@ public class getOfflineList extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        LogUtils.d("buss","buss");
+        Log.d(TAG, " send_post:: EventBus GET_OFFLINE_LIST ");
         EventBus.getDefault().post(new Event(Event.GET_OFFLINE_LIST, buffer.toString(), null));
 
         return buffer.toString();

@@ -869,9 +869,9 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     return;
 
                         JSONObject dataJson = new JSONObject(message);//https://www.dazhuanlan.com/szm897394125/topics/1335731
-                        LogUtils.d(TAG, " dataJson : " + dataJson );
+                        LogUtils.d(TAG, " GET_OFFLINE_TEXT:: dataJson : " + dataJson );
                         JSONArray data = dataJson.getJSONArray("messages");
-                        LogUtils.d(TAG, " data : " + data );
+                        LogUtils.d(TAG, " GET_OFFLINE_TEXT:: data : " + data );
 //                        UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
 //                        String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName())); //M
 //                        String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
