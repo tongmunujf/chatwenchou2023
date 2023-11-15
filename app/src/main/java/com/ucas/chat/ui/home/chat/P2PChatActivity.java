@@ -63,7 +63,6 @@ import com.ucas.chat.ui.home.InterfaceOffline.getOfflineList;
 import com.ucas.chat.ui.home.InterfaceOffline.getOfflinePic;
 import com.ucas.chat.ui.home.InterfaceOffline.getOfflineText;
 import com.ucas.chat.ui.home.InterfaceOffline.sendOfflineFile;
-import com.ucas.chat.ui.home.InterfaceOffline.sendOfflinePic;
 import com.ucas.chat.ui.home.InterfaceOffline.sendOfflinePic2;
 import com.ucas.chat.ui.home.InterfaceOffline.sendOfflineText;
 import com.ucas.chat.ui.home.InterfaceOffline.sendSentMessage;
@@ -735,7 +734,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 //                    count++;
 //                }else
                     {
-                    System.out.println(" nMoonEvent:: SEND_OFFLINE_PIC 我该显示100%了,"+count);
+                    System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC 我该显示100%了,"+count);
                     //为了获取离线文件名和文件传输速率对peerHostname做了修改
                     String messageID2 = peerHostname.split(",")[0];// TODO: 2021/8/9 得到该发送文件的标记
                     String speedOffline2 = peerHostname.split(",")[1];
@@ -757,7 +756,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
 
 
-                        System.out.println(" nMoonEvent:: SEND_OFFLINE_PIC fileBean1:"+fileBean1);
+                        System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC fileBean1:"+fileBean1);
                         //文件进度和传输速度
                         MyAsyncTask asyncTask1 = new MyAsyncTask(mAdapter.getViewList(), updatePostion, true);
                         asyncTask1.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean1);
@@ -774,14 +773,14 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
             case Event.GET_OFFLINE_LIST:
                 if(message==null)
                     return;
-                    LogUtils.d(TAG + " nMoonEvent:: GET_OFFLINE_LIST ","bus");
+                    LogUtils.d(TAG + " onMoonEvent:: GET_OFFLINE_LIST ","bus");
                     LogUtils.d(TAG, " nMoonEvent:: GET_OFFLINE_LIST message: " + message);
                     dataJsonAll = new JSONObject(message);
-                    LogUtils.d(" nMoonEvent:: GET_OFFLINE_LIST dataJsonAll: ",dataJsonAll);
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonAll: " + dataJsonAll);
                     JSONObject json = dataJsonAll.getJSONObject("file");
-                    LogUtils.d(" nMoonEvent:: GET_OFFLINE_LIST dataJsonAll: ",json);
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonAll: " + json);
                     JSONArray dataFileAll = json.getJSONArray("messages: ");
-                    LogUtils.d(" nMoonEvent:: GET_OFFLINE_LIST dataJsonAll: ",dataFileAll);
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonAll: " + dataFileAll);
                     for (int i =0;i<dataFileAll.length();i++){
                         JSONObject infoFile = dataFileAll.getJSONObject(i);
                         String Id = infoFile.getString("id");
@@ -791,10 +790,10 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                         UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
 //                        String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName()));
                         String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-                        LogUtils.d("  nMoonEvent:: GET_OFFLINE_LIST 发文件的from?????",from);
+                        LogUtils.d(TAG,"  onMoonEvent:: GET_OFFLINE_LIST 发文件的from?????" + from);
 
                         String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                        Log.d(TAG, "  nMoonEvent:: GET_OFFLINE_LIST decOfflineServer = " + decOfflineServer);
+                        Log.d(TAG, "  onMoonEvent:: GET_OFFLINE_LIST decOfflineServer = " + decOfflineServer);
 
                         getOfflineFile getOfflineFile = new getOfflineFile(from,Id,"/sdcard/Android/data/com.ucas.chat/files/" + infoFile.getString("abs"),decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
                         getOfflineFile.start();
@@ -804,11 +803,11 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                         sendSentMessage.start();
                     }
                     dataJsonAll = new JSONObject(message);
-                    LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST dataJsonAllPic: ",dataJsonAll);
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonAllPic: " + dataJsonAll);
                     JSONObject jsonPic = dataJsonAll.getJSONObject("pic");
-                    LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST jsonPic: ",jsonPic);
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST jsonPic: " + jsonPic);
                     JSONArray dataPicAll = jsonPic.getJSONArray("messages");
-                    LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST dataPicAll: ",dataPicAll);
+                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataPicAll: " + dataPicAll);
                     for (int i = 0; i<dataPicAll.length();i++){
                         JSONObject infoPic = dataPicAll.getJSONObject(i);
                         String Id = infoPic.getString("id");
@@ -820,23 +819,24 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                         String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
 
                         String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                        Log.d(TAG, " MoonEvent:: GET_OFFLINE_LIST  decOfflineServer = " + decOfflineServer);
+                        Log.d(TAG, " onMoonEvent:: GET_OFFLINE_LIST  decOfflineServer = " + decOfflineServer);
 
                         getOfflinePic getOfflinePic = new getOfflinePic(from,Id,"/sdcard/Android/data/com.ucas.chat/files/"+name,decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
                         getOfflinePic.start();
-                        LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST from:!!!!!!!!!!!!!!!!!!",from);
-                        LogUtils.d(" MoonEvent:: GET_OFFLINE_LIST to:!!!!!!!!!!!!!",to);
+                        LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST from:!!!!!!!!!!!!!!!!!!" + from);
+                        LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST to:!!!!!!!!!!!!!" + to);
 //                        from = "25b7d8a11bf3fe39452593b121c0435e8a4ca0f246f6c3601fd7ff9340031c9a";
 //                        to = "19720eaf21365c54e86714548a825e10cf975dd408c25cc23cf1eb1eaeeea082";
                         sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
                         sendSentMessage.start();
                     }
 //                }
-                LogUtils.d(TAG, " MoonEvent:: GET_OFFLINE_LIST test!!!DataJsonAll: " + dataJsonAll );
+                LogUtils.d(TAG, " onMoonEvent:: GET_OFFLINE_LIST test!!!DataJsonAll: " + dataJsonAll );
                 break;
 
 
             case Event.START_COMMUNICATION_SUCCESS://接收到此Status，才可以以在线方式发送消息
+                LogUtils.d(TAG," onMoonEvent:: START_COMMUNICATION_SUCCESS 接收到此Status，才可以以在线方式发送消息");
                 mTvNickName.setTextColor(getColor(R.color.blue4));
                 mContactsBean.setOnlineStatus("1");//连接状态置1
                 SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
@@ -846,6 +846,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
                 break;
             case Event.SEND_PROTOCOL_FAILURE:
+                LogUtils.d(TAG," onMoonEvent:: SEND_PROTOCOL_FAI 对方离线");
                 mTvNickName.setTextColor(getColor(R.color.gray12));
                 mContactsBean.setOnlineStatus("0");
                 SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
@@ -856,10 +857,12 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
                 break;
             case Event.PEER_HAS_RECEIVED_MESSAGE_SUCCESS:
+                LogUtils.d(TAG," onMoonEvent:: PEER_HAS_RECEIVED_MESSAGE_SUCCESS 更新发送文本的状态");
                 String ack = messageEvent.getMessage();
                 ackMatch(ack);//更新发送文本的状态
                 break;
             case Event.PEER_HAS_RECEIVED_MESSAGE_FAILURE:
+                LogUtils.d(TAG," onMoonEvent:: PEER_HAS_RECEIVED_MESSAGE_FAILURE 对方接受到消息失败");
                 ToastUtils.showMessage(getContext(), "对方接受到消息失败");
                 LogUtils.d(TAG, " onMoonEvent:: 对方接受到消息失败" );
                 break;
@@ -869,9 +872,9 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     return;
 
                         JSONObject dataJson = new JSONObject(message);//https://www.dazhuanlan.com/szm897394125/topics/1335731
-                        LogUtils.d(TAG, " GET_OFFLINE_TEXT:: dataJson : " + dataJson );
+                        LogUtils.d(TAG, " onMoonEvent:: GET_OFFLINE_TEXT dataJson : " + dataJson );
                         JSONArray data = dataJson.getJSONArray("messages");
-                        LogUtils.d(TAG, " GET_OFFLINE_TEXT:: data : " + data );
+                        LogUtils.d(TAG, " onMoonEvent:: GET_OFFLINE_TEXT data : " + data );
 //                        UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
 //                        String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName())); //M
 //                        String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
@@ -892,7 +895,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                             String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
 
                             String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                            Log.d(TAG, " GET_OFFLINE_TEXT:: decOfflineServer = " + decOfflineServer);
+                            Log.d(TAG, " onMoonEvent::  GET_OFFLINE_TEXT decOfflineServer = " + decOfflineServer);
 
                             sendSentMessage sendSentMessage = new sendSentMessage(to, from, messageID3,message_content,decOfflineServer);
                             sendSentMessage.start();
@@ -902,6 +905,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                             mAdapter.notifyDataSetChanged();
                             msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
                             LogUtils.d("接收","消息");
+                            Log.d(TAG, " onMoonEvent::  GET_OFFLINE_TEXT 接收 消息" );
                         }
                         notifyAdapter();
 
@@ -910,8 +914,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
              case Event.GET_OFFLINE_FILE://本机收到离线文件
 
                      String messageID5 = RandomUtil.randomChar();// TODO: 2021/8/8 更新文件标记，用这个来唯一标记当前次的发送情况
-
-                     LogUtils.d(TAG, "test!!!" + "get file");
+                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE" );
                      ContentValues values = new ContentValues();
                      values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
                      values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.file);
@@ -926,6 +929,12 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                      values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID5);// TODO: 2021/8/10 这里后期处理，从服务器发来的解析出来
                      mHelper.insertData(getContext(),values);
 
+                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE path = " + pathFile );
+                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE name = " + message );
+                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE fileSize = " +  FileUtils.getFileSize(pathFile) );
+                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE from = " + mContactsBean.getUserId() );
+                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE to = " + mUserBean.getUserId() );
+                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE message_id = " + messageID5 );
                      MsgListBean bean = new MsgListBean(pathFile, FileUtils.getFileName(pathFile), FileUtils.getFileSize(pathFile),0,
                              "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID5,mContactsBean.getOrionId(),mContactsBean.getNickName());
                      mMsgList.add(bean);
@@ -939,8 +948,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
             case Event.GET_OFFLINE_PIC://本机收到离线图片
 
                 String messageID6 = RandomUtil.randomChar();// TODO: 2021/8/8 更新文件标记，用这个来唯一标记当前次的发送情况
-
-                LogUtils.d(TAG, "test!!!" + "get pic!!!");
+                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC");
                 ContentValues values1 = new ContentValues();
                 values1.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
                 values1.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.image);
@@ -955,6 +963,13 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 values1.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID6);// TODO: 2021/8/10 后期从服务器返回的消息中解析出
                 mHelper.insertData(getContext(),values1);
 
+                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC path = " + path_pic );
+                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC name = " + peerHostname );
+                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC fileSize = " +  FileUtils.getFileSize(path_pic) );
+                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC from = " + mContactsBean.getUserId() );
+                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC to = " + mUserBean.getUserId() );
+                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC message_id = " + messageID6 );
+
                 MsgListBean bean1 = new MsgListBean(path_pic, FileUtils.getFileName(path_pic), FileUtils.getFileSize(path_pic),0,
                         "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID6,mContactsBean.getOrionId(),mContactsBean.getNickName());
                 mMsgList.add(bean1);
@@ -963,9 +978,11 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 break;
 
             case Event.HAS_RECEIVED_MESSAGE://对方发来的文本消息
+                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 对方发来的文本消息");
                 MsgListBean msgListBean = gson.fromJson(message, MsgListBean.class);
-                Log.d(TAG, " 收消息msgListBean = " + msgListBean.toString());
+                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 收消息msgListBean = " + msgListBean.toString());
                 String onlineStauts =mContactsBean.getOnlineStatus();
+                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE onlineStauts = " +onlineStauts);
                 if(onlineStauts.equals("0")){
                     mTvNickName.setTextColor(getColor(R.color.blue4));
                     mContactsBean.setOnlineStatus("1");
@@ -982,7 +999,9 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
 
              case Event.RECIEVE_ONLINE_FILE://收到文件的第一步，准备好环境，但未正式接收
+                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE 收到文件的第一步，准备好环境，但未正式接收");
                  onlineStauts =mContactsBean.getOnlineStatus();
+                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE onlineStauts = " + onlineStauts);
                  if(onlineStauts.equals("0")){//再次检测更新连接状态
                      mTvNickName.setTextColor(getColor(R.color.blue4));
                      mContactsBean.setOnlineStatus("1");
@@ -993,7 +1012,6 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                  }
 
                  String messageID7 = peerHostname;// TODO: 2021/8/8 更新文件标记，用这个来唯一标记这个文件
-                 System.out.println("###########收到文件的第一步############## ");
                  Event.FileMetaMessage fileMetaMessage = gson.fromJson(message, Event.FileMetaMessage.class);
                  String fileName =  fileMetaMessage.getFileName();//文件名
                  long fileSize = fileMetaMessage.getTotalSize();
@@ -1015,6 +1033,12 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                  values.put(ChatContract.MsgListEntry.FRIEND_ORIONID, mContactsBean.getOrionId());
                  values.put(ChatContract.MsgListEntry.FRIEND_NICKNAME, mContactsBean.getNickName());// TODO: 2022/3/28 null 的原因
 
+                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE path = " + filePath );
+                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE name = " + fileName );
+                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE fileSize = " +  fileSize);
+                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE from = " + mContactsBean.getUserId() );
+                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE to = " + mUserBean.getUserId() );
+                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE message_id = " + messageID7 );
 
 //                 values.put(ChatContract.MsgListEntry.MESSAGE_ID, startTime.getTime());//用这个时间做标记（发现 不行，这个时间是新生成的）
                 mHelper.insertData(getContext(),values);
@@ -1029,7 +1053,9 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
 
             case Event.FILE_MESSAGE:// TODO: 2021/8/13  接收文件的每一个分片，问题在于怎么和上面的messageID7或下面的messageID8绑定(已解决)，然后用来更新文件进度等
+                Log.d(TAG, " onMoonEvent::  FILE_MESSAGE 接收文件的每一个分片" );
                 onlineStauts =mContactsBean.getOnlineStatus();
+                Log.d(TAG, " onMoonEvent::  FILE_MESSAGE onlineStauts = " + onlineStauts );
                 if(onlineStauts.equals("0")){
                     mTvNickName.setTextColor(getColor(R.color.blue4));
                     mContactsBean.setOnlineStatus("1");
@@ -1048,7 +1074,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 if (percent.contains(".")){
                     percent = percent.substring(0,percent.indexOf("."));
                 }
-                Log.d(TAG, " name = " + name + " percent = " + percent + " speed = " + speed);
+                Log.d(TAG, " onMoonEvent:: FILE_MESSAGE name = " + name + " percent = " + percent + " speed = " + speed );
                 MsgListBean fileBean = null;
 //                mHelper.updateFileProgress(name,Integer.parseInt(percent));//根据文件名字更新文件进度 有bug，会导致文件名一样的全部变
                 mHelper.updateFileProgress2(messageID8,Integer.parseInt(percent));// TODO: 2021/8/25 改为以消息id为更新数据库依据  是updateFileProgress2！
@@ -1062,7 +1088,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                             fileBean.setFileProgress(Integer.parseInt(percent));// TODO: 2021/8/26 拍照图片也用这个
                             fileBean.setSpeed(speed);
                             updatePostion = i;
-                            Log.d("updatePostion",updatePostion+"");
+                            Log.d(TAG, " onMoonEvent:: FILE_MESSAGE updatePostion = " + updatePostion);
 //                            mAdapter.notifyDataSetChanged();// TODO: 2021/9/27 另一种更新界面的方法,但是全局刷新比较耗时
 
                             if(fileBean.getMsgType()==MsgTypeStateNew.image && percent.equals("100") ){
@@ -1077,22 +1103,21 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 boolean isSend;
 
                 if(fileBean==null){//没有找到的情况下。估计是Event.RECIEVE_ONLINE_FILE没有处理
-
-                    System.out.println("###########fileBean==null############## ");
+                    Log.d(TAG, " onMoonEvent:: FILE_MESSAGE fileBean == null");
                     isSend=false;
                     filePath ="/sdcard/Android/data/com.ucas.chat/files/"+name;// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
                     fileBean= new MsgListBean(filePath, name, (int)0,0,
                             "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID8,mContactsBean.getOrionId(),mContactsBean.getNickName());
-                    System.out.println("######################### "+fileBean);
+                    Log.d(TAG, " onMoonEvent:: FILE_MESSAGE fileBean = " + fileBean);
                     mMsgList.add(fileBean);
                     mAdapter.notifyDataSetChanged();
                     msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
                 }else if (fileBean.getFrom().equals(mUserBean.getUserId())){
-                    System.out.println("###########isSend = true############## "+fileBean);
+                    Log.d(TAG, " onMoonEvent:: FILE_MESSAGE  isSend = true fileBean = " + fileBean);
                     isSend = true;
                 }else {
                     isSend = false;
-                    System.out.println("########### isSend = false############## "+fileBean);
+                    Log.d(TAG, " onMoonEvent:: FILE_MESSAGE  isSend = false fileBean = " + fileBean);
                 }
                 //文件进度和传输速度
                 MyAsyncTask asyncTask = new MyAsyncTask(mAdapter.getViewList(), updatePostion, isSend);
@@ -1106,9 +1131,9 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 break;
 
             case Event.CREATE_CONNECTION_SUCCESS:
-                Log.d(TAG,  " CREATE_CONNECTION_SUCCESS:: " + message);
+                Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS message = " + message);
                 if (message.equals("success")){//连接好友服务器tor成功？
-                    Log.d(TAG,  " CREATE_CONNECTION_SUCCESS:: mContactsBean = " + mContactsBean.toString());
+                    Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS mContactsBean = " + mContactsBean.toString());
                     String orionId = mContactsBean.getOrionId();
                     TorManager.startHandShakeProcess(orionId);//再与朋友进行握手连接
                 }else {
@@ -1119,10 +1144,10 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     mTvOnLineState.setText(R.string.off_line);
                     ServerMessageHandler handler = ServerMessageHandler.getInstance();
                     handler.setMySelfBean(mUserBean);
-                    LogUtils.d(TAG, " CREATE_CONNECTION_SUCCESS:: 转化前OfflineServer: " + mServiceHelper.getSecond());
-                    LogUtils.d(TAG, " CREATE_CONNECTION_SUCCESS:: peerHostname: " + peerHostname);
+                    Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS:: 转化前OfflineServer: " + mServiceHelper.getSecond());
+                    Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS:: peerHostname: " + peerHostname);
                     String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                    Log.d(TAG, " CREATE_CONNECTION_SUCCESS:: decOfflineServer = " + decOfflineServer);
+                    Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS:: decOfflineServer: " + decOfflineServer);
                     handler.processOfflineMessage(peerHostname,decOfflineServer, "messageID");// TODO: 2021/8/10 留后面改
 
                     mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为离线头像

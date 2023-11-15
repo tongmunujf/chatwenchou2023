@@ -1,5 +1,8 @@
 package com.ucas.chat.ui.home.InterfaceOffline;
 
+import android.util.Log;
+
+import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
 
 import org.apaches.commons.codec.digest.DigestUtils;
@@ -25,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class sendOfflineFile extends Thread {
+    static String TAG = ConstantValue.TAG_CHAT + "sendOfflineFile";
     private String from,to,type,filePath,onion_name;
     private String messageID;
     public sendOfflineFile(String from,String to,String type,String filePath,String onion_name,String messageID){
@@ -45,6 +49,9 @@ public class sendOfflineFile extends Thread {
      */
     public static String formUpload(String urlStr, Map<String, String> textMap,
                                     Map<String, String> fileMap, String contentType,Long fileLength,String messageID) {
+        Log.d(TAG, " formUpload:: urlStr = " + urlStr);
+        Log.d(TAG, " formUpload:: contentType = " + contentType);
+        Log.d(TAG, " formUpload:: fileLength = " + fileLength);
         long start = System.currentTimeMillis()/1000;
         String filename = "";
         String res = "";
@@ -130,6 +137,7 @@ public class sendOfflineFile extends Thread {
             out.close();
             // 读取返回数据
             StringBuffer strBuf = new StringBuffer();
+            Log.d(TAG, " formUpload:: ResponseCode = " + conn.getResponseCode());
             if (conn.getResponseCode() == 200) {
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -138,12 +146,10 @@ public class sendOfflineFile extends Thread {
                     strBuf.append(line).append("\n");
                 }
                 res = strBuf.toString();
-                System.out.println("发文件正常："+res);
+                Log.d(TAG, " formUpload:: 发文件正常 = " + res);
                 reader.close();
             }else{
-                System.out.println("发生错误：" + conn.getResponseMessage());
-                System.out.println("错误码：" + conn.getResponseCode());
-//                StringBuffer strBuf = new StringBuffer();
+                Log.d(TAG, " formUpload:: 发生错误 = " + conn.getResponseMessage());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -155,7 +161,7 @@ public class sendOfflineFile extends Thread {
 
             }
         } catch (Exception e) {
-            System.out.println("发送POST请求出错。" + urlStr);
+            Log.d(TAG, " formUpload:: 发送POST请求出错 = " + urlStr);
             e.printStackTrace();
         } finally {
             if (conn != null) {
@@ -166,16 +172,16 @@ public class sendOfflineFile extends Thread {
         long speed = fileLength/(end-start);
         if(speed>1024){
             speed = speed/1024;
-            System.out.println("文件大小："+fileLength);
-            System.out.println("文件发送开始时间："+start);
-            System.out.println("文件发送结束时间："+end);
-            System.out.println("文件传输速率："+speed);
+            Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
+            Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
+            Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
+            Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
             EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_FILE, res, messageID+","+speed+" KB/s"));// TODO: 2021/8/10 替换 filename为messageID
         }else{
-            System.out.println("文件大小："+fileLength);
-            System.out.println("文件发送开始时间："+start);
-            System.out.println("文件发送结束时间："+end);
-            System.out.println("文件传输速率："+speed);
+            Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
+            Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
+            Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
+            Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
             EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_FILE, res, messageID+","+speed+" b/s"));
         }
         return res;
@@ -194,8 +200,13 @@ public class sendOfflineFile extends Thread {
      * 封装接口
      */
     public static String sendPic(String from,String to,String type, String filePath,String onion_name,String messageID) {
+        Log.d(TAG, " sendPic:: from = " + from);
+        Log.d(TAG, " sendPic:: to = " + to);
+        Log.d(TAG, " sendPic:: filePath = " + filePath);
+        Log.d(TAG, " sendPic:: onion_name = " + onion_name);
+        Log.d(TAG, " sendPic:: messageID = " + messageID);
         String url = "http://"+onion_name+"/receive_message/";
-        System.out.println("请求地址："+url);
+        Log.d(TAG, " sendPic:: 请求地址url = " + url);
         String fileHash = null;
         File file = new File(filePath);
         long fileLength =  file.length();
@@ -234,7 +245,7 @@ public class sendOfflineFile extends Thread {
 
     @Override
     public void run() {
-        System.out.println("当前线程(send_offline_file)："+Thread.currentThread().getName());
+        Log.d(TAG, " run:: 当前线程(send_offline_file)："+Thread.currentThread().getName());
         System.out.println("send_offline_file:"+sendPic(from,to,type,filePath,onion_name,messageID));
     }
 

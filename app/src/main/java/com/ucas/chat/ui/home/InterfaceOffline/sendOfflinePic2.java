@@ -1,5 +1,8 @@
 package com.ucas.chat.ui.home.InterfaceOffline;
 
+import android.util.Log;
+
+import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
 
 import org.apaches.commons.codec.digest.DigestUtils;
@@ -31,6 +34,7 @@ import java.util.Map;
  * usefulness   :Chat
  */
 public class sendOfflinePic2 extends Thread  {
+    static String TAG = ConstantValue.TAG_CHAT + "sendOfflinePic2";
     private String from,to,type,filePath,onion_name;
     private byte[] picByte;//图片的
 
@@ -55,6 +59,9 @@ public class sendOfflinePic2 extends Thread  {
      */
     public static String formUpload(String urlStr, Map<String, String> textMap,
                                     byte[] picByte, String contentType,Long fileLength,String messageID) {
+        Log.d(TAG, " formUpload:: urlStr = " + urlStr);
+        Log.d(TAG, " formUpload:: contentType = " + contentType);
+        Log.d(TAG, " formUpload:: fileLength = " + fileLength);
         long start = System.currentTimeMillis()/1000;
         String filename = "filename.jpg";
         String res = "";
@@ -91,7 +98,7 @@ public class sendOfflinePic2 extends Thread  {
                     strBuf.append(inputValue);
 
                 }
-                System.out.println("发图片配置信息："+strBuf.toString());
+                Log.d(TAG, " formUpload:: 发图片配置信息 = " + strBuf.toString());
                 out.write(strBuf.toString().getBytes());
             }
             if (picByte != null) {
@@ -127,7 +134,7 @@ public class sendOfflinePic2 extends Thread  {
                     strBuf.append("Content-Disposition: form-data; name=\"" + "message" + "\"; filename=\"" + "filename.jpg" + "\"\r\n");
                     strBuf.append("Content-Type:" + contentType + "\r\n\r\n");
                     out.write(strBuf.toString().getBytes());
-                    System.out.println("发图片信息："+strBuf.toString());
+                    Log.d(TAG, " formUpload:: 发图片信息 = " + strBuf.toString());
 //                    DataInputStream in = new DataInputStream(new FileInputStream(file));
 //                    int bytes = 0;
 //                    byte[] bufferOut = new byte[2048];
@@ -143,8 +150,9 @@ public class sendOfflinePic2 extends Thread  {
             out.close();
             // 读取返回数据
             StringBuffer strBuf = new StringBuffer();
+            Log.d(TAG, " formUpload:: 图片发送错误码ResponseCode = " + conn.getResponseCode());
             if (conn.getResponseCode() == 200) {
-                System.out.println("发图片成功");
+                Log.d(TAG, " formUpload:: 发图片成功");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -153,8 +161,7 @@ public class sendOfflinePic2 extends Thread  {
                 res = strBuf.toString();
                 reader.close();
             }else{
-                System.out.println("图片发送发生错误：" + conn.getResponseMessage());
-                System.out.println("图片发送错误码：" + conn.getResponseCode());
+                Log.d(TAG, " formUpload::图片发送发生错误 = " + conn.getResponseMessage());
 //                StringBuffer strBuf = new StringBuffer();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
                 String line;
@@ -167,7 +174,7 @@ public class sendOfflinePic2 extends Thread  {
 
             }
         } catch (Exception e) {
-            System.out.println("图片发送发送POST请求出错。" + urlStr);
+            Log.d(TAG, " formUpload::图片发送发送POST请求出错 = " +urlStr);
             e.printStackTrace();
         } finally {
             if (conn != null) {
@@ -178,16 +185,16 @@ public class sendOfflinePic2 extends Thread  {
         long speed = fileLength/(end-start);
         if(speed>1024){
             speed = speed/1024;
-            System.out.println("文件大小："+fileLength);
-            System.out.println("文件发送开始时间："+start);
-            System.out.println("文件发送结束时间："+end);
-            System.out.println("文件传输速率："+speed);
+            Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
+            Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
+            Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
+            Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
             EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_PIC, res, messageID+","+speed+" KB/s"));
         }else{
-            System.out.println("文件大小："+fileLength);
-            System.out.println("文件发送开始时间："+start);
-            System.out.println("文件发送结束时间："+end);
-            System.out.println("文件传输速率："+speed);
+            Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
+            Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
+            Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
+            Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
             EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_PIC, res, messageID+","+speed+" b/s"));
         }
         return res;
@@ -207,7 +214,7 @@ public class sendOfflinePic2 extends Thread  {
      */
     public static String sendPic(String from,String to,String type, byte[] picByte,String onion_name,String randomString) {
         String url = "http://"+onion_name+"/receive_message/";
-        System.out.println("请求地址："+url);
+        Log.d(TAG, " sendPic:: 请求地址url = " + url);
         String fileHash = null;
 //        File file = new File(filePath);
         long fileLength =  picByte.length;
@@ -246,7 +253,7 @@ public class sendOfflinePic2 extends Thread  {
 
     @Override
     public void run() {
-        System.out.println("当前线程(send_offline_file)："+Thread.currentThread().getName());
+        Log.d(TAG, " run:: 当前线程(send_offline_pic)："+Thread.currentThread().getName());
         System.out.println("图片send_offline_pic2:"+sendPic(from,to,type,picByte,onion_name,messageID));
     }
 

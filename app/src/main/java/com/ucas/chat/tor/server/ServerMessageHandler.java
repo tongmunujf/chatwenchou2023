@@ -1853,7 +1853,7 @@ public class ServerMessageHandler {
 				Socket socket = new Socket(proxy);
 				//MailItem [onionName=liqf2ad7xgi4ewixwvk6qxf5bsevaq7qojvfzu74ruwusvc4ullfonyd.onion(b), port=6677]
 				Log.e(TAG + " CreateConnectionThread run:: cc线程ServerMessagndler88",mailItem.toString());
-				System.out.println("cc线程ServerMessageHandler try connect to  " +this.mailItem.getOnionName()+ " with time "+ (count +1));
+				System.out.println("cc线程CreateConnectionThread try connect to  " +this.mailItem.getOnionName()+ " with time "+ (count +1));
 
 				InetSocketAddress dest = new InetSocketAddress(this.mailItem.getOnionName(), mailItem.getPort());//好友的
 				System.out.println(dest);

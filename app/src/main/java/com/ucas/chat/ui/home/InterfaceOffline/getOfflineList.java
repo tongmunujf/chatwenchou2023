@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.google.android.material.tabs.TabLayout;
+import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.db.ServiceInfoHelper;
 import com.ucas.chat.eventbus.Event;
 import com.ucas.chat.utils.LogUtils;
@@ -23,7 +24,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class getOfflineList extends Thread{
-    static String TAG = "Chat_" + "getOfflineList";
+    static String TAG = ConstantValue.TAG_CHAT + "getOfflineList";
     private SQLiteDatabase mDatabase;
     private Context mContext;
     private ServiceInfoHelper mServiceHelper;

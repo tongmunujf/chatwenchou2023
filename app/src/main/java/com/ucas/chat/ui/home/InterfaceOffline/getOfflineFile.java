@@ -1,5 +1,8 @@
 package com.ucas.chat.ui.home.InterfaceOffline;
 
+import android.util.Log;
+
+import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
 
 import org.greenrobot.eventbus.EventBus;
@@ -18,6 +21,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class getOfflineFile extends Thread{
+    static String TAG = ConstantValue.TAG_CHAT + "getOfflineFile";
     private String id,messageID,filePath;
     private String onion_name;
     private String name;
@@ -32,12 +36,14 @@ public class getOfflineFile extends Thread{
      * HttpURLConnection post请求通用函数
      */
     public static String send_post(URL url, String body,String filePath,String name) {
+        Log.d(TAG, " send_post:: url = " + url);
+        Log.d(TAG, " send_post:: filePath = " + filePath);
+        Log.d(TAG, " send_post:: name = " + name);
         OutputStreamWriter out;
         String result = null;
         BufferedReader bufferedReader = null;
         StringBuffer buffer = new StringBuffer();
         Proxy proxy1 = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 9050));
-        System.out.println("请求地址：" + url);
         try {
             // http协议传输
             HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection(proxy1);
@@ -54,6 +60,7 @@ public class getOfflineFile extends Thread{
             out.write(body);
             out.flush();
             out.close();
+            Log.d(TAG, " send_post:: ResponseCode = " + httpUrlConn.getResponseCode());
             //3.获取数据
             // 将返回的输入流转换成字符串
             if (httpUrlConn.getResponseCode() == 200) {
@@ -74,8 +81,7 @@ public class getOfflineFile extends Thread{
                     bw.close();
                 }
             } else {
-                System.out.println("发生错误：" + httpUrlConn.getResponseMessage());
-                System.out.println("错误码：" + httpUrlConn.getResponseCode());
+                Log.d(TAG, " send_post:: 发生错误 = " + httpUrlConn.getResponseMessage());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(httpUrlConn.getErrorStream()));
                 String line;
                 while ((line = reader.readLine()) != null) {

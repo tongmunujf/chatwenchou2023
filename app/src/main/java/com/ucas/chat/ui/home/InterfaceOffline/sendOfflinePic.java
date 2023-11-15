@@ -29,6 +29,7 @@ import java.util.Map;
  * date         :2021/8/5 15:21
  * e-mail       :2931945387@qq.com
  * usefulness   :Chat
+ * 暂时没用
  */
 public class sendOfflinePic extends Thread {
 
