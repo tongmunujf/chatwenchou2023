@@ -45,6 +45,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -920,17 +921,12 @@ public class ServerMessageHandler {
 
 	public int handleTextMessageSend(String messageContent, String remoteOnion, int remotePort,String messageID) {
 		LogUtils.d(TAG, " handleTextMessageSend:: remoteOnion: " + remoteOnion);
+		Log.d(TAG, " handleTextMessageSend:: messageContent = " + messageContent);
+
 		ConnectionStatusItem statusItem = getConnectionStatusItemByOnionName(remoteOnion, Constant.SOCKET_PURPOSE_TEXT);
 		if (statusItem == null) {
 			System.out.println(TAG + " handleTextMessageSend:: socket not find in mapping list");
 			this.createConnectionAsyc(remoteOnion, Constant.SOCKET_PURPOSE_TEXT);
-//			if (!) {
-//				// offline process
-//				return this.handleTextMessageOfflineManner(messageContent, remoteOnion, remotePort);
-//			} else {
-//				// online process
-//				statusItem = getConnectionStatusItemByOnionName(remoteOnion, Constant.SOCKET_PURPOSE_TEXT);
-//			}
 		}
 		if (statusItem.getShareKey() == null) {
 			try {
@@ -954,7 +950,10 @@ public class ServerMessageHandler {
 		recordXOR.setMessageID(messageID);
 
 		try {
-			hell = messageContent.getBytes("utf-8");//文本转为byte
+			hell = messageContent.getBytes(Charset.forName("ISO-8859-1"));
+			Log.d(TAG, " handleTextMessageSend:: String转byte[] hell = " +  Arrays.toString(hell));
+
+			//hell = messageContent.getBytes("utf-8");//文本转为byte
 			System.out.println(TAG + " handleTextMessageSend:: 未加密的文本字节16进制："+AESCrypto.bytesToHex(hell));
 			hell = FileTask.TextXOR(hell,recordXOR);// TODO: 2021/10/4 增加 // TODO: 2021/9/23 文本也采用异或
 			System.out.println(TAG + " handleTextMessageSend:: 加密的文本字节16进制："+AESCrypto.bytesToHex(hell));
@@ -1915,8 +1914,9 @@ public class ServerMessageHandler {
 
 
 			if(mailItem!=null)
-				EventBus.getDefault().post(new Event(Event.CREATE_CONNECTION_SUCCESS, "fail", this.mailItem.getOnionName()));
-
+				//临时修改
+				//EventBus.getDefault().post(new Event(Event.CREATE_CONNECTION_SUCCESS, "success", this.mailItem.getOnionName()));
+			    EventBus.getDefault().post(new Event(Event.CREATE_CONNECTION_SUCCESS, "fail", this.mailItem.getOnionName()));
 			return status;
 		}
 

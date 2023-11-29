@@ -218,14 +218,15 @@ public class MessageListAdapter extends BaseAdapter {
         LogUtils.d(TAG, " handleGetTextL:: message = " + bean.getTextContent());
         String message = null;
 
-        message = AesTools.getDecryptContent(bean.getTextContent(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
-        LogUtils.d(TAG, " handleGetTextL:: 解密message = " + message);
-        if (message == null || message.isEmpty()){
-            //对没有进行加密的聊天内容进行兼容
-            message = bean.getTextContent();
-        }
+//        message = AesTools.getDecryptContent(bean.getTextContent(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+//        LogUtils.d(TAG, " handleGetTextL:: 解密message = " + message);
+//        if (message == null || message.isEmpty()){
+//            //对没有进行加密的聊天内容进行兼容
+//            message = bean.getTextContent();
+//        }
 
-
+        message = bean.getTextContent();
+        LogUtils.d(TAG, " handleGetTextL:: message = " + message);
         holder.tv_chat_msg.setText(message);
 
         String onlineStatus=mBean.getOnlineStatus();
@@ -266,13 +267,15 @@ public class MessageListAdapter extends BaseAdapter {
         LogUtils.d(TAG, " handleGetTextR:: 加密message = " + bean.getTextContent());
         String message = null;
 
-        message = AesTools.getDecryptContent(bean.getTextContent(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
-        LogUtils.d(TAG, " handleGetTextR:: 解密message = " + message);
-        if (message == null || message.isEmpty()){
-            //对没有进行加密的聊天内容进行兼容
-            message = bean.getTextContent();
-        }
+//        message = AesTools.getDecryptContent(bean.getTextContent(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+//        LogUtils.d(TAG, " handleGetTextR:: 解密message = " + message);
+//        if (message == null || message.isEmpty()){
+//            //对没有进行加密的聊天内容进行兼容
+//            message = bean.getTextContent();
+//        }
 
+        message = bean.getTextContent();
+        LogUtils.d(TAG, " handleGetTextL:: message = " + message);
         holder.tv_chat_msg.setText(message);
 
         Log.i("asffwdw1",holder.tv_chat_msg.getCurrentTextColor()+"");//检测文字的颜色

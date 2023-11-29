@@ -1,5 +1,7 @@
 package com.ucas.chat.ui.home.chat;
 
+import static com.ucas.chat.MyApplication.getContext;
+
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,18 +9,14 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.graphics.drawable.Animatable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.telephony.mbms.StreamingServiceInfo;
 import android.util.Log;
-import android.view.View;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -29,7 +27,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.android_play.MainActivity;
@@ -45,17 +42,15 @@ import com.ucas.chat.bean.MsgListBean;
 import com.ucas.chat.bean.UserBean;
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.bean.litepal.ContactsBean;
-import com.ucas.chat.bean.session.MsgDirectionEnum;
-import com.ucas.chat.bean.session.message.AudioAttachment;
-import com.ucas.chat.bean.session.message.IMMessage;
 import com.ucas.chat.bean.session1.MsgTypeStateNew;
 import com.ucas.chat.db.ChatContract;
-import com.ucas.chat.db.MyInforTool;
 import com.ucas.chat.db.ServiceInfoHelper;
 import com.ucas.chat.db.news.MsgListSQLiteHelper;
 import com.ucas.chat.eventbus.Event;
+import com.ucas.chat.jni.ServiceLoaderImpl;
+import com.ucas.chat.jni.common.IDecry;
+import com.ucas.chat.jni.common.IEntry;
 import com.ucas.chat.tor.server.ServerMessageHandler;
-import com.ucas.chat.tor.util.AESCrypto;
 import com.ucas.chat.ui.camera.MyCameraActivity;
 import com.ucas.chat.ui.camera.adapter.DataPictureActivity;
 import com.ucas.chat.ui.home.InterfaceOffline.getOfflineFile;
@@ -66,29 +61,24 @@ import com.ucas.chat.ui.home.InterfaceOffline.sendOfflineFile;
 import com.ucas.chat.ui.home.InterfaceOffline.sendOfflinePic2;
 import com.ucas.chat.ui.home.InterfaceOffline.sendOfflineText;
 import com.ucas.chat.ui.home.InterfaceOffline.sendSentMessage;
-
 import com.ucas.chat.ui.view.ChatUiHelper;
 import com.ucas.chat.ui.view.RecordButton;
 import com.ucas.chat.ui.view.SounchTouchView;
 import com.ucas.chat.ui.view.StateButton;
-import com.ucas.chat.ui.view.audio.AudioPlayManager;
 import com.ucas.chat.ui.view.chat.AudioPlayHandler;
-import com.ucas.chat.ui.view.chat.RViewHolder;
 import com.ucas.chat.ui.view.voice.TimeDateUtils;
 import com.ucas.chat.ui.view.voice.dialog.MYAudio;
 import com.ucas.chat.utils.AesTools;
 import com.ucas.chat.utils.FileUtils;
 import com.ucas.chat.utils.LogUtils;
 import com.ucas.chat.utils.PictureFileUtil;
-
 import com.ucas.chat.utils.RandomUtil;
 import com.ucas.chat.utils.SharedPreferencesUtil;
+import com.ucas.chat.utils.TextUtils;
 import com.ucas.chat.utils.TimeUtils;
+import com.ucas.chat.utils.ToastUtils;
 import com.zlylib.fileselectorlib.FileSelector;
 import com.zlylib.fileselectorlib.utils.Const;
-
-import com.ucas.chat.utils.TextUtils;
-import com.ucas.chat.utils.ToastUtils;
 
 import org.apaches.commons.codec.digest.DigestUtils;
 import org.greenrobot.eventbus.EventBus;
@@ -98,20 +88,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-
-
-
-import static com.ucas.chat.MyApplication.getContext;
 
 public class P2PChatActivity extends BaseActivity implements RecordButton.OnRecordListener {
 
@@ -175,6 +159,8 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
     private String messageSet = "ran";
 
     private static Context mContext;
+
+    private static final String jniIv = "++++";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -447,76 +433,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 return false;
             }
         });
-        //
-//        ((RecordButton) mBtnAudio).setOnFinishedRecordListener(new RecordButton.OnFinishedRecordListener() {
-//            @Override
-//            public void onFinishedRecord(String audioPath, int time) {
-//                LogUtil.d("录音结束回调");
-//                File file = new File(audioPath);
-//                if (file.exists()) {
-//                    sendAudioMessage(audioPath,time);
-//                }
-//            }
-//
-//        });
     }
-
-    /*** 播放音频，并监听播放进度，更新页面动画 ***/
-//    public void playAudio(final RViewHolder holder, final IMMessage message) {
-//
-//        if (isAudioPlay) {
-//            // 如果正在播放，那会先关闭当前播放
-//            AudioPlayManager.pause();
-//            AudioPlayManager.release();
-//            mAudioPlayHandler.stopAnimTimer();
-//            isAudioPlay = false;
-//
-//            // 如果关闭的是自己,那关闭后就停止执行下面的操作
-////            if (message.getUuid().equals(mPlayId)) {
-////                mPlayId = "";
-////                return;
-////            }
-//        }
-//
-//        if (mAudioPlayHandler == null) {
-//            mAudioPlayHandler = new AudioPlayHandler();
-//        }
-//
-//        AudioAttachment audioAttachment = (AudioAttachment) message.getAttachment();
-//        if (audioAttachment == null || TextUtils.isEmpty(audioAttachment.getPath())) {
-//            ToastUtils.showMessage(getContext(), "音频附件失效，播放失败！");
-//            return;
-//        }
-//
-//        final ImageView imageView = holder.getImageView(R.id.iv_audio_sound);
-//        final boolean isLeft = message.getDirect() == MsgDirectionEnum.In;
-//
-//        AudioPlayManager.playAudio(P2PChatActivity.this, audioAttachment.getPath(),
-//                new AudioPlayManager.OnPlayAudioListener() {
-//                    @Override
-//                    public void onPlay() {
-//                        // 启动播放动画
-//                        isAudioPlay = true;
-//                        mPlayId = message.getUuid();
-//                        mAudioPlayHandler.startAudioAnim(imageView, isLeft);
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//                        isAudioPlay = false;
-//                        mPlayId = "";
-//                        mAudioPlayHandler.stopAnimTimer();
-//                    }
-//
-//                    @Override
-//                    public void onError(String message) {
-//                        isAudioPlay = false;
-//                        mPlayId = "";
-//                        mAudioPlayHandler.stopAnimTimer();
-//                        ToastUtils.showMessage(P2PChatActivity.this, message);
-//                    }
-//                });
-//    }
 
 
     Handler handler = new Handler(){
@@ -569,7 +486,22 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                         @Override
                         public void run() {
 
-                            boolean success = TorManager.interface_send_text(textMessage, mContactsBean.getOrionId(),messageID,getContext());// TODO: 2021/8/24 增加消息id
+                            Log.d(TAG, " onClick:: btn_send 发送在线文本消息 jni加密前 textMessage = " + textMessage);
+
+                            byte[] byteArrayTextMessage = ServiceLoaderImpl.load(IEntry.class).entry(jniIv,null,textMessage.getBytes());
+                            Log.d(TAG, " onClick:: btn_send entry加密后byte[] byteArrayTextMessage = " +  Arrays.toString(byteArrayTextMessage));
+
+                            String strTextMessage = new String(byteArrayTextMessage, Charset.forName("ISO-8859-1"));
+                            Log.d(TAG, " onClick:: btn_send 发送在线文本消息 jni加密后 strTextMessage = " + strTextMessage);
+
+                            byte[] afterByteArray = strTextMessage.getBytes(Charset.forName("ISO-8859-1"));
+                            Log.d(TAG, " onClick:: btn_send  转化后byte[] afterByteArray = " +  Arrays.toString(afterByteArray));
+
+                            byte[] deTextMessage = ServiceLoaderImpl.load(IDecry.class).decry(jniIv,null,afterByteArray);
+                            Log.d(TAG, " entry_lokiccc_byte      afterByteArray = " +  Arrays.toString(afterByteArray));
+                            Log.d(TAG, " onClick:: btn_send 在线文本解密后内容 = " + new String(deTextMessage));
+
+                            boolean success = TorManager.interface_send_text(strTextMessage, mContactsBean.getOrionId(),messageID,getContext());// TODO: 2021/8/24 增加消息id
 
                             if (!success){// TODO: 2021/10/29  //发送不够异或材料
 
@@ -605,19 +537,24 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
                     Log.d(TAG, " onClick:: send_offline_text decOfflineServer = " + decOfflineServer);
 
-                    sendOfflineText sendOfflineText = new sendOfflineText(to, from, textMessage, decOfflineServer, messageID);
+                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni加密前 textMessage = " + textMessage);
+
+                    byte[] byteArrayTextMessage = textMessage.getBytes();
+                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni加密前 textMessage转byte[] = " + byteArrayTextMessage);
+                    //加密代码
+                    byte[] byteOffTextMessage = ServiceLoaderImpl.load(IEntry.class).entry(jniIv,null,byteArrayTextMessage);
+                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni加密后 byteOffTextMessage = " + byteOffTextMessage);
+
+                    //解密测试
+                    byte[] deOffTextMessage = ServiceLoaderImpl.load(IDecry.class).decry(jniIv,null,byteOffTextMessage);
+                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni解密后  = " + new String(deOffTextMessage));
+
+                    String strOffTextMessage = new String(byteOffTextMessage);
+                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni加密后 strOffTextMessage = " + strOffTextMessage);
+
+                    sendOfflineText sendOfflineText = new sendOfflineText(to, from, strOffTextMessage, decOfflineServer, messageID);
                     sendOfflineText.start();
                 }
-
-
-                //LogUtils.d("test!!!!!!!!!!!!!!!!!",DigestUtils.sha256Hex(mContactsBean.getOrionId()));
-//#######################send offline text message
-//                sendOfflineText sendOfflineText = new sendOfflineText(from,to,textMessage);
-//                sendOfflineText.start();
-
-//                getOfflineList getOfflineList =new getOfflineList(from);
-//                getOfflineList.start();
-                //########
 
                 break;
             case R.id.rlPhoto://选择图片
@@ -978,8 +915,17 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 break;
 
             case Event.HAS_RECEIVED_MESSAGE://对方发来的文本消息
-                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 对方发来的文本消息");
-                MsgListBean msgListBean = gson.fromJson(message, MsgListBean.class);
+                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 对方发来的文本消息 message = " + message);
+
+                byte[] byteArrayTextMessage = message.getBytes(Charset.forName("ISO-8859-1"));
+                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE  byteArrayTextMessage = " +  Arrays.toString(byteArrayTextMessage));
+
+                byte[] de = ServiceLoaderImpl.load(IDecry.class).decry(jniIv,null, byteArrayTextMessage);
+
+                String decry_message = new String(de);
+                Log.d(TAG, "\" onMoonEvent::  HAS_RECEIVED_MESSAGE jni解密后decry_message = " + decry_message);
+
+                MsgListBean msgListBean = gson.fromJson(decry_message, MsgListBean.class);
                 Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 收消息msgListBean = " + msgListBean.toString());
                 String onlineStauts =mContactsBean.getOnlineStatus();
                 Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE onlineStauts = " +onlineStauts);
@@ -1136,6 +1082,8 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS mContactsBean = " + mContactsBean.toString());
                     String orionId = mContactsBean.getOrionId();
                     TorManager.startHandShakeProcess(orionId);//再与朋友进行握手连接
+                    //临时添加
+                    //mTvOnLineState.setText(R.string.on_line);
                 }else {
                     //###########
                     mTvNickName.setTextColor(getColor(R.color.gray12));
@@ -1217,17 +1165,17 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         String toUserId = AesTools.getEncryptContent(mContactsBean.getUserId(), AesTools.AesKeyTypeEnum.COMMON_KEY);
         String orionId = AesTools.getEncryptContent(mContactsBean.getOrionId(), AesTools.AesKeyTypeEnum.COMMON_KEY);
         String nickName = AesTools.getEncryptContent(mContactsBean.getNickName(), AesTools.AesKeyTypeEnum.COMMON_KEY);
-        String message = AesTools.getEncryptContent(textMessage, AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+       // String message = AesTools.getEncryptContent(textMessage, AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
         LogUtils.d(TAG, " sendTextMessage:: 加密后 from userId = " + fromUserId);
         LogUtils.d(TAG, " sendTextMessage:: 加密后 to userId = " + toUserId);
         LogUtils.d(TAG, " sendTextMessage:: 加密后 orionId = " + orionId);
         LogUtils.d(TAG, " sendTextMessage:: 加密后 nickName = " + nickName);
-        LogUtils.d(TAG, " sendTextMessage:: 加密后 message = " + message);
+        LogUtils.d(TAG, " sendTextMessage:: 未加密后 message = " + textMessage);
 
         ContentValues values = new ContentValues();
         values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
         values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.text);
-        values.put(ChatContract.MsgListEntry.TEXT_CONTENT, message);
+        values.put(ChatContract.MsgListEntry.TEXT_CONTENT, textMessage);
         values.put(ChatContract.MsgListEntry.FROM, fromUserId);
         values.put(ChatContract.MsgListEntry.TO, toUserId);
         values.put(ChatContract.MsgListEntry.IS_ACKED, 0);
@@ -1240,7 +1188,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         mHelper.insertData(getContext(),values);
 
         //MsgListBean bean = new MsgListBean(textMessage, mUserBean.getUserId(), mContactsBean.getUserId(), 0,messageID,mContactsBean.getOrionId(),mContactsBean.getNickName());
-        MsgListBean bean = new MsgListBean(message, fromUserId, toUserId, 0, messageID, orionId, nickName);
+        MsgListBean bean = new MsgListBean(textMessage, fromUserId, toUserId, 0, messageID, orionId, nickName);
         LogUtils.d(TAG, " sendTextMessage:: 加密消息MsgListBean = " +bean.toString() );
         mMsgList.add(bean);
         mAdapter.notifyDataSetChanged();

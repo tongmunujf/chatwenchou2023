@@ -1439,7 +1439,16 @@ public class OrbotService extends VpnService implements TorServiceConstants, Orb
        // extraLines.append("Socks5Proxy 185.126.70.145:22009").append('\n');
        //extraLines.append("Socks5Proxy 185.126.70.145:22009").append('\n');
         //extraLines.append("Socks5Proxy 195.133.10.141:22005").append('\n');
-        extraLines.append("Socks5Proxy 127.0.0.1:10808").append('\n');
+       // extraLines.append("Socks5Proxy 127.0.0.1:10808").append('\n');
+        String s = "TestingTorNetwork 1\n" +
+                "DirAuthority AUTH1 orport=9001 no-v2 hs v3ident=14C50FF987CBB764A57948AC49B500D215878DC5 43.254.1.192:9030 C090723493B234D18BE4C5CACCBCEF11C81401A5\n" +
+                "RunAsDaemon 1\n" +
+                "ConnLimit 60\n" +
+                "ShutdownWaitLength 0\n" +
+                "ProtocolWarnings 1\n" +
+                "SafeLogging 0\n" +
+                "Socks5Proxy 43.254.1.192:19043\n";
+        extraLines.append(s);
 
         if (!useBridges) {
             extraLines.append("UseBridges 0").append('\n');

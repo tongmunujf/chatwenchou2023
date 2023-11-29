@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -198,13 +199,15 @@ public class TorManager {
      */
     public static boolean interface_send_text(String textMessage, String friendOrion,String messageID,Context context)  {// TODO: 2021/8/24 增加消息id
         LogUtils.d(TAG, " 3、interface_send_text:: textMessage = " + textMessage + " friendOrion = " + friendOrion);
-        //InterfaceToAndroid.interface_send_text(textMessage, selfOrion , context);
-//        TextMessageHandler textMessageHandler = TextMessageHandler.getInstance();\
+
+        byte[] afterByteArray = textMessage.getBytes(Charset.forName("ISO-8859-1"));
+        Log.d(TAG, " interface_send_text:: textMessage转成byte[] afterByteArray = " +  Arrays.toString(afterByteArray));
+        Log.d(TAG, " interface_send_text:: textMessage转成byte[] afterByteArray.length = " +  afterByteArray.length);
 
         int sendSize = 0;//文本转为byte;
         try {
             sendSize = textMessage.getBytes("utf-8").length;
-
+            Log.d(TAG, " interface_send_text:: tsendSize = " +  sendSize);
             boolean isSend = judgeEnoughXOR(context,sendSize);
             if(!isSend)
                 return false;// TODO: 2021/10/28 不够长度就不发送
