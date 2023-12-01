@@ -1,8 +1,11 @@
 package com.ucas.chat.tor.util;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.ucas.chat.bean.contact.ConstantValue;
+import com.ucas.chat.jni.ServiceLoaderImpl;
+import com.ucas.chat.jni.common.IKeyIndex;
 import com.ucas.chat.tor.message.Message;
 import com.ucas.chat.ui.login.LoginActivity;
 import com.ucas.chat.utils.LogUtils;
@@ -31,6 +34,7 @@ public class XORutil {
     private static final String TAG = ConstantValue.TAG_CHAT + "XORutil";
     ///data/data/com.ucas.chat/files
     public static final String XOR_PATH = "/data/data/com.ucas.chat/files/XOR1";//为多个xor文件的文件包路径
+    public static final String SECRET_KEY_FILE = "/data/data/com.ucas.chat/files/key.bin";
 
     public static RecordXOR getStartXOR(Context context){// TODO: 2021/10/3  双方发信息前，确认能从哪个大家都可以进行异或开始的位置。
 
@@ -78,8 +82,7 @@ public class XORutil {
 
 
     public static byte[] xorFile2Byte(int fileName ,int fileIndex ){//要使用xor开始或结束的文件的信息转化为byte数组，即合并文件名和位置
-
-
+        fileName = 1;
         ByteBuffer data = ByteBuffer.allocate(40);//https://blog.csdn.net/mrliuzhao/article/details/89453082
         byte[] byteFileName = new byte[Constant.BYTE_STARTXORFILENAME_LENGTH];//文件名。开始和结束的文件名长度一样，下同理
         byte[] byteFileIndex = new byte[Constant.BYTE_STARTXORINDEX_LENGTH];//位置
@@ -99,6 +102,11 @@ public class XORutil {
         data.flip();//不仅将position复位为0，同时也将limit的位置放置在了position之前所在的位置上
         data.clear();
 
+        ServiceLoaderImpl.setFileKeyLocation(SECRET_KEY_FILE,0);
+        fileIndex = ServiceLoaderImpl.load(IKeyIndex.class).keyIndex(SECRET_KEY_FILE);
+        fileIndex++;
+
+        Log.d(TAG, " xorFile2Byte:: keyIndex = " + fileIndex);
         data.putInt(fileIndex);//最大是999999999
         data.position(0);
         data.get(byteFileIndex);
@@ -126,20 +134,13 @@ public class XORutil {
     }
 
 
-    public static int commonStartXORIndex(int friendStartXORFileName ,int friendStartXORIndex,int myStartXORFileName,int myStartXORIndex ){
-
-        if (friendStartXORFileName>myStartXORFileName){
-            return friendStartXORIndex;
-        }else if(friendStartXORFileName==myStartXORFileName){
-            if (friendStartXORIndex<=myStartXORIndex){
-                return friendStartXORIndex;//以离文件尾更近的为准
-            }else
-                return myStartXORIndex;
-        }else
-            return myStartXORIndex;
-
-
-
+    public static int compareKeyIndex(int friendStartXORFileName ,int friendStartXORIndex,int myStartXORFileName,int myStartXORIndex ){
+        Log.d(TAG, " compareKeyIndex:: friendStartXORIndex = " + friendStartXORIndex + " myStartXORIndex = " + myStartXORIndex);
+        int keyIndex = myStartXORIndex;
+        if (friendStartXORIndex > myStartXORIndex){
+            keyIndex = friendStartXORIndex;
+        }
+        return keyIndex;
     }
 
 
@@ -203,50 +204,6 @@ public class XORutil {
 
 
     }
-
-//    private static void deleteUsedXORFile(RecordXOR targetRecordXOR) {// TODO: 2021/10/6 //删除已用过的xor文件的片段，真实删除文件内容！
-//
-//        int startXORFileName = targetRecordXOR.getStartFileName();//恢复原样
-//        int startXORIndex = targetRecordXOR.getStartFileIndex();//恢复原样
-//        int endXORFileName = targetRecordXOR.getEndFileName();//恢复原样
-//        int endXORIndex = targetRecordXOR.getEndFileIndex();//恢复原样
-//
-//        String path = XOR_PATH+"/"+startXORFileName;
-//
-//        File oldFile = new File(path);//未删除的
-//        File newFile = new File(path);//删除后新生成的
-//
-//        FileInputStream fileInputStream = null;
-//        FileOutputStream fileOutputStream = null;
-//        try {
-//            fileInputStream = new FileInputStream(oldFile);
-//            int filelen = fileInputStream.available();
-//
-//            byte[] bytes = new byte[filelen];
-//
-//            byte[] startFilebytes = Message.subBytes(bytes,0,filelen-startXORIndex);//前一部分没用到的
-//            byte[] endFilebytes = Message.subBytes(bytes,filelen-endXORIndex,endXORIndex);//后一部分没用到的
-//            byte[] newFilebytes = Message.byteMerger(startFilebytes,endFilebytes);//合并成新的文件
-//            fileInputStream.close();
-//            oldFile.delete();
-//
-//            newFile.createNewFile();
-//            fileOutputStream = new FileOutputStream(newFile);
-//            fileOutputStream.write(newFilebytes);
-//            fileOutputStream.close();
-//
-//
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//    }
-
-
 
     public static RecordXOR changecommonRecordXOR(RecordXOR commonRecordXOR,RecordXOR recordXOR){// TODO: 2021/10/24 比较尾指针，以靠最右的为准
 

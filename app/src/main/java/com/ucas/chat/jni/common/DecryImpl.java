@@ -12,9 +12,10 @@ public class DecryImpl implements IDecry {
     public byte[] decry(String iv,String keyFileName, byte[] decodeEntry) {
 
         byte[] key = "qazwsxedcrfvtgbyhnujmikol1234567".getBytes();
-//        int index= ServiceLoaderImpl.load(IKeyIndex.class).keyIndex(keyFileName);
-//        String key = ServiceLoaderImpl.getFileKeyLocation(keyFileName,index);
-        byte[] en= ServiceLoaderImpl.decry_lokiccc_byte(decodeEntry,key,iv.getBytes());
+       /* int index=ServiceLoaderImpl.load(IKeyIndex.class).keyIndex(keyFileName);
+        String key = ServiceLoaderImpl.getFileKeyLocation(keyFileName,index);*/
+        byte[] ivDecry=ServiceLoaderImpl.padding(iv);
+        byte[] en= ServiceLoaderImpl.decry_lokiccc_byte(decodeEntry,key,ivDecry);
         return en;
     }
 

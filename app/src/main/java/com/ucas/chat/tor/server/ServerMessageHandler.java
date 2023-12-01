@@ -9,6 +9,9 @@ import com.google.gson.Gson;
 import com.ucas.chat.bean.UserBean;
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
+import com.ucas.chat.jni.ServiceLoaderImpl;
+import com.ucas.chat.jni.common.IDecry;
+import com.ucas.chat.jni.common.IEntry;
 import com.ucas.chat.tor.message.ACKMessage;
 import com.ucas.chat.tor.message.DataMessage;
 import com.ucas.chat.tor.message.FailedTextMessage;
@@ -789,7 +792,8 @@ public class ServerMessageHandler {
 			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件位置我",""+myStartXORIndex);
 
 			int commonStartXORFileName = XORutil.commonStartXORFileName(friendStartXORFileName,myStartXORFileName);// TODO: 2021/10/4 共同的开始文件
-			int commonStartXORIndex = XORutil.commonStartXORIndex(friendStartXORFileName , friendStartXORIndex, myStartXORFileName, myStartXORIndex);//获取共同开始的位置
+
+			int commonStartXORIndex = XORutil.compareKeyIndex(friendStartXORFileName , friendStartXORIndex, myStartXORFileName, myStartXORIndex);//获取共同开始的位置
 			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件名共同",""+commonStartXORFileName);
 			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件位置共同",""+commonStartXORIndex);
 
@@ -941,6 +945,7 @@ public class ServerMessageHandler {
 			}
 		}
 		byte[] hell = null;
+		byte[] jniHellByteArray = null;
 
 		System.out.println(TAG + " handleTextMessageSend:: 发送文本异或的指针前commonRecordXOR："+commonRecordXOR);
 
@@ -950,13 +955,13 @@ public class ServerMessageHandler {
 		recordXOR.setMessageID(messageID);
 
 		try {
-			hell = messageContent.getBytes(Charset.forName("ISO-8859-1"));
-			Log.d(TAG, " handleTextMessageSend:: String转byte[] hell = " +  Arrays.toString(hell));
-
-			//hell = messageContent.getBytes("utf-8");//文本转为byte
+			hell = messageContent.getBytes("utf-8");//文本转为byte
 			System.out.println(TAG + " handleTextMessageSend:: 未加密的文本字节16进制："+AESCrypto.bytesToHex(hell));
-			hell = FileTask.TextXOR(hell,recordXOR);// TODO: 2021/10/4 增加 // TODO: 2021/9/23 文本也采用异或
-			System.out.println(TAG + " handleTextMessageSend:: 加密的文本字节16进制："+AESCrypto.bytesToHex(hell));
+
+			//jni算法加密文本
+			jniHellByteArray = ServiceLoaderImpl.load(IEntry.class).entry("++++",null,hell);
+			//hell = FileTask.TextXOR(hell,recordXOR);// TODO: 2021/10/4 增加 // TODO: 2021/9/23 文本也采用异或
+			System.out.println(TAG + " handleTextMessageSend:: jni算法加密的文本字节16进制："+AESCrypto.bytesToHex(jniHellByteArray));
 
 			commonRecordXOR.setStartFileName(recordXOR.getStartFileName());//硬拷贝,在这里就修改全局变量指针了，也没考虑对方有没有收到
 			commonRecordXOR.setStartFileIndex(recordXOR.getStartFileIndex());
@@ -978,7 +983,9 @@ public class ServerMessageHandler {
 		}
 
 		byte type = 5;//文本是指定为5的类型
-		byte[] externaltmpPayload = Message.createDataMessageExternalPaylod(type, hell, messageID,recordXOR);// TODO: 2021/10/5 增加xor文件的使用信息 //组装
+		// TODO: 2021/10/5 增加jni加密文件的使用信息 //组装
+		byte[] externaltmpPayload = Message.createDataMessageExternalPaylod(type, jniHellByteArray, messageID,recordXOR);
+		//byte[] externaltmpPayload = Message.createDataMessageExternalPaylod(type, hell, messageID,recordXOR);// TODO: 2021/10/5 增加xor文件的使用信息 //组装
 		System.out.println(TAG + " handleTextMessageSend:: 已发送的消息"+Arrays.toString(externaltmpPayload));
 		byte[] finalPayload = Message.packDataPayload(externaltmpPayload, statusItem.getShareKey());//加密
 		MessageItem tmps = new MessageItem(remoteOnion, statusItem.getSocket(), finalPayload, 1, 0, null);
@@ -1194,9 +1201,11 @@ public class ServerMessageHandler {
 
 			try {
 
+                //jni算法解密文本
+				internalPayload = ServiceLoaderImpl.load(IDecry.class).decry("++++",null,internalPayload);
+				Log.d(TAG, " dataMessageHandle:: jni解密 internalPayload[] = " + AESCrypto.bytesToHex(internalPayload));
 
-				internalPayload = FileTask.TextXOR(internalPayload, recordXOR);// TODO: 2021/10/4 增加 // TODO: 2021/9/23  再次异或解密
-				
+				//internalPayload = FileTask.TextXOR(internalPayload, recordXOR);// TODO: 2021/10/4 增加 // TODO: 2021/9/23  再次异或解密
 				String reply = new String(internalPayload, "utf-8");// TODO: 2021/8/23 这里就直接是原文了
 				Intent intent = new Intent();
 				intent.setAction(Constant.TOR_BROAD_CAST_ACTION);

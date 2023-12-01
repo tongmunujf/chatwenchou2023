@@ -36,7 +36,7 @@ public class Constant {
     //12
     public static int BYTE_PAYLOAD_LENGTH_BEGIN = BYTE_MESSAGE_TYPE_BEGIN + BYTE_MESSAGE_TYPE;
     public static int BYTE_PAYLOAD_LENGTH = 2;
-    //14
+    //14 = x + 2
     public static int BYTE_internalPayload_BEGIN = BYTE_PAYLOAD_LENGTH_BEGIN + BYTE_PAYLOAD_LENGTH;
     public static int SHAREDKEY_LENGTH = 32;
 

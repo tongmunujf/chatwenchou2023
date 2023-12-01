@@ -81,6 +81,7 @@ public class ServiceLoaderImpl {
         return builder.toString();
     }
 
+
     public static byte[]  padding(String iv){
         return lenpadding(iv.getBytes());
     }
@@ -117,9 +118,13 @@ public class ServiceLoaderImpl {
         return decodeEntry;
     }
 
-    public static native byte[] encrypt_lokicc_byte(byte[] inputStream, byte[] key, byte[] iv);
+
+
+
+    public static native byte[] encrypt_lokicc_byte(byte[] inputStream, byte[] key, byte[] iv,int entryLen);
     public static native byte[] decry_lokiccc_byte(byte[] inputStream,byte[] key,byte[] iv);
     public static native int   decry_lokicc_file(String infileName,String outfileName,byte[] key,byte[] iv);
     public static native int   encrypt_lokicc_file(String infileName,String outfileName,byte[] key,byte[] iv);
+
 
 }

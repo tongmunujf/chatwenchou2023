@@ -487,21 +487,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                         public void run() {
 
                             Log.d(TAG, " onClick:: btn_send 发送在线文本消息 jni加密前 textMessage = " + textMessage);
-
-                            byte[] byteArrayTextMessage = ServiceLoaderImpl.load(IEntry.class).entry(jniIv,null,textMessage.getBytes());
-                            Log.d(TAG, " onClick:: btn_send entry加密后byte[] byteArrayTextMessage = " +  Arrays.toString(byteArrayTextMessage));
-
-                            String strTextMessage = new String(byteArrayTextMessage, Charset.forName("ISO-8859-1"));
-                            Log.d(TAG, " onClick:: btn_send 发送在线文本消息 jni加密后 strTextMessage = " + strTextMessage);
-
-                            byte[] afterByteArray = strTextMessage.getBytes(Charset.forName("ISO-8859-1"));
-                            Log.d(TAG, " onClick:: btn_send  转化后byte[] afterByteArray = " +  Arrays.toString(afterByteArray));
-
-                            byte[] deTextMessage = ServiceLoaderImpl.load(IDecry.class).decry(jniIv,null,afterByteArray);
-                            Log.d(TAG, " entry_lokiccc_byte      afterByteArray = " +  Arrays.toString(afterByteArray));
-                            Log.d(TAG, " onClick:: btn_send 在线文本解密后内容 = " + new String(deTextMessage));
-
-                            boolean success = TorManager.interface_send_text(strTextMessage, mContactsBean.getOrionId(),messageID,getContext());// TODO: 2021/8/24 增加消息id
+                            boolean success = TorManager.interface_send_text(textMessage, mContactsBean.getOrionId(),messageID,getContext());// TODO: 2021/8/24 增加消息id
 
                             if (!success){// TODO: 2021/10/29  //发送不够异或材料
 
@@ -537,22 +523,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
                     Log.d(TAG, " onClick:: send_offline_text decOfflineServer = " + decOfflineServer);
 
-                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni加密前 textMessage = " + textMessage);
-
-                    byte[] byteArrayTextMessage = textMessage.getBytes();
-                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni加密前 textMessage转byte[] = " + byteArrayTextMessage);
-                    //加密代码
-                    byte[] byteOffTextMessage = ServiceLoaderImpl.load(IEntry.class).entry(jniIv,null,byteArrayTextMessage);
-                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni加密后 byteOffTextMessage = " + byteOffTextMessage);
-
-                    //解密测试
-                    byte[] deOffTextMessage = ServiceLoaderImpl.load(IDecry.class).decry(jniIv,null,byteOffTextMessage);
-                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni解密后  = " + new String(deOffTextMessage));
-
-                    String strOffTextMessage = new String(byteOffTextMessage);
-                    Log.d(TAG, " onClick::  send_offline_text 发送离线文本消息 jni加密后 strOffTextMessage = " + strOffTextMessage);
-
-                    sendOfflineText sendOfflineText = new sendOfflineText(to, from, strOffTextMessage, decOfflineServer, messageID);
+                    sendOfflineText sendOfflineText = new sendOfflineText(to, from, textMessage, decOfflineServer, messageID);
                     sendOfflineText.start();
                 }
 
@@ -916,16 +887,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
             case Event.HAS_RECEIVED_MESSAGE://对方发来的文本消息
                 Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 对方发来的文本消息 message = " + message);
-
-                byte[] byteArrayTextMessage = message.getBytes(Charset.forName("ISO-8859-1"));
-                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE  byteArrayTextMessage = " +  Arrays.toString(byteArrayTextMessage));
-
-                byte[] de = ServiceLoaderImpl.load(IDecry.class).decry(jniIv,null, byteArrayTextMessage);
-
-                String decry_message = new String(de);
-                Log.d(TAG, "\" onMoonEvent::  HAS_RECEIVED_MESSAGE jni解密后decry_message = " + decry_message);
-
-                MsgListBean msgListBean = gson.fromJson(decry_message, MsgListBean.class);
+                MsgListBean msgListBean = gson.fromJson(message, MsgListBean.class);
                 Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 收消息msgListBean = " + msgListBean.toString());
                 String onlineStauts =mContactsBean.getOnlineStatus();
                 Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE onlineStauts = " +onlineStauts);
