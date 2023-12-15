@@ -69,4 +69,5 @@
     <string name="off_line">离线</string>
     <string name="content_file">[文件]</string>
     <string name="content_im">[图片]</string>
+    <string name="key_exhausted">密钥用尽</string>
 </resources>

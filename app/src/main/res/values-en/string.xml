@@ -69,4 +69,5 @@
     <string name="off_line">off line</string>
     <string name="content_file">[File]</string>
     <string name="content_im">[Image]</string>
+    <string name="key_exhausted">Key exhausted</string>
 </resources>

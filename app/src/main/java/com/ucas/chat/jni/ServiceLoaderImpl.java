@@ -20,6 +20,13 @@ public class ServiceLoaderImpl {
         }
     }
 
+    public static int byteToInteger(byte[] array){
+        int decimal=0;
+        for(int i=0;i<4;i++){
+            decimal+=(array[i]&0XFF)*Math.pow(256,i);
+        }
+        return  decimal;
+    }
 
     public static String getFileKeyLocation(String filePath, int postions) {
         String value = null;

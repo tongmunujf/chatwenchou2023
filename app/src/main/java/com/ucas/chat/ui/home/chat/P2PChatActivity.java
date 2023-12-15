@@ -1302,24 +1302,20 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     }
                     break;
                 case REQUEST_CODE_IMAGE:
-                case REQUEST_CODE:
-
+                case REQUEST_CODE://相机拍照发送图片
+                    Log.d(TAG, " onActivityResult:: REQUEST_CODE 相机拍照 在线发送图片" );
                     String messageID = null;// TODO: 2021/8/8 用这个来唯一标记当前次的发送情况
-
-
 
                     // 从内置相机相册中选择结果回调
                     List<LocalMedia> selectListPic = PictureSelector.obtainMultipleResult(data);
 
                     for (LocalMedia media : selectListPic) {
-//                        sendMessage(mChatHandler.createImageMessage(media.getPath(), media.getCompressPath()));
-
-
                         messageID = RandomUtil.randomChar();// TODO: 2021/8/8 更新时间标记，用这个来唯一标记当前次的发送情况
-                        System.out.println("发送的messageID： "+messageID);
 
-                        System.out.println("图片："+media.getPath());
-                        String cameraFilePath = media.getPath();//
+                        Log.d(TAG, " onActivityResult:: REQUEST_CODE 在线发送图片messageID = " + messageID);
+                        Log.d(TAG, " onActivityResult:: REQUEST_CODE 在线发送图片path = " + media.getPath());
+
+                        String cameraFilePath = media.getPath();
 
                         File file =new File(cameraFilePath);
 
@@ -1330,14 +1326,14 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                             fileInputStream.read(bitmapBytes);
                             fileInputStream.close();
 
+                            Log.d(TAG, " onActivityResult:: REQUEST_CODE 在线发送图片byte = " + Arrays.toString(bitmapBytes));
 
-                            System.out.println("图片："+Arrays.toString(bitmapBytes));
                             Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);//转为BitMAP类型的图片
                             sendPicture(bitmap,messageID,cameraFilePath);//在界面显示发送情况
 
                             String onlineStatus=mContactsBean.getOnlineStatus();//状态
                             if(onlineStatus.equals("1")){//在线发送
-                                System.out.println("在线发图片"+bitmapBytes.length);
+                                Log.d(TAG, " onActivityResult:: REQUEST_CODE 在线发送图片length = " + bitmapBytes.length);
 
                                 final String  messageIDfinal=  messageID;
 
@@ -1396,7 +1392,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     if (picByte!=null){
 
 
-                        System.out.println("P2PChatActivity最后的照片"+ Arrays.toString(picByte));
+                   //     System.out.println("P2PChatActivity最后的照片"+ Arrays.toString(picByte));
                         Bitmap bitmap = BitmapFactory.decodeByteArray(picByte, 0, picByte.length);//转为BitMAP类型的图片
                         sendPicture(bitmap,messageID,picturePath);
 

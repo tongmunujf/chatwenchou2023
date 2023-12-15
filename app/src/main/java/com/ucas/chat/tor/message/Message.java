@@ -475,7 +475,8 @@ public abstract class Message {
 		payloadLength = Integer.parseInt(AESCrypto.bytesToHex(bytePayloadLength), 16);
 //		System.out.println("message.ExternalPayload.parse.payloadLength :" + payloadLength);
 
-		byte[] internalPayload = Message.subBytes(externalPayload, Constant.BYTE_internalPayload_BEGIN, payloadLength);//没解密具体内容
+		//没解密具体内容
+		byte[] internalPayload = Message.subBytes(externalPayload, Constant.BYTE_internalPayload_BEGIN, payloadLength);
 //		System.out.println("message.ExternalPayload.parse.internalPayload :" + Arrays.toString(internalPayload));
 
 		byte[] cell14 = Message.subBytes(externalPayload, 0, Constant.BYTE_internalPayload_BEGIN + payloadLength);
@@ -489,21 +490,8 @@ public abstract class Message {
 			System.out.println("��ϣ��ͬ");
 		} else {
 			System.out.println("��ϣ��ͬ����Ϣ���۸�");
-//			System.exit(1);
 		}
-//      ���ʱ��������ǲ�����һ�������յ��İ�
-//		byte[] primitiveTime = Message.subBytes(externalPayload, Constant.BYTE_APPLICATION_ID,
-//				Constant.BYTE_UTC_TIMESTAMP);
-//		System.out.println("primitive_time:" + Arrays.toString(primitiveTime));
-//		System.out.println("primitive_time:" + AESCrypto.bytes_to_int(primitiveTime));
-//		long utcTimestamp = System.currentTimeMillis() / 1000;
-//		System.out.println("utc_timestamp:" + utcTimestamp);
-//		if (utcTimestamp - AESCrypto.bytes_to_int(primitiveTime) < 60) {
-//			System.out.println("ʱ�����֤�ɹ�");
-//		} else {
-//			System.out.println("��һ�����˻�û�յ����Ҳ�Ҫ��");
-////			System.exit(1);
-//		}
+
 		return internalPayload;
 	}
 

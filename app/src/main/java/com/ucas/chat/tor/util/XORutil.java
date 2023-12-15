@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.ucas.chat.bean.contact.ConstantValue;
+import com.ucas.chat.jni.JniEntryUtils;
 import com.ucas.chat.jni.ServiceLoaderImpl;
 import com.ucas.chat.jni.common.IKeyIndex;
 import com.ucas.chat.tor.message.Message;
@@ -34,7 +35,7 @@ public class XORutil {
     private static final String TAG = ConstantValue.TAG_CHAT + "XORutil";
     ///data/data/com.ucas.chat/files
     public static final String XOR_PATH = "/data/data/com.ucas.chat/files/XOR1";//为多个xor文件的文件包路径
-    public static final String SECRET_KEY_FILE = "/data/data/com.ucas.chat/files/key.bin";
+    //public static final String SECRET_KEY_FILE = "/data/data/com.ucas.chat/files/key.bin";
 
     public static RecordXOR getStartXOR(Context context){// TODO: 2021/10/3  双方发信息前，确认能从哪个大家都可以进行异或开始的位置。
 
@@ -89,32 +90,25 @@ public class XORutil {
 
         data.order(ByteOrder.BIG_ENDIAN);//字节序(Byte Order)之大端
 
-//        int fileNameInt = Integer.parseInt(fileName);//这里限制了startFileName名字的最大为65535！
         data.putInt(fileName);
         data.position(2);//因为只要2个字节
 
         data.get(byteFileName);
         System.out.println(Arrays.toString(byteFileName));
 
-//        int fdsf = Integer.parseInt(AESCrypto.bytesToHex(byteStartFileName),16);//恢复原样
-//        System.out.println(fdsf);
 
         data.flip();//不仅将position复位为0，同时也将limit的位置放置在了position之前所在的位置上
         data.clear();
 
-        ServiceLoaderImpl.setFileKeyLocation(SECRET_KEY_FILE,0);
-        fileIndex = ServiceLoaderImpl.load(IKeyIndex.class).keyIndex(SECRET_KEY_FILE);
+        ServiceLoaderImpl.setFileKeyLocation(FilePathUtils.SECRET_KEY_FILE,0);
+        fileIndex = JniEntryUtils.getKeyIndex();
         fileIndex++;
 
         Log.d(TAG, " xorFile2Byte:: keyIndex = " + fileIndex);
         data.putInt(fileIndex);//最大是999999999
         data.position(0);
         data.get(byteFileIndex);
-//        data.flip();//不仅将position复位为0
         System.out.println(Arrays.toString(byteFileIndex));
-
-//        int ds = Integer.parseInt(AESCrypto.bytesToHex(byteStartFileIndex),16);
-//        System.out.println(ds);
 
         byte[] bytes = Message.byteMerger(byteFileName,byteFileIndex);
 

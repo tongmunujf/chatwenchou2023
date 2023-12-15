@@ -14,6 +14,7 @@ import com.ucas.chat.db.AddressBookHelper;
 import com.ucas.chat.db.MyInforTool;
 import com.ucas.chat.db.MySelfInfoHelper;
 import com.ucas.chat.db.ServiceInfoHelper;
+import com.ucas.chat.jni.JniEntryUtils;
 import com.ucas.chat.tor.message.Message;
 import com.ucas.chat.tor.server.ServerMessageHandler;
 import com.ucas.chat.tor.util.AESCrypto;
@@ -208,9 +209,14 @@ public class TorManager {
         try {
             sendSize = textMessage.getBytes("utf-8").length;
             Log.d(TAG, " interface_send_text:: tsendSize = " +  sendSize);
-            boolean isSend = judgeEnoughXOR(context,sendSize);
-            if(!isSend)
+            //boolean isSend = judgeEnoughXOR(context,sendSize);
+            boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
+
+            if(isExhausted){
+                //Toast.makeText(context, getContext().getText(R.string.key_exhausted), Toast.LENGTH_LONG).show();
+                Log.d(TAG," interface_send_text:: key.bin用尽");
                 return false;// TODO: 2021/10/28 不够长度就不发送
+            }
 
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -225,7 +231,8 @@ public class TorManager {
 
 
     public static boolean handleFileMessageSend(String fileFullPath, String remoteOnion,String messageID, Context context)  {// TODO: 2021/8/25 增加消息id //在线发送的文件
-
+        Log.d(TAG, " handleFileMessageSend:: fileFullPath = " + fileFullPath);
+        Log.d(TAG, " handleFileMessageSend:: remoteOnion = " + remoteOnion);
         File file = new File(fileFullPath);
         FileInputStream fileInputStream = null;
         try {
@@ -233,8 +240,10 @@ public class TorManager {
 
             int sendSize = fileInputStream.available();//文本转为byte;
             fileInputStream.close();
-            boolean isSend = judgeEnoughXOR(context,sendSize);
-            if(!isSend)
+           // boolean isSend = judgeEnoughXOR(context,sendSize);
+            boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
+
+            if(isExhausted)
                 return false;// TODO: 2021/10/28 不够长度就不发送
 
         } catch (FileNotFoundException e) {
@@ -253,10 +262,14 @@ public class TorManager {
 
 
     public static boolean handleByteMessageSend(String fileFullPath,byte[] bitmapBytes, String remoteOnion,String messageID, Context context ){// TODO: 2021/8/26 增加消息id。在线发送byte图片
-
+        Log.d(TAG, " handleByteMessageSend:: 在线发送图片 fileFullPath = " + fileFullPath);
+        Log.d(TAG, " handleByteMessageSend:: 在线发送图片 remoteOnion = " + remoteOnion);
+        Log.d(TAG, " handleByteMessageSend:: 在线发送图片 messageID = " + messageID);
         int sendSize = bitmapBytes.length;//文本转为byte;
-        boolean isSend = judgeEnoughXOR(context,sendSize);
-        if(!isSend)
+        Log.d(TAG, " handleByteMessageSend:: 在线发送图片 sendSize = " + sendSize);
+       // boolean isSend = judgeEnoughXOR(context,sendSize);
+        boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
+        if(isExhausted)
             return false;// TODO: 2021/10/28 不够长度就不发送
 
         ServerMessageHandler handler = ServerMessageHandler.getInstance();

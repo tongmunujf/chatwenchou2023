@@ -72,7 +72,7 @@ public class FileMessage extends Message {
 	}
 
 	/**
-	 * 
+	 * 组包过程
 	 * @param sharedKey
 	 * @param fileName
 	 * @param fileSize
@@ -137,11 +137,16 @@ public class FileMessage extends Message {
 		byte[] header = Message.byteMerger(externalPayload, externalPayloadHash);//格式：application-id(byte)	时间戳(byte)	message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)
 
 		// TODO: 2021/10/5 增加xor文件的使用信息
-		byte[] startFileNameAndIndex = XORutil.xorFile2Byte(recordXOR.getStartFileName(),recordXOR.getStartFileIndex());//按设计的大小合并文件名和位置
-		byte[] endFileNameAndIndex = XORutil.xorFile2Byte(recordXOR.getEndFileName(),recordXOR.getEndFileIndex());//按设计的大小合并文件名和位置
+//		byte[] startFileNameAndIndex = XORutil.xorFile2Byte(recordXOR.getStartFileName(),recordXOR.getStartFileIndex());//按设计的大小合并文件名和位置
+//		byte[] endFileNameAndIndex = XORutil.xorFile2Byte(recordXOR.getEndFileName(),recordXOR.getEndFileIndex());//按设计的大小合并文件名和位置
 
-		header = Message.byteMerger(header,startFileNameAndIndex);//application-id(byte)	时间戳(byte)	message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)	startXORFileName(byte)	startXORIndex(byte)
-		header = Message.byteMerger(header,endFileNameAndIndex);//message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)	startXORFileName(byte)	startXORIndex(byte)	endXORFileName(byte)	endXORIndex(byte)
+        byte[] placeholderPointer = new byte[6];
+		for (int i=0; i<6; i++){
+			placeholderPointer[0] = 0;
+		}
+
+		header = Message.byteMerger(header,placeholderPointer);//application-id(byte)	时间戳(byte)	message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)	startXORFileName(byte)	startXORIndex(byte)
+		header = Message.byteMerger(header,placeholderPointer);//message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)	startXORFileName(byte)	startXORIndex(byte)	endXORFileName(byte)	endXORIndex(byte)
 
 
 		byte[] payload = AESCrypto.paddingToLength(header, Constant.EXTERNAL_DATA_LEGTH);//剩余长度

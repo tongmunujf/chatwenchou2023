@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.ucas.chat.bean.UserBean;
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
+import com.ucas.chat.jni.JniEntryUtils;
 import com.ucas.chat.jni.ServiceLoaderImpl;
 import com.ucas.chat.jni.common.IDecry;
 import com.ucas.chat.jni.common.IEntry;
@@ -23,6 +24,7 @@ import com.ucas.chat.tor.util.AESCrypto;
 import com.ucas.chat.tor.util.ConnectionItems;
 import com.ucas.chat.tor.util.ConnectionStatusItem;
 import com.ucas.chat.tor.util.Constant;
+import com.ucas.chat.tor.util.FilePathUtils;
 import com.ucas.chat.tor.util.FileTask;
 import com.ucas.chat.tor.util.MailItem;
 import com.ucas.chat.tor.util.RSACrypto;
@@ -462,7 +464,7 @@ public class ServerMessageHandler {
 				// text message
 				try {
 					FailedTextMessage  tmp = new FailedTextMessage(item.getOnionName(),item.getRawMessage());
-					System.out.println(TAG + " Writer put message into failedqueue "+tmp.toString());
+					Log.d(TAG, " Writer:: put message into failedqueue "+tmp.toString());
 					failedQueue.put(tmp);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
@@ -470,7 +472,7 @@ public class ServerMessageHandler {
 				}
 			} else {
 				// file or pic discard
-				System.out.println(TAG + " reput  ");
+				Log.d(TAG, " Writer:: reput");
 			}
 
 			if (item.getSocket() != null) {
@@ -500,20 +502,17 @@ public class ServerMessageHandler {
 						if (count % 100 == 0)
 							Thread.sleep(2000);
 						count = count + 1;
-						System.out.println(TAG + " Writer "+item.getRawMessage()+"  "+item.getSocket()+"  "+item.getPieceID()+"  "+item.getPurpose()+"  "+item.getType()+" "+AESCrypto.bytesToHex(item.getData()));
+						Log.d(TAG, " Writer:: "+item.getRawMessage()+"  "+item.getSocket()+"  "+item.getPieceID()+"  "+item.getPurpose()+"  "+item.getType()+" "+AESCrypto.bytesToHex(item.getData()));
 					} else {
 						Thread.sleep(1000);
-//						count = 1;
-//						System.out.println("Writer kong        ...........");
 					}
 				} catch (SocketException e) {
 					this.reput(item);
-					System.out.println(TAG + " Writer SocketException " + e.getMessage());
+					Log.d(TAG, " Writer:: SocketException " + e.getMessage());
 				} catch (Exception e) {
-					System.out.println(TAG + " Writer Exception " + e.getMessage());
+					Log.d(TAG, " Writer::  Exception " + e.getMessage());
 					this.reput(item);
 				}
-//				System.out.println("Writer finall        ...........");
 			}
 		}
 
@@ -539,13 +538,13 @@ public class ServerMessageHandler {
 							} else if (item.getType() == 1) {
 								dataMessageHandle(item);//处理实际消息
 							} else {
-								System.out.println(TAG + " Reader socket status is not valid {0,1}" + item.getType());
+								Log.d(TAG, "Reader:: socket status is not valid {0,1}" + item.getType());
 							}
 
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 //							e.printStackTrace();
-							System.out.println(TAG + " Reader error " + e.getMessage());
+							Log.d(TAG, "Reader:: error " + e.getMessage());
 						}
 					} else {
 //						Thread.sleep(5000);
@@ -553,7 +552,7 @@ public class ServerMessageHandler {
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					System.out.println(TAG + " Reader error "+e.getMessage());
+					Log.d(TAG, "Reader:: error "+e.getMessage());
 				}
 
 			}
@@ -959,7 +958,8 @@ public class ServerMessageHandler {
 			System.out.println(TAG + " handleTextMessageSend:: 未加密的文本字节16进制："+AESCrypto.bytesToHex(hell));
 
 			//jni算法加密文本
-			jniHellByteArray = ServiceLoaderImpl.load(IEntry.class).entry("++++",null,hell);
+			jniHellByteArray = JniEntryUtils.entry(hell);
+			//jniHellByteArray = ServiceLoaderImpl.load(IEntry.class).entry("++++", FilePathUtils.SECRET_KEY_FILE,hell);
 			//hell = FileTask.TextXOR(hell,recordXOR);// TODO: 2021/10/4 增加 // TODO: 2021/9/23 文本也采用异或
 			System.out.println(TAG + " handleTextMessageSend:: jni算法加密的文本字节16进制："+AESCrypto.bytesToHex(jniHellByteArray));
 
@@ -1017,20 +1017,17 @@ public class ServerMessageHandler {
 		ConnectionStatusItem statusItem = getConnectionStatusItemByOnionName(remoteOnion, Constant.SOCKET_PURPOSE_FILE);
 		if (statusItem == null) {
 			System.out.println(TAG + " handleFileMessageSend:: socket not find in mapping list");
-//			this.createConnectionAsyc(remoteOnion, Constant.SOCKET_PURPOSE_FILE);
-//			if (!) {
-//				// offline process
-//				return 0;
-//			} else {
-			// online process
 			statusItem = getConnectionStatusItemByOnionName(remoteOnion, Constant.SOCKET_PURPOSE_TEXT);
-//			}
 		}
 
 		RecordXOR recordXOR = new RecordXOR();// TODO: 2021/10/25 给发送文件增加文件xor指针
 		recordXOR.setStartFileName(commonRecordXOR.getEndFileName());//硬拷贝，commonRecordXOR记录了最新使用xor文件的情况。应该从结束文件开始xor新的一次消息
 		recordXOR.setStartFileIndex(commonRecordXOR.getEndFileIndex());
 		recordXOR.setMessageID(messageID);
+
+
+		//ServiceLoaderImpl.load()
+
 
 		FileTask fileTask = new FileTask(remoteOnion, fileFullPath, 0, recordXOR );// TODO: 2021/10/25 给发送文件增加文件xor指针
 		fileTask.setStartTime(new Date());
@@ -1071,10 +1068,10 @@ public class ServerMessageHandler {
 
 
 	public int handleByteMessageSend(String fileFullPath,byte[] bitmapBytes, String remoteOnion, int remoteOnionPort,String messageID ){// TODO: 2021/8/26 增加消息id。在线发送byte图片 // TODO: 2021/8/12 专门在线发送byte
-
+		Log.d(TAG," handleByteMessageSend:: 在线发送图片");
 		ConnectionStatusItem statusItem = getConnectionStatusItemByOnionName(remoteOnion, Constant.SOCKET_PURPOSE_FILE);
 		if (statusItem == null) {
-			System.out.println(TAG + " handleByteMessageSend:: socket not find in mapping list");
+			Log.d(TAG," handleByteMessageSend:: 在线发送图片 socket not find in mapping list");
 //			this.createConnectionAsyc(remoteOnion, Constant.SOCKET_PURPOSE_FILE);
 //			if (!) {
 //				// offline process
@@ -1095,6 +1092,8 @@ public class ServerMessageHandler {
 		fileTask.setStartTime(new Date());
 		fileTask.setMessageID(messageID);
 
+		Log.d(TAG, " handleByteMessageSend:: 在线发送图片 切片完成");
+
 		commonRecordXOR.setStartFileName(recordXOR.getStartFileName());//硬拷贝,在这里就修改全局变量指针了，也没考虑对方有没有收到
 		commonRecordXOR.setStartFileIndex(recordXOR.getStartFileIndex());
 		commonRecordXOR.setEndFileName(recordXOR.getEndFileName());
@@ -1114,7 +1113,7 @@ public class ServerMessageHandler {
 			MessageItem tmps = new MessageItem(remoteOnion, statusItem.getSocket(), finalPayload, 1, 1, null);
 			try {
 				sendQueue.put(tmps);
-				System.out.println(TAG + " handleByteMessageSend::send file filename " + fileFullPath);
+				Log.d(TAG, " handleByteMessageSend:: 在线发送图片 把图片放入消息队列 filename = " + fileFullPath);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -1123,11 +1122,8 @@ public class ServerMessageHandler {
 			fileTask.setStatus(4);
 		}
 		this.senderFileMap.put(fileTask.getFileName(), fileTask);
-		System.out.println(TAG + " handleByteMessageSend::filename hash " + AESCrypto.bytesToHex(fileTask.getFileNameHash()));
+		Log.d(TAG, " handleByteMessageSend:: 在线发送图片 filename hash " + AESCrypto.bytesToHex(fileTask.getFileNameHash()));
 		return 1;
-
-
-
 	}
 
 
@@ -1158,376 +1154,411 @@ public class ServerMessageHandler {
 	}
 
 
-
+	/**
+	 *
+	 * @param item
+	 * @throws UnsupportedEncodingException
+	 */
 	private void dataMessageHandle(MessageItem item) throws UnsupportedEncodingException {//解析收到的不同类型的消息
 		byte[] externalPayload = item.getData();//已解密的文本！！
-		System.out.println(TAG + " dataMessageHandle:: 已解密的消息"+Arrays.toString(externalPayload));
-//		HandShakeMessage handShakeMessage = item.getHandShakeMessage();
+		System.out.println(TAG + " dataMessageHandle:: 接收方处理消息 已解密的消息"+Arrays.toString(externalPayload));
 		ConnectionStatusItem statusItem = getConnectionStatusItem(item);
 		if (statusItem == null) {
-			System.out.println(TAG + " dataMessageHandle:: socket not find in mapping list");
+			System.out.println(TAG + " dataMessageHandle:: 接收方处理消息 socket not find in mapping list");
 			return;
 		}else {
-			System.out.println(TAG + " dataMessageHandle:: sharekey "+AESCrypto.bytesToHex(statusItem.getShareKey()));
+			System.out.println(TAG + " dataMessageHandle:: 接收方处理消息 sharekey "+AESCrypto.bytesToHex(statusItem.getShareKey()));
 		}
-
-		byte[] byteUtcTimestamp = Message.subBytes(externalPayload, Constant.BYTE_APPLICATION_ID,
-				Constant.BYTE_UTC_TIMESTAMP);
-		long timel = Long.parseLong(AESCrypto.bytesToHex(byteUtcTimestamp), 16);
-
 
 		byte[] byteMessageID = Message.subBytes(externalPayload, Constant.BYTE_MESSAGE_TIMESTAMP_BEGIN,
 				Constant.BYTE_MESSAGE_NO);// TODO: 2021/8/24  提取得到消息id
 
 		String oldmessageID = new String(byteMessageID);// TODO: 2021/10/25 旧的解析 /真实的消息id
-		System.out.println(TAG + " dataMessageHandle:: 接收的messageID： "+oldmessageID);
+		System.out.println(TAG + " dataMessageHandle:: 接收方处理消息 接收的messageID： "+oldmessageID);
 
 		String messageID = String.valueOf(Integer.parseInt(AESCrypto.bytesToHex(byteMessageID), 16));// TODO: 2021/10/25 新的解析方式 //将以16进制数的“String s”转为十进制数
-		System.out.println(TAG + " dataMessageHandle:: 接收的messageID新解析int： "+messageID);
+		System.out.println(TAG + " dataMessageHandle:: 接收方处理消息 接收的messageID新解析int： "+messageID);
 
 
 		byte[] byteMessageType = Message.subBytes(externalPayload, Constant.BYTE_MESSAGE_TYPE_BEGIN,
 				Constant.BYTE_MESSAGE_TYPE);//得到类型  从第10字节开始，取到Constant.BYTE_MESSAGE_TYPE即1字节
 		int messageType = Integer.parseInt(AESCrypto.bytesToHex(byteMessageType), 16);//将以16进制数的“String s”转为十进制数
-		System.out.println(TAG + " dataMessageHandle:: 接收的类型： "+messageType);
+		System.out.println(TAG + " dataMessageHandle:: 接收方处理消息 接收的类型： "+messageType);
 
 		byte[] internalPayload = Message.parseExternalPaylod(externalPayload);//解析文本内容。！！
 
+		switch (messageType){
+			case Constant.DATA_MESSAGE://收到文本消息 对应5
+				receiveTextMessage(externalPayload, internalPayload,statusItem, item, messageID);
+				break;
+			case Constant.DATA_FILE_META://接收方收到文件消息的第一步，只是通知，让接收方准备好接下来的文件接收环境 对应6
+				prepareReceiveFile(externalPayload, internalPayload,statusItem, item, messageID);
+				break;
+			case Constant.DATA_FILE_READY://这里发送方知道 接收方收到了要开始接收文件的通知。然后发送方在这里将一个个分片发送出去 对应7
+				sendFileShards(externalPayload, internalPayload,statusItem, item, messageID);
+				break;
+			case Constant.DATA_FILE_DATA://接收方接收并处理每一个文件分片 对应8
+				receiveFileShards(externalPayload, internalPayload,statusItem, item, messageID);
+				break;
+			case Constant.DATA_FILE_DONE: //发送方收到接收方收完了 对应9
+				receiveFileDone(internalPayload, messageID);
+				break;
+			case Constant.DATA_ACK ://发送方收到 文件或文本的ack报文  对应12
+				receiveAck(internalPayload,statusItem, item, messageID);
+				break;
+			default:
+				Log.d(TAG, " dataMessageHandle:: messageType : " + messageType);
+				break;
+		}
+	}
 
+	/**
+	 * 处理接收的文本消息
+	 */
+	private void receiveTextMessage(byte[] externalPayload, byte[] internalPayload,
+									ConnectionStatusItem statusItem,MessageItem item, String messageID){
+		System.out.println(TAG + " receiveTextMessage:: 接收方处理消息 ");
+		RecordXOR recordXOR =  getRecordXOR(externalPayload,messageID);// TODO: 2021/10/24 解析本次消息的异或指针，改变commonRecordXOR的全局指针
 
-		if (Constant.DATA_MESSAGE == messageType) {//收到文本消息 对应5
-			System.out.println(TAG + " dataMessageHandle:: Recieve DATA_MESSAGE");
-			RecordXOR recordXOR =  getRecordXOR(externalPayload,messageID);// TODO: 2021/10/24 解析本次消息的异或指针，改变commonRecordXOR的全局指针
+		try {
 
-			try {
+			//jni算法解密文本
+			//internalPayload = ServiceLoaderImpl.load(IDecry.class).decry("++++",FilePathUtils.SECRET_KEY_FILE,internalPayload);
+			internalPayload = JniEntryUtils.decry(internalPayload);
+			Log.d(TAG, " receiveTextMessage:: 接收方处理消息 jni解密 internalPayload[] = " + AESCrypto.bytesToHex(internalPayload));
 
-                //jni算法解密文本
-				internalPayload = ServiceLoaderImpl.load(IDecry.class).decry("++++",null,internalPayload);
-				Log.d(TAG, " dataMessageHandle:: jni解密 internalPayload[] = " + AESCrypto.bytesToHex(internalPayload));
+			//internalPayload = FileTask.TextXOR(internalPayload, recordXOR);// TODO: 2021/10/4 增加 // TODO: 2021/9/23  再次异或解密
+			String reply = new String(internalPayload, "utf-8");// TODO: 2021/8/23 这里就直接是原文了
+			Intent intent = new Intent();
+			intent.setAction(Constant.TOR_BROAD_CAST_ACTION);
+			intent.putExtra(Constant.TOR_BROAD_CAST_INTENT_KEY, Constant.HAS_RECEIVED_MESSAGE);//收到文本消息
+			intent.putExtra("Message", reply);
+			intent.putExtra("PeerHostname",statusItem.getOnionName());// TODO: 2021/8/24 改为statusItem.getOnionName()
+			intent.putExtra("MessageID", messageID);// TODO: 2021/8/24 消息id
+			intent.setComponent(new ComponentName(Constant.PACKAGE,Constant.TOR_BROAD_CAST_PATH));
+			context.sendBroadcast(intent);//发广播
+			System.out.println(TAG + " receiveTextMessage:: 接收方处理消息 Recive text replyMessage =  " + reply + " replyOnion = " +statusItem.getOnionName() );
 
-				//internalPayload = FileTask.TextXOR(internalPayload, recordXOR);// TODO: 2021/10/4 增加 // TODO: 2021/9/23  再次异或解密
-				String reply = new String(internalPayload, "utf-8");// TODO: 2021/8/23 这里就直接是原文了
-				Intent intent = new Intent();
-				intent.setAction(Constant.TOR_BROAD_CAST_ACTION);
-				intent.putExtra(Constant.TOR_BROAD_CAST_INTENT_KEY, Constant.HAS_RECEIVED_MESSAGE);//收到文本消息
-				intent.putExtra("Message", reply);
-				intent.putExtra("PeerHostname",statusItem.getOnionName());// TODO: 2021/8/24 改为statusItem.getOnionName() 
-				intent.putExtra("MessageID", messageID);// TODO: 2021/8/24 消息id
-				intent.setComponent(new ComponentName(Constant.PACKAGE,Constant.TOR_BROAD_CAST_PATH));
-				context.sendBroadcast(intent);//发广播
-				System.out.println(TAG + " dataMessageHandle:: Recive text replyMessage =  " + reply + " replyOnion = " +statusItem.getOnionName() );
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		byte[] sharedKey = statusItem.getShareKey();
+		byte[] messageHash = AESCrypto.digest_fast(internalPayload);
+		int ackMessageType = 0;
+		String ack = Constant.DATA_ACK_CONTENT;//ok
+		int pieceID = 1;
+		byte[] payload = DataMessage.buildACKDataMessage(sharedKey, ackMessageType, pieceID, ack, messageHash,messageID,recordXOR);// TODO: 2021/10/25 在ack增加xor异或头尾指针 // TODO: 2021/8/24 加入文本消息的id //组装ACK报文
 
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			byte[] sharedKey = statusItem.getShareKey();
-			byte[] messageHash = AESCrypto.digest_fast(internalPayload);
-			int ackMessageType = 0;
-			String ack = Constant.DATA_ACK_CONTENT;//ok
-			int pieceID = 1;
-			byte[] payload = DataMessage.buildACKDataMessage(sharedKey, ackMessageType, pieceID, ack, messageHash,messageID,recordXOR);// TODO: 2021/10/25 在ack增加xor异或头尾指针 // TODO: 2021/8/24 加入文本消息的id //组装ACK报文
+		if (!this.sendMessage(statusItem.getSocket(), payload)) {//给发送方发ack//发送messageType = 12的ack
+			System.out.println(
+					TAG + " receiveTextMessage:: 接收方处理消息 send DATA_ACK failed to " + item.getOnionName());
+			if (statusItem.getSocket() != null)
+				this.deleteConnection(item.getOnionName(), statusItem.getSocket());
+		} else {
+			System.out.println(
+					TAG + " receiveTextMessage:: 接收方处理消息 send DATA_ACK success to " + item.getOnionName());
 
-			if (!this.sendMessage(statusItem.getSocket(), payload)) {//给发送方发ack//发送messageType = 12的ack
-				System.out.println(
-						TAG + " dataMessageHandle:: send DATA_ACK failed to " + item.getOnionName());
-				if (statusItem.getSocket() != null)
-					this.deleteConnection(item.getOnionName(), statusItem.getSocket());
-			} else {
-				System.out.println(
-						TAG + " dataMessageHandle:: send DATA_ACK success to " + item.getOnionName());
+			XORutil.deleteRecordXORandXORFile(recordXORs,messageID);// TODO: 2021/10/6  可以删除recordXORs中的recordXOR和已用过的XORFile了
+		}
+	}
 
-				XORutil.deleteRecordXORandXORFile(recordXORs,messageID);// TODO: 2021/10/6  可以删除recordXORs中的recordXOR和已用过的XORFile了
+	/**
+	 * 接收方收到文件消息的第一步
+	 * 只是通知，让接收方准备好接下来的文件接收环境
+	 */
+	private void prepareReceiveFile(byte[] externalPayload, byte[] internalPayload,
+									  ConnectionStatusItem statusItem,MessageItem item, String messageID){
+		RecordXOR recordXOR =  getRecordXOR(externalPayload,messageID);// TODO: 2021/10/24 解析本次消息的异或指针，改变commonRecordXOR的全局指针
 
-			}
-//			handleTextMessageSend("你好000000000", statusItem.getOnionName(), 6677);
+		updateConnectionPurpose(item, Constant.SOCKET_PURPOSE_FILE);//标记为文件接收
+		System.out.println(TAG + " prepareReceiveFile:: 接收方处理消息 Recieve DATA_FILE_META");
+		FileTask fileTask = FileMessage.parseFileMetaMessage(item.getOnionName(), internalPayload);
 
-		} else if (Constant.DATA_FILE_META == messageType) {// 6 ，接收方收到文件消息的第一步，只是通知，让接收方准备好接下来的文件接收环境
+		byte[] finalPayload = FileMessage.buildFileReadyMessage(statusItem.getShareKey(),
+				fileTask.getFileNameHash(),messageID,recordXOR);// TODO: 2021/8/25 增加消息id //构建ACK报文，告诉发送方，我收到了要接收文件的通知
 
-			RecordXOR recordXOR =  getRecordXOR(externalPayload,messageID);// TODO: 2021/10/24 解析本次消息的异或指针，改变commonRecordXOR的全局指针
+		if (!this.sendMessage(statusItem.getSocket(), finalPayload)) {//发送messageType = 7的ack
+			System.out.println(
+					TAG + " prepareReceiveFile:: 接收方处理消息 send DATA_FILE_READY failed to " + item.getOnionName());
+			if (item.getSocket() != null)
+				this.deleteConnection(item.getOnionName(), statusItem.getSocket());
+		} else {
+			System.out.println(TAG + " prepareReceiveFile:: 接收方处理消息 send DATA_FILE_READY success to "
+					+ item.getOnionName());
+			fileTask.setStatus(0);
+			this.senderFileMap.put(fileTask.getFileName(), fileTask);//备后面接收查询用
 
-			updateConnectionPurpose(item, Constant.SOCKET_PURPOSE_FILE);//标记为文件接收
-			System.out.println(TAG + " dataMessageHandle:: Recieve DATA_FILE_META");
-			FileTask fileTask = FileMessage.parseFileMetaMessage(item.getOnionName(), internalPayload);
-//			String key = new String(fileTask.getFileNameHash());
-
-			byte[] finalPayload = FileMessage.buildFileReadyMessage(statusItem.getShareKey(),
-					fileTask.getFileNameHash(),messageID,recordXOR);// TODO: 2021/8/25 增加消息id //构建ACK报文，告诉发送方，我收到了要接收文件的通知
-
-			if (!this.sendMessage(statusItem.getSocket(), finalPayload)) {//发送messageType = 7的ack
-				System.out.println(
-						TAG + " dataMessageHandle::  send DATA_FILE_READY failed to " + item.getOnionName());
-				if (item.getSocket() != null)
-					this.deleteConnection(item.getOnionName(), statusItem.getSocket());
-			} else {
-				System.out.println(TAG + " dataMessageHandle:: send DATA_FILE_READY success to "
-						+ item.getOnionName());
-				fileTask.setStatus(0);
-				this.senderFileMap.put(fileTask.getFileName(), fileTask);//备后面接收查询用
-
-				Event.FileMetaMessage mess = new Event.FileMetaMessage(fileTask.getFileName(), fileTask.getTotalSize());
-				Gson gson = new Gson();
-				String messJson = gson.toJson(mess);
-//							Log.d("FILE_MESSAGE111" , " messJson = " + messJson +"\ttmpNumber"+tmpNumber+"\t getTotalPieceNumber "+fileTask.getTotalPieceNumber());
-				Log.d(TAG , " dataMessageHandle:: messJson = "  + messJson);
-				EventBus.getDefault().post(new Event(Event.RECIEVE_ONLINE_FILE, messJson, messageID));// TODO: 2021/8/25 改为messageID 方便更新
-
-//				Event.FileMetaMessage mess = new Event.FileMetaMessage(fileTask.getFileName(),fileTask.getTotalSize());
-//				Gson gson = new Gson();
-//				String messJson = gson.toJson(mess);
-//				Log.d("FILE_MESSAGE777777" , " messJson = " + messJson );
-//				EventBus.getDefault().post(new Event(Event.RECIEVE_ONLINE_FILE, messJson, fileTask.getOnionName()));
-			}
-
-		} else if (Constant.DATA_FILE_READY == messageType) { // 7,这里发送方知道 接收方收到了要开始接收文件的通知。然后发送方在这里将一个个分片发送出去
-
-			RecordXOR recordXOR =  getRecordXOR(externalPayload,messageID);// TODO: 2021/10/24 解析本次消息的异或指针，改变commonRecordXOR的全局指针
-
-			updateConnectionPurpose(item, Constant.SOCKET_PURPOSE_FILE);
-			System.out.println(TAG + " dataMessageHandle:: Recieve FLIE_READY");
-			byte[] fileNameHash = FileMessage.parseFileReadyMessage(internalPayload);
-			FileTask fileTask = getFileTaskByFileNameHash(fileNameHash);
-			if (fileTask == null) {
-				System.out.println(TAG + " dataMessageHandle:: FileMessageHandler recieved filename hash not in our list "
-						+ AESCrypto.bytesToHex(fileNameHash));
-				return;
-			}
-			fileTask.setStatus(1);//设置状态为转移中
-			byte[] sharedKey = statusItem.getShareKey();
-			fileTask.setStartTime(new Date());
-			ConcurrentHashMap<Integer, byte[]> filePieceContentMap = fileTask.getFilePieceContentMap();//获取发送文件的一个个分片
-
-			ConcurrentHashMap<Integer, RecordXOR> filePieceRecordXORMap = fileTask.getFilePieceRecordXORMap();// TODO: 2021/10/25 记录每一个文件分片的xor指针
-
-			int totalPieceNumber = fileTask.getTotalPieceNumber();
-			System.out.println(TAG + " dataMessageHandle:: fileName" + fileTask.getFileName() + " total pieceNumber " + totalPieceNumber);
-			byte[] fileContent = null;
-			byte[] payload = null;
-			MessageItem tmp = null;
-
-			RecordXOR pieceRecordXOR = new RecordXOR();//每一个分片的指针
-
-			for (int i = 0; i < totalPieceNumber; i++) {//发送方在这里将一个个分片发送出去
-				fileContent = filePieceContentMap.get(i);
-
-//				pieceRecordXOR = filePieceRecordXORMap.get(i);// TODO: 2021/10/25 获取该序号的分片的指针
-
-				System.out.println(TAG + " dataMessageHandle:: 发出片段的:"+i+"：messageID："+messageID+"recordXOR："+recordXOR);
-
-				payload = FileMessage.buildFileDataMessage(sharedKey, fileNameHash, i, fileContent,messageID,recordXOR);// TODO: 2021/8/25 增加消息id 组装报文
-
-				tmp = new MessageItem(item.getOnionName(), item.getSocket(), payload, 1, 1, item.getHandShakeMessage());
-//				System.out.println("dataMessageHandle  sendfiledata "+AESCrypto.bytesToHex(payload));
-				tmp.setPieceID(i);
-				try {
-					sendQueue.put(tmp);//发送messageType = 8的报文
-					System.out.println(fileTask.getFileName() + " pieceNumber " + i + " put into sending queue");
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					System.out.println(TAG + " dataMessageHandle:: FileMessageHandler fileDataMessageHandle" + e.getMessage());
-				}
-			}
-			System.out.println(TAG + " dataMessageHandle:: FileMessageHandler put file data into send queue complete " + totalPieceNumber);
-		} else if (Constant.DATA_FILE_DATA == messageType) {//接收方处理文件内容 的每一个分片   8
-
-			RecordXOR recordXOR =  getRecordXOR(externalPayload,messageID);// TODO: 2021/10/24 解析本次消息的异或指针，改变commonRecordXOR的全局指针
-
-			System.out.println(TAG + " dataMessageHandle:: Recieve DATA_FILE_DATA");
-
-			byte[] byteFileNameHash = Message.subBytes(internalPayload, 0, 20);
-			System.out
-					.println(TAG + " dataMessageHandle:: FileMessage parseFileDataMessage fileNameHash " + AESCrypto.bytesToHex(byteFileNameHash));
-
-			byte[] bytePieceID = Message.subBytes(internalPayload, 20, 4);
-			int pieceID = Integer.parseInt(AESCrypto.bytesToHex(bytePieceID), 16);
-			System.out.println(TAG + " dataMessageHandle:: FileMessage parseFileMetaMessage.pieceID:" + pieceID);
-
-			byte[] fileContent = Message.subBytes(internalPayload, 24, internalPayload.length - 24);
-
-			FileTask fileTask = getFileTaskByFileNameHash(byteFileNameHash);
-			if (fileTask == null) {
-				System.out.println(TAG + " dataMessageHandle:: FileMessageHandler recieved filename hash not in our list "
-						+ AESCrypto.bytesToHex(byteFileNameHash));
-				return;
-			}
-			fileTask.recievePieceData(pieceID, fileContent);//接收方的还是空的，所以在这里分片存储//计算接收的速度，更新界面
-			fileTask.setStatus(1);//设置状态为转移中
-			LogUtils.d(TAG, " dataMessageHandle:: file piece " + pieceID + " is recieved of file " + fileTask.getFileName());
-			LogUtils.d(TAG, " dataMessageHandle:: file " + fileTask.getFileName() + " transfer " + fileTask.getPercent() + " "
-					+ fileTask.getSpeed() + "KB/s");
-
-			int tmpNumber = fileTask.getFileTransferStatusMap().size();
-			int num = tmpNumber%fileTask.getStepNumber();//？？
-			if(num==0) {
-				Event.FileMessage mess = new Event.FileMessage(fileTask.getFileName(), fileTask.getPercent(), fileTask.getSpeed());
-				Gson gson = new Gson();
-				String messJson = gson.toJson(mess);
-//							Log.d("FILE_MESSAGE111" , " messJson = " + messJson +"\ttmpNumber"+tmpNumber+"\t getTotalPieceNumber "+fileTask.getTotalPieceNumber());
-				Log.d(TAG ,"  dataMessageHandle:: FILE_MESSAGE555555" + " messJson = " + messJson);
-				EventBus.getDefault().post(new Event(Event.FILE_MESSAGE, messJson, messageID));// TODO: 2021/8/25 fileTask.getOnionName()改为 messageID
-
-
-
-			}
-
-
-			byte[] sharedKey = statusItem.getShareKey();
-
-			byte[] messageHash = fileTask.getFileNameHash();
-			int ackMessageType = 2;
-			String ack = Constant.DATA_ACK_CONTENT;
-
-//			String messageID = RandomUtil.randomChar(); // TODO: 2021/8/24 更新消息id标记，用这个来唯一标记当前次的发送情况
-			byte[] finalPayload = DataMessage.buildACKDataMessage(sharedKey, ackMessageType, pieceID, ack, messageHash,messageID,recordXOR);// TODO: 2021/10/25 在ack增加xor异或头尾指针// TODO: 2021/10/25 增加 //发ack给发送方
-//			MessageItem tmps = new MessageItem(item.getOnionName(), statusItem.getSocket(), finalPayload, 1, 1,
-//					item.getHandShakeMessage());
-//			try {
-//				sendQueue.put(tmps);
-//				System.out.println("handleFileMessageSend recieve file filename " + fileTask.getFileName()
-//						+ " filesize " + fileTask.getTotalSize());
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-
-			if (!this.sendMessage(statusItem.getSocket(), finalPayload)) {//发送messageType = 12的ack给发送方
-				fileTask.setStatus(0);
-				System.out.println(
-						TAG + "  dataMessageHandle::  send DATA_FILE_ACK failed to " + item.getOnionName());
-				if (statusItem.getSocket() != null)
-					this.deleteConnection(item.getOnionName(), statusItem.getSocket());
-			} else {
-				System.out.println(
-						TAG + " dataMessageHandle::  send DATA_FILE_ACK success to " + item.getOnionName());
-			}
-
-			/**
-			 * is the last piece
-			 */
-			if (fileTask.getFileTransferStatusMap().size() == fileTask.getTotalPieceNumber()) {
-
-				String filePath = fileTask.mergeFileUsedXOR(fileTask.getFileName(),recordXOR);// TODO: 2021/10/26 根据文件xor指针开始解异或 //合并各个分片文件，XOR解密文件
-
-				if (filePath != null) {
-
-					finalPayload = FileMessage.buildFileDoneMessage(sharedKey, fileTask.getFileNameHash(), messageID,recordXOR );// TODO: 2021/8/25 增加消息id //通知发送者已收完
-
-					if (!this.sendMessage(statusItem.getSocket(), finalPayload)) {//发送messageType = 9的ack
-						fileTask.setStatus(0);
-						System.out.println(TAG + " dataMessageHandle:: send DATA_FILE_DONE failed to "
-								+ item.getOnionName());
-						if (statusItem.getSocket() != null)
-							this.deleteConnection(item.getOnionName(), statusItem.getSocket());
-					} else {
-						System.out.println(TAG + " dataMessageHandle:: send DATA_FILE_DONE success to "
-								+ item.getOnionName());
-
-						Event.FileMessage mess = new Event.FileMessage(fileTask.getFileName(),"100.00",fileTask.getSpeed());
-						Gson gson = new Gson();
-						String messJson = gson.toJson(mess);
-						Log.d(TAG , " dataMessageHandle:: messJson = " + messJson );
-						EventBus.getDefault().post(new Event(Event.FILE_MESSAGE, messJson, messageID));// TODO: 2021/8/25 fileTask.getOnionName()改为 messageID
-
-
-
-						fileTask.setStatus(2);//设置为接收完
-						System.out.println(TAG + " dataMessageHandle:: remove fileTask before " + this.senderFileMap.size());
-						this.senderFileMap.remove(fileTask.getFileName());//移除本次文件接收任务
-						System.out.println(TAG + " dataMessageHandle:: remove fileTask before " + this.senderFileMap.size());
-					}
-
-				} else {
-					System.out.println(TAG + " dataMessageHandle:: recieve error ");
-				}
-			}
-		} else if (Constant.DATA_FILE_DONE == messageType) {// 9 ，发送方收到接收方收完了
-			System.out.println(TAG + " dataMessageHandle:: Recieve FLIE_DONE");
-			byte[] fileNameHash = FileMessage.parseFileReadyMessage(internalPayload);
-			FileTask fileTask = getFileTaskByFileNameHash(fileNameHash);
-			if (fileTask == null) {
-				System.out.println(TAG + " dataMessageHandle:: FileMessageHandler recieved file done message filehash not in our list "
-						+ AESCrypto.bytesToHex(fileNameHash));
-				return;
-			} else {
-				fileTask.setStatus(2);
-				System.out.println(TAG + " dataMessageHandle:: FileMessageHandler send file complete and success" + fileTask.getFileName());
-			}
-
-			Event.FileMessage mess = new Event.FileMessage(fileTask.getFileName(),"100.00",fileTask.getSpeed());
+			Event.FileMetaMessage mess = new Event.FileMetaMessage(fileTask.getFileName(), fileTask.getTotalSize());
 			Gson gson = new Gson();
 			String messJson = gson.toJson(mess);
-			Log.d(TAG , " dataMessageHandle::  messJson = " + messJson );
+			Log.d(TAG , " prepareReceiveFile:: 接收方处理消息 messJson = "  + messJson);
+			EventBus.getDefault().post(new Event(Event.RECIEVE_ONLINE_FILE, messJson, messageID));// TODO: 2021/8/25 改为messageID 方便更新
+		}
+	}
+
+	/**
+	 * 发送方发送文件分片
+	 */
+	private void sendFileShards(byte[] externalPayload, byte[] internalPayload,
+								ConnectionStatusItem statusItem,MessageItem item, String messageID){
+		RecordXOR recordXOR =  getRecordXOR(externalPayload,messageID);// TODO: 2021/10/24 解析本次消息的异或指针，改变commonRecordXOR的全局指针
+
+		updateConnectionPurpose(item, Constant.SOCKET_PURPOSE_FILE);
+		System.out.println(TAG + " sendFileShards:: 接收方处理消息 Recieve FLIE_READY");
+		byte[] fileNameHash = FileMessage.parseFileReadyMessage(internalPayload);
+		FileTask fileTask = getFileTaskByFileNameHash(fileNameHash);
+		if (fileTask == null) {
+			System.out.println(TAG + " sendFileShards:: 接收方处理消息 FileMessageHandler recieved filename hash not in our list "
+					+ AESCrypto.bytesToHex(fileNameHash));
+			return;
+		}
+		fileTask.setStatus(1);//设置状态为转移中
+		byte[] sharedKey = statusItem.getShareKey();
+		fileTask.setStartTime(new Date());
+		ConcurrentHashMap<Integer, byte[]> filePieceContentMap = fileTask.getFilePieceContentMap();//获取发送文件的一个个分片
+
+		ConcurrentHashMap<Integer, RecordXOR> filePieceRecordXORMap = fileTask.getFilePieceRecordXORMap();// TODO: 2021/10/25 记录每一个文件分片的xor指针
+
+		int totalPieceNumber = fileTask.getTotalPieceNumber();
+		System.out.println(TAG + " sendFileShards:: 接收方处理消息 fileName" + fileTask.getFileName() + " total pieceNumber " + totalPieceNumber);
+		byte[] fileContent = null;
+		byte[] payload = null;
+		MessageItem tmp = null;
+
+		RecordXOR pieceRecordXOR = new RecordXOR();//每一个分片的指针
+
+		for (int i = 0; i < totalPieceNumber; i++) {//发送方在这里将一个个分片发送出去
+			fileContent = filePieceContentMap.get(i);
+
+			System.out.println(TAG + " sendFileShards:: 接收方处理消息 发出片段的:" + i + " messageID：" + messageID + " recordXOR：" + recordXOR);
+
+			payload = FileMessage.buildFileDataMessage(sharedKey, fileNameHash, i, fileContent,messageID,recordXOR);// TODO: 2021/8/25 增加消息id 组装报文
+
+			tmp = new MessageItem(item.getOnionName(), item.getSocket(), payload, 1, 1, item.getHandShakeMessage());
+//				System.out.println("dataMessageHandle  sendfiledata "+AESCrypto.bytesToHex(payload));
+			tmp.setPieceID(i);
+			try {
+				sendQueue.put(tmp);//发送messageType = 8的报文
+				System.out.println(fileTask.getFileName() + " 接收方处理消息 sendFileShards:: pieceNumber " + i + " put into sending queue");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				System.out.println(TAG + " sendFileShards:: 接收方处理消息 FileMessageHandler fileDataMessageHandle" + e.getMessage());
+			}
+		}
+		System.out.println(TAG + " sendFileShards:: 接收方处理消息 FileMessageHandler put file data into send queue complete " + totalPieceNumber);
+	}
+
+	/**
+	 * 接收文件分片
+	 */
+	private void receiveFileShards(byte[] externalPayload, byte[] internalPayload,
+								   ConnectionStatusItem statusItem,MessageItem item, String messageID){
+		RecordXOR recordXOR =  getRecordXOR(externalPayload,messageID);// TODO: 2021/10/24 解析本次消息的异或指针，改变commonRecordXOR的全局指针
+
+		System.out.println(TAG + " receiveFileShards:: 接收方处理消息 Recieve DATA_FILE_DATA");
+
+		byte[] byteFileNameHash = Message.subBytes(internalPayload, 0, 20);
+		System.out.println(TAG + " receiveFileShards:: 接收方处理消息 FileMessage parseFileDataMessage fileNameHash " + AESCrypto.bytesToHex(byteFileNameHash));
+
+		byte[] bytePieceID = Message.subBytes(internalPayload, 20, 4);
+		int pieceID = Integer.parseInt(AESCrypto.bytesToHex(bytePieceID), 16);
+		System.out.println(TAG + " receiveFileShards:: 接收方处理消息 FileMessage parseFileMetaMessage.pieceID:" + pieceID);
+
+		byte[] fileContent = Message.subBytes(internalPayload, 24, internalPayload.length - 24);
+
+		FileTask fileTask = getFileTaskByFileNameHash(byteFileNameHash);
+		if (fileTask == null) {
+			System.out.println(TAG + " receiveFileShards::接收方处理消息  FileMessageHandler recieved filename hash not in our list "
+					+ AESCrypto.bytesToHex(byteFileNameHash));
+			return;
+		}
+		fileTask.recievePieceData(pieceID, fileContent);//接收方的还是空的，所以在这里分片存储//计算接收的速度，更新界面
+		fileTask.setStatus(1);//设置状态为转移中
+		LogUtils.d(TAG, " receiveFileShards:: 接收方处理消息 file piece " + pieceID + " is recieved of file " + fileTask.getFileName());
+		LogUtils.d(TAG, " receiveFileShards:: 接收方处理消息 file " + fileTask.getFileName() + " transfer " + fileTask.getPercent() + " "
+				+ fileTask.getSpeed() + "KB/s");
+
+		int tmpNumber = fileTask.getFileTransferStatusMap().size();
+		int num = tmpNumber%fileTask.getStepNumber();//？？
+		if(num==0) {
+			Event.FileMessage mess = new Event.FileMessage(fileTask.getFileName(), fileTask.getPercent(), fileTask.getSpeed());
+			Gson gson = new Gson();
+			String messJson = gson.toJson(mess);
+//							Log.d("FILE_MESSAGE111" , " messJson = " + messJson +"\ttmpNumber"+tmpNumber+"\t getTotalPieceNumber "+fileTask.getTotalPieceNumber());
+			//messJson = {"fileName":"Log.txt","filePercent":"100.00","fileSpeed":"0.95"}
+			Log.d(TAG ,"  receiveFileShards:: 接收方处理消息 " + " messJson = " + messJson);
 			EventBus.getDefault().post(new Event(Event.FILE_MESSAGE, messJson, messageID));// TODO: 2021/8/25 fileTask.getOnionName()改为 messageID
-			// remove file transfer task
-			fileTask.setEndTime(new Date());
-			System.out.println(TAG + " dataMessageHandle:: remove fileTask before " + this.senderFileMap.size());
-			this.senderFileMap.remove(fileTask.getFileName());
-			System.out.println(TAG + " dataMessageHandle:: remove fileTask after " + this.senderFileMap.size());
+		}
 
-		} else if (Constant.DATA_ACK == messageType) {//12，	发送方收到	文件或文本的ack报文
-//			System.out.println("Recieve DATA_ACK");
-			ACKMessage message = DataMessage.parseACKDataMessage(internalPayload);//拆解ack内容 结构为：ack_type		receive-piece-number		ok,这是小写	file_id_hash
+		byte[] sharedKey = statusItem.getShareKey();
 
-			if (message.getMessageType() > 0) {//发文件，对方回复的ack。更新发文件的进度
-				FileTask fileTask = getFileTaskByFileNameHash(message.getMessageHash());
-				if (fileTask != null) {
-					int pieceID = message.getRecievePieceNumber();
-					if (message.getAckok().equals("ok")) {
+		byte[] messageHash = fileTask.getFileNameHash();
+		int ackMessageType = 2;
+		String ack = Constant.DATA_ACK_CONTENT;
+
+		byte[] finalPayload = DataMessage.buildACKDataMessage(sharedKey, ackMessageType, pieceID, ack, messageHash,messageID,recordXOR);// TODO: 2021/10/25 在ack增加xor异或头尾指针// TODO: 2021/10/25 增加 //发ack给发送方
+
+		if (!this.sendMessage(statusItem.getSocket(), finalPayload)) {//发送messageType = 12的ack给发送方
+			fileTask.setStatus(0);
+			System.out.println(
+					TAG + "  receiveFileShards:: 接收方处理消息 send DATA_FILE_ACK failed to " + item.getOnionName());
+			if (statusItem.getSocket() != null)
+				this.deleteConnection(item.getOnionName(), statusItem.getSocket());
+		} else {
+			System.out.println(
+					TAG + " receiveFileShards:: 接收方处理消息 send DATA_FILE_ACK success to " + item.getOnionName());
+		}
+
+		receiveAllFileShards(fileTask, finalPayload,sharedKey,statusItem,item,messageID,recordXOR);
+	}
+	/**
+	 * 接收万所有文件分片
+	 */
+	private void receiveAllFileShards(FileTask fileTask, byte[] finalPayload, byte[] sharedKey,
+									  ConnectionStatusItem statusItem, MessageItem item, String messageID,
+									  RecordXOR recordXOR){
+		/**
+		 * is the last piece
+		 */
+		if (fileTask.getFileTransferStatusMap().size() == fileTask.getTotalPieceNumber()) {
+
+			String filePath = fileTask.mergeFile(fileTask.getFileName(),recordXOR);// TODO: 2021/10/26 根据文件xor指针开始解异或 //合并各个分片文件，XOR解密文件
+			Log.d(TAG," receiveAllFileShards:: 接收方处理消息 分片已合并 filePath " + filePath);
+			if (filePath != null) {
+
+				finalPayload = FileMessage.buildFileDoneMessage(sharedKey, fileTask.getFileNameHash(), messageID,recordXOR );// TODO: 2021/8/25 增加消息id //通知发送者已收完
+
+				if (!this.sendMessage(statusItem.getSocket(), finalPayload)) {//发送messageType = 9的ack
+					fileTask.setStatus(0);
+					System.out.println(TAG + " receiveAllFileShards:: 接收方处理消息 分片已合并 send DATA_FILE_DONE failed to "
+							+ item.getOnionName());
+					if (statusItem.getSocket() != null)
+						this.deleteConnection(item.getOnionName(), statusItem.getSocket());
+				} else {
+					System.out.println(TAG + " receiveAllFileShards:: 接收方处理消息 分片已合并 send DATA_FILE_DONE success to "
+							+ item.getOnionName());
+
+					Event.FileMessage mess = new Event.FileMessage(fileTask.getFileName(),"100.00",fileTask.getSpeed());
+					Gson gson = new Gson();
+					String messJson = gson.toJson(mess);
+					Log.d(TAG , " receiveAllFileShards:: 接收方处理消息 分片已合并 messJson = " + messJson );
+					EventBus.getDefault().post(new Event(Event.FILE_MESSAGE, messJson, messageID));// TODO: 2021/8/25 fileTask.getOnionName()改为 messageID
+
+
+
+					fileTask.setStatus(2);//设置为接收完
+					System.out.println(TAG + " receiveAllFileShards:: 接收方处理消息 分片已合并 remove fileTask before " + this.senderFileMap.size());
+					this.senderFileMap.remove(fileTask.getFileName());//移除本次文件接收任务
+					System.out.println(TAG + " receiveAllFileShards::  接收方处理消息 分片已合并 remove fileTask before " + this.senderFileMap.size());
+				}
+
+			} else {
+				System.out.println(TAG + " receiveAllFileShards:: 接收方处理消息 分片已合并 recieve error ");
+			}
+		}
+	}
+
+	/**
+	 * 接收文件完成
+	 */
+	private void receiveFileDone(byte[] internalPayload, String messageID ){
+		System.out.println(TAG + " receiveFileDone:: 接收方处理消息 Recieve FLIE_DONE");
+		byte[] fileNameHash = FileMessage.parseFileReadyMessage(internalPayload);
+		FileTask fileTask = getFileTaskByFileNameHash(fileNameHash);
+		if (fileTask == null) {
+			System.out.println(TAG + " receiveFileDone:: 接收方处理消息 FileMessageHandler recieved file done message filehash not in our list "
+					+ AESCrypto.bytesToHex(fileNameHash));
+			return;
+		} else {
+			fileTask.setStatus(2);
+			System.out.println(TAG + " receiveFileDone:: 接收方处理消息 FileMessageHandler send file complete and success" + fileTask.getFileName());
+		}
+
+		Event.FileMessage mess = new Event.FileMessage(fileTask.getFileName(),"100.00",fileTask.getSpeed());
+		Gson gson = new Gson();
+		String messJson = gson.toJson(mess);
+		Log.d(TAG , " receiveFileDone:: 接收方处理消息 messJson = " + messJson );
+		EventBus.getDefault().post(new Event(Event.FILE_MESSAGE, messJson, messageID));// TODO: 2021/8/25 fileTask.getOnionName()改为 messageID
+		// remove file transfer task
+		fileTask.setEndTime(new Date());
+		System.out.println(TAG + " receiveFileDone:: 接收方处理消息 remove fileTask before " + this.senderFileMap.size());
+		this.senderFileMap.remove(fileTask.getFileName());
+		System.out.println(TAG + " receiveFileDone:: 接收方处理消息 remove fileTask after " + this.senderFileMap.size());
+	}
+
+	/**
+	 * 发送方收到 文件或文本的 ack报文
+	 */
+	private void receiveAck(byte[] internalPayload, ConnectionStatusItem statusItem,
+								  MessageItem item,String messageID) {
+		ACKMessage message = DataMessage.parseACKDataMessage(internalPayload);//拆解ack内容 结构为：ack_type		receive-piece-number		ok,这是小写	file_id_hash
+
+		if (message.getMessageType() > 0) {//发文件，对方回复的ack。更新发文件的进度
+			receiveFileAck(message, statusItem, item, messageID);
+		} else {//发文本后，对方发来的ack
+			if (message != null && messageID!=null) {
+				receiveTextAck(message, messageID);
+			}
+		}
+	}
+
+	private void receiveFileAck(ACKMessage message, ConnectionStatusItem statusItem,
+								MessageItem item,String messageID){
+		FileTask fileTask = getFileTaskByFileNameHash(message.getMessageHash());
+		if (fileTask != null) {
+			int pieceID = message.getRecievePieceNumber();
+			if (message.getAckok().equals("ok")) {
 
 //						System.out.println("file piece " + pieceID + " is acked of file " + fileTask.getFileName());
-						fileTask.updateTransferStatus(pieceID);//计算接收的速度，更新界面
+				fileTask.updateTransferStatus(pieceID);//计算接收的速度，更新界面
 //						System.out.println("file " + fileTask.getFileName() + " transfer " + fileTask.getPercent() + " "
 //								+ fileTask.getSpeed() + "KB/s");
-						fileTask.setStatus(1);
+				fileTask.setStatus(1);
 
 //						Log.d("FILE_MESSAGE111",  " name= " + fileTask.getFileName() + " percent = "
 //								+ fileTask.getPercent() + " speed = " + fileTask.getSpeed() );
-						int tmpNumber = fileTask.getFileTransferStatusMap().size();
-						int num = tmpNumber%fileTask.getStepNumber();//更新发送方自己的发送进度，但是是每到一段段的更新
+				int tmpNumber = fileTask.getFileTransferStatusMap().size();
+				int num = tmpNumber%fileTask.getStepNumber();//更新发送方自己的发送进度，但是是每到一段段的更新
 
-						if (num == 0||(tmpNumber==fileTask.getTotalPieceNumber())){
-							Event.FileMessage mess = new Event.FileMessage(fileTask.getFileName(),fileTask.getPercent(),fileTask.getSpeed());
-							Gson gson = new Gson();
-							String messJson = gson.toJson(mess);
+				if (num == 0||(tmpNumber==fileTask.getTotalPieceNumber())){
+					Event.FileMessage mess = new Event.FileMessage(fileTask.getFileName(),fileTask.getPercent(),fileTask.getSpeed());
+					Gson gson = new Gson();
+					String messJson = gson.toJson(mess);
 //							Log.d("FILE_MESSAGE111" , " messJson = " + messJson +"\ttmpNumber"+tmpNumber+"\t getTotalPieceNumber "+fileTask.getTotalPieceNumber());
-							Log.d(TAG , " dataMessageHandle:: messJson = " + messJson );
-							EventBus.getDefault().post(new Event(Event.FILE_MESSAGE, messJson, messageID));// TODO: 2021/8/25 fileTask.getOnionName()改为 messageID
+					Log.d(TAG , " receiveFileAck:: 接收方处理消息 messJson = " + messJson );
+					EventBus.getDefault().post(new Event(Event.FILE_MESSAGE, messJson, messageID));// TODO: 2021/8/25 fileTask.getOnionName()改为 messageID
 
-							byte[] tmp= new byte[2048];
+					byte[] tmp= new byte[2048];
 //							System.out.println("2048000000 "+AESCrypto.bytesToHex(tmp));
-							MessageItem tmps = new MessageItem(item.getOnionName(), item.getSocket(), tmp, 1, 1, item.getHandShakeMessage());//发握手
-							try {
-								sendQueue.put(tmps);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								System.out.println(TAG + " dataMessageHandle:: send 2048000000" + e.getMessage());
-							}
-						}
-					} else if (message.getAckok().equals("ck")) {
-						this.resend(fileTask, statusItem,messageID);// TODO: 2021/8/25 增加消息id
+					MessageItem tmps = new MessageItem(item.getOnionName(), item.getSocket(), tmp, 1, 1, item.getHandShakeMessage());//发握手
+					try {
+						sendQueue.put(tmps);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						System.out.println(TAG + " receiveFileAck:: 接收方处理消息 send 2048000000" + e.getMessage());
 					}
-				} else {
-					System.out.println(TAG + " dataMessageHandle:: recieve file piece ack ,but filetask not exists, just neglet");
 				}
-			} else {//发文本后，对方发来的ack
-				if (message != null && messageID!=null) {
-					System.out.println(TAG + " dataMessageHandle:: message " + message.getMessageHash() + " is acked");
-					Intent intent = new Intent();
-					intent.setAction(Constant.TOR_BROAD_CAST_ACTION);
-					intent.putExtra(Constant.TOR_BROAD_CAST_INTENT_KEY,Constant.PEER_HAS_RECEIVED_MESSAGE);//Status
-//					intent.putExtra("result",new String(message.getMessageHash()));// TODO: 2021/8/24 这里应该改为以消息id验证。因为 message不唯一
-					intent.putExtra("result",messageID);// TODO: 2021/8/24 这里应该改为以消息id验证。因为 message不唯一
-					intent.setComponent(new ComponentName(Constant.PACKAGE,Constant.TOR_BROAD_CAST_PATH));
-					context.sendBroadcast(intent);
-
-					XORutil.deleteRecordXORandXORFile(recordXORs,messageID);// TODO: 2021/10/6 可以删除recordXORs中的recordXOR和已用过的XORFile了
-					
-				}
+			} else if (message.getAckok().equals("ck")) {
+				this.resend(fileTask, statusItem,messageID);// TODO: 2021/8/25 增加消息id
 			}
 		} else {
-			System.out.println(TAG + " dataMessageHandle::  messageType : " + messageType);
+			System.out.println(TAG + " receiveFileAck:: 接收方处理消息 recieve file piece ack ,but filetask not exists, just neglet");
 		}
+	}
+
+	private void receiveTextAck(ACKMessage message,String messageID){
+		System.out.println(TAG + " receiveTextAck:: 接收方处理消息 message " + message.getMessageHash() + " is acked");
+		Intent intent = new Intent();
+		intent.setAction(Constant.TOR_BROAD_CAST_ACTION);
+		intent.putExtra(Constant.TOR_BROAD_CAST_INTENT_KEY,Constant.PEER_HAS_RECEIVED_MESSAGE);//Status
+//					intent.putExtra("result",new String(message.getMessageHash()));// TODO: 2021/8/24 这里应该改为以消息id验证。因为 message不唯一
+		intent.putExtra("result",messageID);// TODO: 2021/8/24 这里应该改为以消息id验证。因为 message不唯一
+		intent.setComponent(new ComponentName(Constant.PACKAGE,Constant.TOR_BROAD_CAST_PATH));
+		context.sendBroadcast(intent);
+		XORutil.deleteRecordXORandXORFile(recordXORs,messageID);// TODO: 2021/10/6 可以删除recordXORs中的recordXOR和已用过的XORFile了
 	}
 
 	private void resend(FileTask fileTask, ConnectionStatusItem statusItem,String messageID ) {// TODO: 2021/8/25 增加消息id
@@ -1544,7 +1575,7 @@ public class ServerMessageHandler {
 
 		byte[] sharedKey = statusItem.getShareKey();
 		if(sharedKey!=null) {
-			System.out.println(TAG + " resend:: sharedKey " + AESCrypto.bytesToHex(sharedKey));
+			System.out.println(TAG + " resend:: 接收方处理消息 sharedKey " + AESCrypto.bytesToHex(sharedKey));
 
 			for (int i = 0; i < totalPieceNumber; i++) {
 				if (transferedPieceIDSET.contains(i)) {
@@ -1562,14 +1593,14 @@ public class ServerMessageHandler {
 				tmp.setPieceID(i);
 				try {
 					sendQueue.put(tmp);
-					System.out.println(TAG + " resend:: fileName: " +fileTask.getFileName() + " pieceNumber: " + i + " put into sending queue");
+					System.out.println(TAG + " resend:: 接收方处理消息 fileName: " +fileTask.getFileName() + " pieceNumber: " + i + " put into sending queue");
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		}else{
-			System.out.println(TAG + " resend::  sharedKey is null" +statusItem.toString());
+			System.out.println(TAG + " resend::  接收方处理消息 sharedKey is null" +statusItem.toString());
 		}
 
 	}
@@ -1671,7 +1702,7 @@ public class ServerMessageHandler {
 			public RequestHandler(Socket socket, String localPrivateKey) {
 				this.socket = socket;
 				this.localPrivateKey = localPrivateKey;
-				System.out.println(TAG + " RequestHandler accept a socket " + socket.toString());
+				System.out.println(TAG + " RequestHandler:: accept a socket " + socket.toString());
 			}
 
 			private byte[] readExactly(InputStream in) {

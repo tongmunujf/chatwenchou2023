@@ -21,9 +21,14 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.ucas.chat.R;
+import com.ucas.chat.jni.JniEntryUtils;
+import com.ucas.chat.jni.ServiceLoaderImpl;
+import com.ucas.chat.jni.common.IDecry;
 import com.ucas.chat.tor.util.AESCrypto;
 import com.ucas.chat.tor.util.Constant;
+import com.ucas.chat.tor.util.FilePathUtils;
 import com.ucas.chat.tor.util.RecordXOR;
+import com.ucas.chat.tor.util.XORutil;
 import com.ucas.chat.ui.camera.adapter.MyUtils;
 import com.ucas.chat.ui.camera.adapter.RecycleScaleAdapter;
 
@@ -245,23 +250,13 @@ public class ShowMultiImageActivity extends AppCompatActivity {
             File xorf = new File("/sdcard/Android/data/com.ucas.chat/files/XOR");
 
             RandomAccessFile xorfile = new RandomAccessFile(xorf, "r");
-
             long offSet = 0L;
-
-
-//                long begin = offSet;
-//				file.seek(begin);//将文件游标移动到文件的begin位置,
-//				xorfile.seek(begin);
-//                byte[] b = new byte[this.pieceSize];
             byte[] x = new byte[bitmapBytes.length];
-//				file.read(b);
-//                b = Arrays.copyOfRange(bitmapBytes,i*this.pieceSize,i*this.pieceSize+this.pieceSize);
-
-//				System.out.println("the "+i+" piece");
             xorfile.read(x);
 
-
-            byte[] c = byteArrayXOR(bitmapBytes, x);
+            byte[] c = JniEntryUtils.decry(bitmapBytes);
+           // byte[] c = ServiceLoaderImpl.load(IDecry.class).decry("++++", FilePathUtils.SECRET_KEY_FILE, bitmapBytes);
+           // byte[] c = byteArrayXOR(bitmapBytes, x);
 
             xorfile.close();
 

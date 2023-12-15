@@ -59,13 +59,13 @@ public class Constant {
     public static int SESSION_EXCHANGE = 3;
     public static int SESSION_DONE = 4;
 
-    public static int DATA_MESSAGE = 5;
-    public static int DATA_ACK = 12;
+    public final static int DATA_MESSAGE = 5;
+    public final static int DATA_ACK = 12;
 
-    public static int DATA_FILE_META = 6;
-    public static int DATA_FILE_READY = 7;
-    public static int DATA_FILE_DATA = 8;
-    public static int DATA_FILE_DONE = 9;
+    public final static int DATA_FILE_META = 6;
+    public final static int DATA_FILE_READY = 7;
+    public final static int DATA_FILE_DATA = 8;
+    public final static int DATA_FILE_DONE = 9;
 
     public static int CLOSE_REQUEST = 10;
     public static int CLOSE_ACK = 11;
@@ -112,7 +112,7 @@ public class Constant {
     public static final String XOR_FILE_PATH = XORutil.XOR_PATH;
     // recieve file 
     public static final String RECIEVE_FILE_PATH="/sdcard/Android/data/com.ucas.chat/files/";
-    public static final int FILE_PIECE_SIZE=1978;// TODO: 2021/10/26 1990改为1978，让出12字节给指针存放
+    public static final int FILE_PIECE_SIZE=1968;// TODO: 2021/10/26 1990改为1968，让出12字节给指针存放
 
     
     public static final int SOCKET_PURPOSE_TEXT=0;
