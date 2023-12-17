@@ -8,6 +8,8 @@ import com.ucas.chat.bean.GuardNodeBean;
 import com.ucas.chat.bean.MyInforBean;
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.MyApplication;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.tor.util.FileUtil;
 import com.ucas.chat.utils.AesUtils;
 import com.ucas.chat.utils.FileUtils;
 import com.ucas.chat.utils.LogUtils;
@@ -46,9 +48,9 @@ public class MyInforTool {
         return mInstance;
     }
 
-
     public MyInforBean insertMyInforBean(){
-        String[] splited = FileUtils.copy_file("userinfo.txt").split(" ");
+        //String[] splited = FileUtils.copy_file("userinfo.txt").split(" ");
+        String[] splited = FileUtil.readFileFromSdcardChatUser(FilePathUtils.USERINFO_NAME).split(" ");
         ACCOUNT = splited[0];
         PASSWORD = splited[1];
         NICK_NAME = splited[2];
@@ -56,16 +58,20 @@ public class MyInforTool {
 
         HEADIMAGEPATH = "Temporarily none";
 
-        ONIONNAME = FileUtils.copy_file("hostname").trim();
+        //ONIONNAME = FileUtils.copy_file("hostname").trim();
+        ONIONNAME = FileUtil.readFileFromSdcardChatUser(FilePathUtils.HOSTNAME).trim();
         LogUtils.d(TAG, " insertMyInforBean:: hostname.txt ONIONNAME：" + ONIONNAME);
 
-        String Str = FileUtils.copy_file("client_private_key");
+       // String Str = FileUtils.copy_file("client_private_key");
+        String Str = FileUtil.readFileFromSdcardChatUser(FilePathUtils.CLIENT_PRIVATE_KEY);
+
         String Str1 = Str.replaceAll("-----BEGIN PRIVATE KEY-----\r\n","");
         RSA_PRIVATE_KEY = Str1.replaceAll("-----END PRIVATE KEY-----\r\n","").trim();
         LogUtils.d(TAG, " insertMyInforBean:: client_private_key.txt Str1：" + Str1);
         LogUtils.d(TAG, " insertMyInforBean:: client_private_key.txt RSA_PRIVATE_KEY：" + RSA_PRIVATE_KEY);
 
-        String Stri = FileUtils.copy_file("client_public_key");
+        //String Stri = FileUtils.copy_file("client_public_key");
+        String Stri = FileUtil.readFileFromSdcardChatUser(FilePathUtils.CLIENT_PUBLIC_KEY);
         String Stri1 = Stri.replaceAll("-----BEGIN PUBLIC KEY-----\r\n","");
         RSA_PUBLIC_KEY = Stri1.replaceAll("-----END PUBLIC KEY-----\r\n","").trim();
         LogUtils.d(TAG, " insertMyInforBean:: client_public_key.txt Stri1：" + Stri1);
@@ -74,26 +80,6 @@ public class MyInforTool {
         MyInforBean bean = new MyInforBean(ACCOUNT,PASSWORD,NICK_NAME,GENDER,HEADIMAGEPATH,
                 ONIONNAME,RSA_PUBLIC_KEY,RSA_PRIVATE_KEY);// TODO: 2021/7/16  RSA_PRIVATE_KEY,RSA_PUBLIC_KEY改为RSA_PUBLIC_KEY,RSA_PRIVATE_KEY
         return bean;
-    }
-
-    /**
-     * 解密数据
-     * @param value
-     * @return
-     */
-    public String getDecryptValue(String value){
-        String[] splited = FileUtils.copy_file("userinfo.txt").split(" ");
-        String key = "08c08c24f1f2a444";
-       // String key = DigestUtils.sha256Hex(splited[1]).substring(0, 16);
-        LogUtils.d(TAG, " getDecryptValue:: key = " + key);
-        String decryptValue = null;
-        try {
-            decryptValue = AesUtils.decrypt(key, value);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        LogUtils.d(TAG, " getDecryptValue:: decryptValue = " + decryptValue);
-        return decryptValue;
     }
 
     /**

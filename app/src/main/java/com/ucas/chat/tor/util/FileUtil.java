@@ -1,5 +1,6 @@
 package com.ucas.chat.tor.util;
 
+import android.os.Environment;
 import android.provider.ContactsContract;
 import android.util.Log;
 
@@ -8,6 +9,7 @@ import com.ucas.chat.bean.contact.ConstantValue;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Paths;
@@ -319,4 +321,34 @@ public class FileUtil {
 		}
 	}
 
+
+	public static void createUserInfoFile(){
+		File sdcardChatFile = new File(FilePathUtils.SDCARD_CHAT);
+		if (!sdcardChatFile.exists()){
+			sdcardChatFile.mkdirs();
+		}
+		File userFile = new File(FilePathUtils.USER_INFO_FILE);
+		if (!userFile.exists()){
+			userFile.mkdirs();
+		}
+	}
+
+	public static String readFileFromSdcardChatUser(String fileName){
+		String content="";
+		String file = FilePathUtils.USER_INFO_FILE + "/" + fileName;
+		FileInputStream inputStream = null;
+		try {
+			inputStream = new FileInputStream(file);
+			byte[] buf = new byte[inputStream.available()];
+			inputStream.read(buf);
+			content = new String(buf,"utf-8");// TODO: 2021/7/13 utf-8格式
+			inputStream.close();
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		Log.d(TAG, " readFileFromSdcardChatUser content = " + content);
+		return content;
+	}
 }

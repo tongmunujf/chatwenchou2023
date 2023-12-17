@@ -170,8 +170,14 @@ public class CustomTorResourceInstaller implements TorServiceConstants {
         return true;
     }
 
-    /*
+    /**
      * Reads file from assetPath/assetKey writes it to the install folder
+     * @param assetPath
+     * @param assetKey
+     * @param isZipped
+     * @param isExecutable
+     * @return
+     * @throws IOException
      */
     private File assetToFile(String assetPath, String assetKey, boolean isZipped, boolean isExecutable) throws IOException {
         InputStream is = context.getAssets().open(assetPath);

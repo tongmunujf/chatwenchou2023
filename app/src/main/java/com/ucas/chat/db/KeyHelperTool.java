@@ -8,6 +8,8 @@ import com.ucas.chat.bean.AddressBookBean;
 import com.ucas.chat.bean.KeyInforBean;
 import com.ucas.chat.bean.MyInforBean;
 import com.ucas.chat.bean.contact.ConstantValue;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.tor.util.FileUtil;
 import com.ucas.chat.utils.LogUtils;
 
 import org.apaches.commons.codec.digest.DigestUtils;
@@ -37,7 +39,8 @@ public class KeyHelperTool {
 
     private List<KeyInforBean> getKeyValue(){
         List<KeyInforBean> list = new ArrayList<>();
-        String[] splited = copy_file("key.txt").split("\r");
+        //String[] splited = copy_file("key.txt").split("\r");
+        String[] splited = FileUtil.readFileFromSdcardChatUser(FilePathUtils.KEY_NAME).split("\r");
         for(int i = 0; i<splited.length; i++){
             String[] str = splited[i].split(" ");
             String keyName = str[0].trim();

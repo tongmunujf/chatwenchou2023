@@ -57,34 +57,19 @@ import com.ucas.chat.db.NodeHelper;
 import com.ucas.chat.db.ServiceInfoHelper;
 import com.ucas.chat.db.ServiceInfoTool;
 import com.ucas.chat.eventbus.Event;
-import com.ucas.chat.tor.util.AESCrypto;
 import com.ucas.chat.tor.util.Constant;
-import com.ucas.chat.tor.util.RecordXOR;
-import com.ucas.chat.tor.util.XORutil;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.tor.util.FileUtil;
 import com.ucas.chat.ui.ChangePasswordActivity;
 import com.ucas.chat.ui.home.HomeActivity;
 import com.ucas.chat.ui.register.RegisterActivity;
 import com.ucas.chat.utils.AesTools;
-import com.ucas.chat.utils.AesUtils;
 import com.ucas.chat.utils.FileUtils;
 import com.ucas.chat.utils.LogUtils;
-import com.ucas.chat.utils.NewRandomAccess;
 import com.ucas.chat.utils.PermissionUtils;
 import com.ucas.chat.utils.SharedPreferencesUtil;
 import com.ucas.chat.utils.ToastUtils;
-import com.ucas.chat.utils.testUser.TestUserA;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.ucas.chat.MyApplication.getContext;
@@ -172,21 +157,6 @@ public class LoginActivity extends BaseActivity {
         LogUtils.d(TAG, " byKeyNameBean1 = " + byKeyNameBean1.toString());
         LogUtils.e(TAG," ******************************************************");
 
-//
-//        TestUserA.test();
-//        LogUtils.e("TestUserA"," ******************************************************");
-//        TestUserA.test1();
-//        LogUtils.e("TestUserA"," ******************************************************");
-//        TestUserA.test2();
-//        LogUtils.e("TestUserA"," ******************************************************");
-//        TestUserA.test4();
-//        LogUtils.e("TestUserA"," ******************************************************");
-//        TestUserA.test5();
-//        LogUtils.e("TestUserA"," ******************************************************");
-
-
-
-
         initPermission();
         mEdUserName = findViewById(R.id.ed_user_name);
         mEdPassWord = findViewById(R.id.ed_pass_word);
@@ -197,8 +167,8 @@ public class LoginActivity extends BaseActivity {
         mTool = MailListUserNameTool.getInstance();
         mMailList = mTool.initMailList();
 
-        mEdUserName.setText("testA");// TODO: 2021/8/5
-        mEdPassWord.setText("testA");
+        mEdUserName.setText("testB");// TODO: 2021/8/5
+        mEdPassWord.setText("testB");
 
         //#######
         mySelfInfoHelper= MySelfInfoHelper.getInstance(getContext());
@@ -241,75 +211,10 @@ public class LoginActivity extends BaseActivity {
         //MailList = [AddressBookBean{nickName='b', gender=1, headImagePath='Temporarily none', remoteOnionName='liqf2ad7xgi4ewixwvk6qxf5bsevaq7qojvfzu74ruwusvc4ullfonyd.onion', remotePublicKey='null', remaks='Temporarily none'}]
         LogUtils.d(TAG, " onCreate:: MailList = " + addressBookHelper.queryAll().toString());
         initClick();
-        FileUtils.copy_file(getContext());
+        FileUtils.copy_file_from_sdcard(getContext());
         EventBus.getDefault().register(this);
-
-        deleteXORFileFromCommonRecordXOR();// TODO: 2021/10/26  删除上次登陆后用掉的xor片段
-
+        FileUtil.createReceiveFileFolder();
     }
-
-    private void deleteXORFileFromCommonRecordXOR() {// TODO: 2021/10/26  删除上次登陆后用掉的xor片段
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                RecordXOR recordXOR = SharedPreferencesUtil.getCommonRecordXOR(LoginActivity.this);
-
-                if (recordXOR==null)
-                    return;
-
-                File allXORFolder = new File(XORutil.XOR_PATH);//文件夹，内包含多个拆分的XOR文件
-                File[] allXORFiles = allXORFolder.listFiles();//多个拆分的XOR文件
-
-                List< File> allXORFileList = com.ucas.chat.tor.message.Message.sortFile(Arrays.asList(allXORFiles));//文件的顺序有问题的，要按数字大小排
-
-                int endXORFileName = recordXOR.getEndFileName();//恢复原样
-                int endXORIndex = recordXOR.getEndFileIndex();//恢复原样
-
-                recordXOR.setStartFileName(endXORFileName);
-                recordXOR.setStartFileIndex(endXORIndex);
-                SharedPreferencesUtil.saveCommonRecordXOR(LoginActivity.this,recordXOR);// TODO: 2021/10/26 保存全局文件xor异或指针
-
-                deleteXORFile(allXORFileList,endXORFileName,endXORIndex);//删除在endXORIndex之前用过的xor异或文件及片段
-
-
-
-
-            }
-        }).start();
-    }
-
-    private void deleteXORFile(List<File> allXORFileList, int endXORFileName, int endXORIndex) {// TODO: 2021/10/26  删除在endXORIndex之前用过的xor异或文件及片段
-
-        for (File file:allXORFileList){
-
-            int filename = Integer.parseInt(file.getName());//获取这个文件名
-
-            if(filename ==endXORFileName ){
-
-                File oldFile = file;//未删除的
-//                File newFile = new File(file.getAbsolutePath());//删除后新生成的. 返回抽象路径名的绝对路径名字符串。
-
-                long usedxorlength = file.length()-endXORIndex;// TODO: 2021/10/29 看看有没有临界值问题 //这个文件用掉的长度
-
-                NewRandomAccess.resetFile(file.getPath(),usedxorlength-1);//这部分重置0
-
-                System.out.println("当前异或文件置0："+file.getName()+" 成功");
-                break;//可以结束了
-
-            }else {
-                NewRandomAccess.resetFile(file.getPath(),file.length());//全部置0
-
-                System.out.println("删除异或文件置0："+file.getName()+" 成功");
-                file.delete();//直接删除了！！
-
-            }
-
-        }
-
-    }
-
 
     private void initClick() {
         mButtConfirm.setOnClickListener(this);
@@ -449,7 +354,8 @@ public class LoginActivity extends BaseActivity {
             case Event.GET_NODE:
                 if ((message.equals("错误")) && (GET_NODE_ERROR != 0)) {
                     GET_NODE_ERROR--;
-                    String hostname = read_file("hostname").trim();
+                    //String hostname = read_file("hostname").trim();
+                    String hostname = FileUtil.readFileFromSdcardChatUser(FilePathUtils.HOSTNAME).trim();
                     LogUtils.d(TAG, " onMoonEvent:: hostname.txt hostname: " + hostname);
 //                    String hostnameWithoutOnion = hostname.replace(" ","").replace(".onion","");
                     hostname = AesTools.getDecryptContent(hostname, AesTools.AesKeyTypeEnum.COMMON_KEY);
@@ -573,24 +479,5 @@ public class LoginActivity extends BaseActivity {
 //            stopTor(getContext());
 //            startTor(getContext());
         }
-    }
-
-    public String read_file(String fileName){
-        String content="";
-        byte[] buf =new byte[1];
-        int length = 0;
-        FileInputStream fileInputStream =null;
-        AssetManager assetManager = MyApplication.getContext().getResources().getAssets();
-        try {
-            InputStream is = assetManager.open(fileName);
-            while((length = is.read(buf))!=-1){
-                content += new String(buf);
-            }
-            System.out.println("读取到的内容是："+ content);
-        } catch (
-                IOException e) {
-            e.printStackTrace();
-        }
-        return content;
     }
 }

@@ -8,6 +8,8 @@ import com.ucas.chat.bean.AddressBookBean;
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.bean.litepal.ContactsBean;
 import com.ucas.chat.tor.util.AESCrypto;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.tor.util.FileUtil;
 import com.ucas.chat.utils.AesTools;
 import com.ucas.chat.utils.AesUtils;
 import com.ucas.chat.utils.LogUtils;
@@ -101,96 +103,9 @@ public class MailListUserNameTool {
         return null;
     }
 
-    /**
-     * 根据peerHostname地址拿到对应userId
-     * @param context
-     * @param peerHostname
-     * @return
-     */
-    public static String getUserId2(Context context, String peerHostname){
-//        return "tom";
-//        List<ContactsBean> userNameList = initMailList();
-//        for (int i=0; i<userNameList.size(); i++){
-//            ContactsBean bean = userNameList.get(i);
-//            Log.d(TAG, bean.toString());
-//            Log.d(TAG, " OrionHashId111 = " + AESCrypto.bytesToHex(bean.getOrionHashId().getBytes()));
-//            Log.d(TAG, " orionHashId222 = " + AESCrypto.bytesToHex(orionHashId.getBytes()));
-//            if (orionHashId.equals(bean.getOrionHashId())){
-//                Log.d("TAG" , " UserId = " + bean.getUserId());
-//                return bean.getUserId();
-//            }
-//        }
-
-        String[] splited = AddressBookTool.copy_file("contact.txt").split("\r");
-        String key = null;
-        for(int i = 0;i<splited.length;i++){
-            String[] str = splited[i].split(" ");
-            String remoteOnionName = str[0];//
-            String nickName = str[1];//朋友的昵称
-
-//            try {
-//                key = MyInforTool.getInstance().getOwnerPassword();
-//                LogUtils.d(TAG, " getUserId2:: ownerPassword = " + MyInforTool.getInstance().getOwnerPassword());
-//                LogUtils.d(TAG, " getUserId2:: key = " + key);
-//                remoteOnionName = AesUtils.decrypt(key, remoteOnionName);
-//                nickName = AesUtils.decrypt(key, nickName);
-//                LogUtils.d(TAG, " getUserId2:: remoteOnionName = " + remoteOnionName + " nickName = " + nickName);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-
-            remoteOnionName = AesTools.getDecryptContent(remoteOnionName, AesTools.AesKeyTypeEnum.COMMON_KEY);
-            nickName = AesTools.getDecryptContent(nickName, AesTools.AesKeyTypeEnum.COMMON_KEY);
-
-           if (remoteOnionName.equals(peerHostname)){
-               return nickName;
-           }
-
-
-        }
-
-        return null;
-    }
-
-    public static String getOrionId(Context context, String name){
-
-        List<ContactsBean> userNameList = initMailList();
-        for(int i = 0; i<ORION_ARR.length;i++){
-            ContactsBean bean = userNameList.get(i);
-            if (name.equals(bean.getUserName())){
-                return ORION_ARR[i];
-            }
-        }
-        return null;
-    }
-    /**
-     * 根据名字拿到索引
-     * @param context
-     * @param name
-     * @return
-     */
-    public static int getIndex(Context context, String name){
-
-        List<ContactsBean> userNameList = initMailList();
-        for (int i=0; i<userNameList.size(); i++){
-            ContactsBean bean = userNameList.get(i);
-            if (name.equals(bean.getUserName())){
-                return i;
-            }
-        }
-        return -1;
-    }
-
 
     public static int getOneSelfImage(Context context, String name){
         MailListSQLiteHelper helper = MailListSQLiteHelper.getInstance(context);
-//        int index = getIndex(context, name);
-//        List<ContactsBean> list = helper.queryAll();
-//        if (index >= list.size()) {
-//            return 0;
-//        }
-//        int imageId = Integer.parseInt(list.get(index).getImageId());
-//        LogUtils.d(TAG, " imageId = " + imageId);
         return 1;
     }
 

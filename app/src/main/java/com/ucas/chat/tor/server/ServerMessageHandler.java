@@ -955,7 +955,8 @@ public class ServerMessageHandler {
 
 		try {
 			hell = messageContent.getBytes("utf-8");//文本转为byte
-			System.out.println(TAG + " handleTextMessageSend:: 未加密的文本字节16进制："+AESCrypto.bytesToHex(hell));
+			//System.out.println(TAG + " handleTextMessageSend:: 未加密的文本字节16进制："+AESCrypto.bytesToHex(hell));
+			Log.e(TAG, " handleTextMessageSend:: 未加密的文本字节16进制："+AESCrypto.bytesToHex(hell));
 
 			//jni算法加密文本
 			jniHellByteArray = JniEntryUtils.entry(hell);
@@ -988,6 +989,7 @@ public class ServerMessageHandler {
 		//byte[] externaltmpPayload = Message.createDataMessageExternalPaylod(type, hell, messageID,recordXOR);// TODO: 2021/10/5 增加xor文件的使用信息 //组装
 		System.out.println(TAG + " handleTextMessageSend:: 已发送的消息"+Arrays.toString(externaltmpPayload));
 		byte[] finalPayload = Message.packDataPayload(externaltmpPayload, statusItem.getShareKey());//加密
+		Log.e(TAG, " handleTextMessageSend:: 加密后的文本字节16进制：finalPayload = "+AESCrypto.bytesToHex(finalPayload));
 		MessageItem tmps = new MessageItem(remoteOnion, statusItem.getSocket(), finalPayload, 1, 0, null);
 		tmps.setRawMessage(messageContent);//Raw：未经加工的
 		try {
@@ -1813,6 +1815,8 @@ public class ServerMessageHandler {
 							if (this.statusItem.getStatus() == 0) {
 								externalPayload = Message.parse(b, this.localPrivateKey, this.mailItem.getPublicKey());
 							} else if (this.statusItem.getStatus() == 1) {
+								Log.d(TAG, " RequestHandler:: b.size = " + b.length);
+								Log.d(TAG, " RequestHandler:: 接收的未加密的文本字节16进制："+AESCrypto.bytesToHex(b));
 								externalPayload = Message.parseDataPayload(b, this.statusItem.getShareKey());//在线接收的解密
 								type = 1;
 							} else {
@@ -2117,12 +2121,13 @@ public class ServerMessageHandler {
 			try {
 				out = socket.getOutputStream();
 				byte[] body = handShakeMessage.createSessionRequestMessage( context);//握手包
+				Log.d(TAG, "  1111111 body = " +AESCrypto.bytesToHex(body));
 				out.write(body);
 				return 1;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 //				e.printStackTrace();
-				System.out.println(TAG + " ClientTransport handle:: sendSessionRequestMessage failed" + e.getMessage());
+				Log.d(TAG, "  1111111 ClientTransport handle:: sendSessionRequestMessage failed" + e.getMessage());
 				return 0;
 			}
 

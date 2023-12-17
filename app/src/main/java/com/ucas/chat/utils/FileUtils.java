@@ -9,6 +9,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.android.material.tabs.TabLayout;
+import com.ucas.chat.bean.contact.ConstantValue;
+import com.ucas.chat.tor.util.FilePathUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -27,7 +31,7 @@ import java.util.zip.ZipInputStream;
  */
 
 public class FileUtils {
-
+    private static String TAG = ConstantValue.TAG_CHAT + "FileUtils";
     /**
      * 递归创建文件夹，从最上层文件夹开始，只要不存在就会新建
      * @param dirPath 文件夹完整路径
@@ -166,9 +170,13 @@ public class FileUtils {
         return stringBuilder.toString();
     }
 
-    public static void copy_file(Context context){
-        Log.d("copy_file", "begin work.....");
-        String v3Dirpath =  "/data/data/com.ucas.chat/files/hidden_service_replace";
+    public static void copy_file_from_sdcard(Context context){
+        Log.d(" copy_file_from_sdcard", " begin work.....");
+        String v3Dirpath =  FilePathUtils.v3Dirpath;
+        String sdcard_chat_user_hostname = FilePathUtils.USER_INFO_FILE + "/" + FilePathUtils.HOSTNAME;
+        String sdcard_chat_user_ed25519 = FilePathUtils.USER_INFO_FILE + "/" + FilePathUtils.hs_ed25519_secret_key;
+        Log.d(TAG, " copy_file_from_sdcard:: sdcard_chat_user_hostname = " + sdcard_chat_user_hostname);
+        Log.d(TAG, " copy_file_from_sdcard:: sdcard_chat_user_ed25519 = " + sdcard_chat_user_ed25519);
         File file = new File(v3Dirpath);
         if(!file.exists()){
             file.mkdirs();
@@ -177,7 +185,7 @@ public class FileUtils {
         BufferedInputStream bis=null;
         BufferedOutputStream bos=null;
         try {
-            bis = new BufferedInputStream(assetManager.open("hostname"));
+            bis = new BufferedInputStream(new FileInputStream(sdcard_chat_user_hostname));
             bos = new BufferedOutputStream(new FileOutputStream(v3Dirpath+"/hostname"));
 
             byte[] buffer = new byte[1024];
@@ -196,8 +204,9 @@ public class FileUtils {
             e.printStackTrace();
         }
         try {
-            bis = new BufferedInputStream(assetManager.open("hs_ed25519_secret_key"));
-            bos = new BufferedOutputStream(new FileOutputStream(v3Dirpath+"/hs_ed25519_secret_key"));
+            //bis = new BufferedInputStream(assetManager.open("hs_ed25519_secret_key"));
+            bis = new BufferedInputStream(new FileInputStream(sdcard_chat_user_ed25519));
+            bos = new BufferedOutputStream(new FileOutputStream(v3Dirpath+"/" + FilePathUtils.hs_ed25519_secret_key));
 
             byte[] buffer = new byte[1024];
             int readLen=0;
@@ -256,6 +265,7 @@ public class FileUtils {
         File file = new File(picturePath);
         file.delete();
     }
+
 
     public static String copy_file(String fileName){
         String content="";

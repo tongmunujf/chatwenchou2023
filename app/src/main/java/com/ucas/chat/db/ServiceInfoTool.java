@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.ucas.chat.bean.ServiceInfoBean;
 import com.ucas.chat.bean.contact.ConstantValue;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.tor.util.FileUtil;
 import com.ucas.chat.utils.LogUtils;
 
 import java.io.FileInputStream;
@@ -43,21 +45,13 @@ public class ServiceInfoTool {
 
     public ServiceInfoBean readInfoFromFile(){
 
-        String[] splited = copy_file("server.txt").split("\r");
+        //String[] splited = copy_file("server.txt").split("\r");
+        String[] splited = FileUtil.readFileFromSdcardChatUser(FilePathUtils.SERVER_NAME).split("\r");
         SERVICE_INFO_NODE[0]=splited[0].trim();
         SERVICE_COMMUNICATION[0]=splited[1].trim();
         LogUtils.d(TAG," readInfoFromFile:: server.txt splited[0] = " + splited[0]);
         LogUtils.d(TAG," readInfoFromFile:: server.txt splited[1] = " + splited[1]);
         ServiceInfoBean bean = new ServiceInfoBean(splited[0].trim(),splited[1].trim());
-//        SQLiteDatabase db = mServerHelper.getWritableDatabase();
-//        String sql = "insert into " + table_name + " (Node_Server_Id,Communication_Server_Id) values(?,?)";
-//        db.execSQL(sql,new Object[]{"5rcugup6diqslfychhpc2onmzuqfhvxdcygh4etn4e4hdzzm52k2tuad.onion", "utye3rrlplncmnkogiecviv3c32q56pgy5wlrk2mimf6njqiv5pjuwyd.onion"});
-//        ContentValues values = new ContentValues();
-//
-//        values.put("Node_Server_Id", SERVICE_INFO_NODE[0]);
-//        values.put("Communication_Server_Id", SERVICE_COMMUNICATION[0]);
-//        db.insert(table_name,null,values);
-//        db.close();
         return bean;
     }
 

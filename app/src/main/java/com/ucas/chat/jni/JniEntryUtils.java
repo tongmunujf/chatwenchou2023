@@ -7,6 +7,7 @@ import com.ucas.chat.jni.common.IDecry;
 import com.ucas.chat.jni.common.IEntry;
 import com.ucas.chat.jni.common.IKeyIndex;
 import com.ucas.chat.tor.message.Message;
+import com.ucas.chat.tor.util.AESCrypto;
 import com.ucas.chat.tor.util.Constant;
 import com.ucas.chat.tor.util.FilePathUtils;
 
@@ -66,10 +67,14 @@ public class JniEntryUtils {
 
     public static byte[] entry(byte[] sourceFileByte){
         byte[] byteArray = ServiceLoaderImpl.load(IEntry.class).entry("++++", FilePathUtils.SECRET_KEY_FILE, sourceFileByte);
+        Log.d(TAG, " entry:: byteArray.size = " + byteArray.length);
+        Log.d(TAG, " entry:: 加密后字节16进制："+ AESCrypto.bytesToHex(byteArray));
         return byteArray;
     }
 
     public static byte[] decry(byte[] ciphertextByte){
+        Log.d(TAG, " decry:: byteArray.size = " + ciphertextByte.length);
+        Log.d(TAG, " decry:: 解密前字节16进制："+ AESCrypto.bytesToHex(ciphertextByte));
         byte[] byteArray = ServiceLoaderImpl.load(IDecry.class).decry("++++", FilePathUtils.SECRET_KEY_FILE, ciphertextByte);
         return byteArray;
     }

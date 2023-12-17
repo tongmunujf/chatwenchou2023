@@ -7,6 +7,8 @@ import com.ucas.chat.MyApplication;
 import com.ucas.chat.bean.AddressBookBean;
 import com.ucas.chat.bean.MyInforBean;
 import com.ucas.chat.bean.contact.ConstantValue;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.tor.util.FileUtil;
 import com.ucas.chat.utils.AesTools;
 import com.ucas.chat.utils.AesUtils;
 import com.ucas.chat.utils.FileUtils;
@@ -42,7 +44,8 @@ public class AddressBookTool {
     public List<AddressBookBean> insertAddressBookBean(){
         List<AddressBookBean> list = new ArrayList<>();
         //判断有几个好友就生成几个AddressBookBean
-        String[] splited = copy_file("contact.txt").split("\r");
+       // String[] splited = copy_file("contact.txt").split("\r");
+        String[] splited = FileUtil.readFileFromSdcardChatUser(FilePathUtils.CONTACT_NAME).split("\r");
         for(int i = 0;i<splited.length;i++){
             String[] str = splited[i].split(" ");
             remoteOnionName = str[0];
@@ -58,7 +61,8 @@ public class AddressBookTool {
             String filename = DigestUtils.sha256Hex(decryptRemoteOnionName)+"_public_key";
             LogUtils.d(TAG," insertAddressBookBean:: filename = " + filename);
 
-            remotePublicKey = FileUtils.copy_file(filename);
+           // remotePublicKey = FileUtils.copy_file(filename);
+            remotePublicKey = FileUtil.readFileFromSdcardChatUser(filename);
             LogUtils.d(TAG, " insertAddressBookBean:: xxx_public_key.txt remotePublicKey: " + remotePublicKey);
 
 //            String SStr = copy_file(filename);
