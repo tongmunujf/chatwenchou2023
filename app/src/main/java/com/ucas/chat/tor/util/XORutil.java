@@ -33,9 +33,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class XORutil {
     private static final String TAG = ConstantValue.TAG_CHAT + "XORutil";
-    ///data/data/com.ucas.chat/files
-    public static final String XOR_PATH = "/data/data/com.ucas.chat/files/XOR1";//为多个xor文件的文件包路径
-    //public static final String SECRET_KEY_FILE = "/data/data/com.ucas.chat/files/key.bin";
 
     public static RecordXOR getStartXOR(Context context){// TODO: 2021/10/3  双方发信息前，确认能从哪个大家都可以进行异或开始的位置。
 
@@ -46,35 +43,9 @@ public class XORutil {
         System.out.println("recordStartXOR不存在");
 
         recordStartXOR = new RecordXOR();// TODO: 2021/11/24 要实例化 //保存开始要用的xor文件信息。
-        
-        //此方法从自己的第一个文件开始用
-        File allXORFolder = new File(XOR_PATH);//文件夹，内包含多个拆分的XOR文件
-        LogUtils.d(TAG , " allXORFolder: " + allXORFolder);
-        File[] allXORFiles = allXORFolder.listFiles();//多个拆分的XOR文件
-        List< File> allXORFileList = Message.sortFile(Arrays.asList(allXORFiles));//文件的顺序有问题的，要按数字大小排
 
-        if (allXORFileList.size()>0) {
-            File startXORfile = allXORFileList.get(0);//从第一个文件开始用
-
-            String fileName = startXORfile.getName();
-//            Long fileLength = startXORfile.length();//文件大小和文件流得到的byte字节数有时是不一样的！fileInputStream.available()是int类型
-
-            FileInputStream fileInputStream = null;
-            int fileLength = 0;
-            try {
-                fileInputStream = new FileInputStream(startXORfile);
-                fileLength = fileInputStream.available();
-                fileInputStream.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            int fileNameInt = Integer.parseInt(fileName);
-
-            recordStartXOR.setStartFileName(fileNameInt);
-            recordStartXOR.setStartFileIndex(fileLength);
-        }
+            recordStartXOR.setStartFileName(1);
+            recordStartXOR.setStartFileIndex(1);
 
         return recordStartXOR;
     }
@@ -150,17 +121,11 @@ public class XORutil {
                 return;//不用加入了
             }
         }
-
         recordXORs.add(recordXOR);
-
-
     }
 
 
     public static RecordXOR getRecordXOR(CopyOnWriteArrayList<RecordXOR> recordXORs, String targetMessageID) {
-
-
-
         Iterator<RecordXOR> iterator = recordXORs.iterator();
         while (iterator.hasNext()){
             RecordXOR recordXOR1 = iterator.next();
@@ -169,10 +134,7 @@ public class XORutil {
                 return recordXOR1;//不用加入了
             }
         }
-
-
         return null;
-
     }
 
 
@@ -191,12 +153,6 @@ public class XORutil {
         }
 
         recordXORs.remove(targetRecordXOR);//删除recordXORs里的
-
-
-//        deleteUsedXORFile(targetRecordXOR);//删除已用过的xor文件的片段，真实删除文件内容！
-
-
-
     }
 
     public static RecordXOR changecommonRecordXOR(RecordXOR commonRecordXOR,RecordXOR recordXOR){// TODO: 2021/10/24 比较尾指针，以靠最右的为准
@@ -214,12 +170,6 @@ public class XORutil {
                 commonRecordXOR = recordXOR;
             }
         }
-
-
         return commonRecordXOR;
     }
-
-
-
-
 }

@@ -107,9 +107,6 @@ public class Constant {
    //CLIENT_PUBLIC_KEY.txt读取 ——》明文
     public static  String CLIENT_PUBLIC_KEY = "";
 
-
-    // TODO: 2021/10/26 改成新的路径 // TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
-    public static final String XOR_FILE_PATH = XORutil.XOR_PATH;
     // recieve file 
     public static final String RECIEVE_FILE_PATH="/sdcard/Android/data/com.ucas.chat/files/";
     public static final int FILE_PIECE_SIZE=1968;// TODO: 2021/10/26 1990改为1968，让出12字节给指针存放

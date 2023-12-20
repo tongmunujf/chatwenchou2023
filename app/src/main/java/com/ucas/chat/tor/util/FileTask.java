@@ -220,26 +220,6 @@ public class FileTask {
 
 			long offSet = 0L;
 
-
-			File allXORFolder = new File(XORutil.XOR_PATH);//文件夹，内包含多个拆分的XOR文件
-			File[] allXORFiles = allXORFolder.listFiles();//多个拆分的XOR文件
-
-			List< File> allXORFileList = Message.sortFile(Arrays.asList(allXORFiles));//文件的顺序有问题的，要按数字大小排
-
-			int startFileName = this.fileTaskRecordXOR.getStartFileName();//从这个文件开始用
-			int startFileIndex = this.fileTaskRecordXOR.getStartFileIndex();//从这个文件这里开始用
-
-			allXORFileList = Message.delectAllUsedFiles(allXORFileList,startFileName);// TODO: 2021/10/4 得到以 startFileName开始的allXORFileList
-
-			FileInputStream fileInputStream =new FileInputStream(allXORFileList.get(0));
-			int fileStart = fileInputStream.available()-startFileIndex;//endFileIndex是到文件尾的距离，真实用的时候是从头部开始的，这里就是此时文件头往文件尾有fileStart距离的位置开始用
-			fileInputStream.close();
-
-			int[] fileStartIndex = {fileStart};// TODO: 2021/10/4 从endFileIndex开始用 //记录每一次发送文件时，里面的每一轮分片进行xor文件的起始点//优化的地方，用数组才能保存和更新数值
-
-
-//			int[] fileStartIndex = {0};//记录每一次发送文件时，里面的每一轮分片进行xor文件的起始点//优化的地方，用数组才能保存和更新数值
-
 			RecordXOR recordXOR = new RecordXOR();// TODO: 2021/10/25 临时变量，存储每一次分片的指针
 
 			for (int i = 0; i < this.totalPieceNumber - 1; i++) {//这里的循环只处理到倒数第二个
@@ -256,18 +236,6 @@ public class FileTask {
 
 				Log.d(TAG, " cutFile:: 未加密的文件字节片段16进制："+AESCrypto.bytesToHex(b));
 
-				byte[] x= Message.xMerger2(this.pieceSize,offSet,allXORFileList,fileStartIndex,recordXOR);//各个小XOR组合后的总长度，这里需要pieceSize长度，会改变allXORFileList,fileStartIndex的值
-//				Log.d(TAG, " cutFile:: 异或材料："+Arrays.toString(x));
-//				Log.d(TAG, " cutFile:: 异或材料："+AESCrypto.bytesToHex(x));
-
-				if (x.length !=this.pieceSize)
-					Log.d(TAG, " cutFile:: 密钥不够用了！");//这里需要处理不够用的逻辑
-
-//				Log.d(TAG, " cutFile:: 加密的文件字节片段异或xor片段16进制："+AESCrypto.bytesToHex(x));
-//				Log.d(TAG, " cutFile:: 异或片段" + i + ": "+recordXOR);
-
-				//byte[] c= this.byteArrayXOR(b, x);//在这个之前完成各个小XOR的组装x
-				//byte[] c = ServiceLoaderImpl.load(IEntry.class).entry("++++",FilePathUtils.SECRET_KEY_FILE, b);
 				byte[] c = JniEntryUtils.entry(b);
 				Log.d(TAG," cutFile:: 加密内容c = " + AESCrypto.bytesToHex(c));
 
@@ -291,20 +259,7 @@ public class FileTask {
 
 				Log.d(TAG, " cutFile:: 未加密的文件字节片段16进制：" + AESCrypto.bytesToHex(b));
 
-				byte[] x= Message.xMerger2(n,offSet,allXORFileList,fileStartIndex,recordXOR);//各个小XOR组合后的总长度，这里需要pieceSize长度
-
-//				Log.d(TAG, " cutFile:: 加密的文件字节片段异或xor片段16进制："+AESCrypto.bytesToHex(x));
-//				Log.d(TAG, " cutFile:: 异或材料："+Arrays.toString(x));
-//				Log.d(TAG, " cutFile:: 异或材料："+AESCrypto.bytesToHex(x));
-
-				if (x.length !=n)
-					Log.d(TAG, " cutFile:: 密钥不够用了！");//这里需要处理不够用的逻辑
-
-				//Log.d(TAG, " cutFile:: 异或片段"+(this.totalPieceNumber - 1)+": "+recordXOR);
-
 				byte[] c = JniEntryUtils.entry(t);
-				//byte[] c = ServiceLoaderImpl.load(IEntry.class).entry("++++",FilePathUtils.SECRET_KEY_FILE, t);
-				//byte[] c= this.byteArrayXOR(t, x);
 				Log.d(TAG, " cutFile:: 加密后的文件数据：" + AESCrypto.bytesToHex(c));
 				Log.d(TAG, " cutFile:: 加密后的文件数据的哈希：" + AESCrypto.digest_fast(c));
 				Log.d(TAG, " cutFile:: 加密的文件字节16进制片段：" + AESCrypto.bytesToHex(c));
@@ -316,8 +271,8 @@ public class FileTask {
 
 			}
 
-			this.fileTaskRecordXOR.setEndFileName(recordXOR.getEndFileName());// TODO: 2021/10/25 将最后一次异或的结束指针给本次发送文件的指针
-			this.fileTaskRecordXOR.setEndFileIndex(recordXOR.getEndFileIndex());
+			this.fileTaskRecordXOR.setEndFileName(1);// TODO: 2021/10/25 将最后一次异或的结束指针给本次发送文件的指针
+			this.fileTaskRecordXOR.setEndFileIndex(1);
 
 			file.close();
 		} catch (Exception e) {
@@ -342,23 +297,6 @@ public class FileTask {
 
 			long offSet = 0L;
 
-			File allXORFolder = new File(XORutil.XOR_PATH);//文件夹，内包含多个拆分的XOR文件
-			File[] allXORFiles = allXORFolder.listFiles();//多个拆分的XOR文件
-
-			List< File> allXORFileList = Message.sortFile(Arrays.asList(allXORFiles));//文件的顺序有问题的，要按数字大小排
-
-
-			int startFileName = this.fileTaskRecordXOR.getStartFileName();//从这个文件开始用
-			int startFileIndex = this.fileTaskRecordXOR.getStartFileIndex();//从这个文件这里开始用
-
-			allXORFileList = Message.delectAllUsedFiles(allXORFileList,startFileName);// TODO: 2021/10/4 得到以 startFileName开始的allXORFileList
-
-			FileInputStream fileInputStream =new FileInputStream(allXORFileList.get(0));
-			int fileStart = fileInputStream.available()-startFileIndex;//endFileIndex是到文件尾的距离，真实用的时候是从头部开始的，这里就是此时文件头往文件尾有fileStart距离的位置开始用
-			fileInputStream.close();
-
-			int[] fileStartIndex = {fileStart};// TODO: 2021/10/4 从endFileIndex开始用 //记录每一次发送文件时，里面的每一轮分片进行xor文件的起始点//优化的地方，用数组才能保存和更新数值
-
 			RecordXOR recordXOR = new RecordXOR();// TODO: 2021/10/25 记录每一次的头尾指针
 
 			for (int i = 0; i < this.totalPieceNumber - 1; i++) {
@@ -369,12 +307,7 @@ public class FileTask {
 				if(i>=675){
 					Log.d(TAG, " cutBitmap:: 该文件for："+i);
 				}
-				byte[] x= Message.xMerger2(this.pieceSize,offSet,allXORFileList,fileStartIndex,recordXOR);//各个小XOR组合后的总长度，这里需要pieceSize长度，会改变allXORFileList,fileStartIndex的值
-				if (x.length !=this.pieceSize)
-					Log.d(TAG, " cutBitmap::密钥不够用了！");//这里需要处理不够用的逻辑
 
-				//byte[] c= this.byteArrayXOR(b, x);
-				//byte[] c = ServiceLoaderImpl.load(IEntry.class).entry("++++",FilePathUtils.SECRET_KEY_FILE, b);
 				byte[] c = JniEntryUtils.entry(b);
 				Log.d(TAG, " cutBitmap:: 加密后的图片数据：" + AESCrypto.bytesToHex(c));
 				Log.d(TAG, " cutBitmap:: 加密后的图片数据的哈希：" + AESCrypto.digest_fast(c));
@@ -392,23 +325,10 @@ public class FileTask {
 				int n = (int)(this.totalSize - offSet );
 				System.out.println(n);
 				System.out.println(b.length);
-//				byte[] t = new byte[n];
-//				System.arraycopy(b, 0, t, 0, n);
-//				System.out.println("the last piece");
 
 				byte[] t = Arrays.copyOfRange(bitmapBytes,(int)offSet,(int)this.totalSize);
 				Log.d(TAG, " cutBitmap:: 加密前图片件数据：" + AESCrypto.bytesToHex(t));
-				
-//				byte[] x= new byte[n];
-//				xorfile.read(x);
-				byte[] x= Message.xMerger2(n,offSet,allXORFileList,fileStartIndex,recordXOR);//各个小XOR组合后的总长度，这里需要pieceSize长度
-				if (x.length !=n)
-					System.out.println("密钥不够用了！");//这里需要处理不够用的逻辑
 
-
-
-				//byte[] c= this.byteArrayXOR(t, x);
-				//byte[] c = ServiceLoaderImpl.load(IEntry.class).entry("++++",FilePathUtils.SECRET_KEY_FILE, t);
 				byte[] c = JniEntryUtils.entry(t);
 				Log.d(TAG, " cutBitmap:: 加密后图片件数据：" + AESCrypto.bytesToHex(c));
 
@@ -419,8 +339,8 @@ public class FileTask {
 //				System.out.println("offset "+offSet);
 			}
 
-			this.fileTaskRecordXOR.setEndFileName(recordXOR.getEndFileName());// TODO: 2021/10/25 将最后一次异或的结束指针给本次发送文件的指针
-			this.fileTaskRecordXOR.setEndFileIndex(recordXOR.getEndFileIndex());
+			this.fileTaskRecordXOR.setEndFileName(1);// TODO: 2021/10/25 将最后一次异或的结束指针给本次发送文件的指针
+			this.fileTaskRecordXOR.setEndFileIndex(1);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -550,19 +470,6 @@ public class FileTask {
 		return this.fileTransferStatusMap.size();
 	}
 
-	private static byte[] byteArrayXOR(byte[] a, byte[] b) {
-		byte[] c=new byte[a.length];
-		for(int i=0;i<a.length;i++) {
-			c[i]=(byte)(a[i]^b[i]);//按位异或
-		}
-
-//		System.out.println("a piece "+AESCrypto.bytesToHex(a));
-//		System.out.println("b piece "+AESCrypto.bytesToHex(b));
-//		System.out.println("c piece "+AESCrypto.bytesToHex(c));
-
-		return c;
-	}
-
 	public String mergeFile(String fileName,RecordXOR fileTaskRecordXOR) {// TODO: 2021/10/26 根据文件xor指针开始解异或 //合并文件之前先XOR解密！
 		int tempCount = this.filePieceContentMap.size();
 		Log.d(TAG, " mergeFile:: fileName = " + fileName);
@@ -571,25 +478,6 @@ public class FileTask {
 		try {
 			File receiveFile = new File(FilePathUtils.RECIEVE_FILE_PATH + fileName);//保存的位置
 			raf = new RandomAccessFile(receiveFile, "rw");
-
-//			File allXORFolder = new File(Constant.XOR_FILE_PATH);//文件夹，内包含多个拆分的XOR文件
-//			File[] allXORFiles = allXORFolder.listFiles();//多个拆分的XOR文件
-//
-//			List< File> allXORFileList = Message.sortFile(Arrays.asList(allXORFiles));//文件的顺序有问题的，要按数字大小排
-//
-//			int startFileName = fileTaskRecordXOR.getStartFileName();//从这个文件开始用
-//			int startFileIndex = fileTaskRecordXOR.getStartFileIndex();//从这个文件这里开始用
-//
-//			allXORFileList = Message.delectAllUsedFiles(allXORFileList,startFileName);// TODO: 2021/10/4 得到以 startFileName开始的allXORFileList
-//
-//			FileInputStream fileInputStream =new FileInputStream(allXORFileList.get(0));
-//			int fileStart = fileInputStream.available()-startFileIndex;//endFileIndex是到文件尾的距离，真实用的时候是从头部开始的，这里就是此时文件头往文件尾有fileStart距离的位置开始用
-//			fileInputStream.close();
-//
-//			int[] fileStartIndex = {fileStart};// TODO: 2021/10/4 从endFileIndex开始用 //记录每一次发送文件时，里面的每一轮分片进行xor文件的起始点//优化的地方，用数组才能保存和更新数值
-//
-//			long offSet = 0L;
-//			RecordXOR recordXOR = new RecordXOR();// TODO: 2021/10/25 临时变量，存储每一次分片的指针
 
 			for (int i = 0; i < tempCount; i++) {
 				byte[] data = this.filePieceContentMap.get(i);//未解密的
