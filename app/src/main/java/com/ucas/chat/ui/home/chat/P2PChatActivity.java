@@ -458,9 +458,6 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         }
     };
 
-
-
-
     @Override
     public void onClick(View v) {
         super.onClick(v);
@@ -560,8 +557,6 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         }
     }
 
-
-
     @SuppressLint("LongLogTag")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMoonEvent(Event messageEvent) throws JSONException, InterruptedException {
@@ -569,200 +564,23 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         String message = messageEvent.getMessage();//收到的消息
         String peerHostname = messageEvent.getPeerHostname(); //对在线消息来说，这里得到的是消息id，对离线消息来说，这里是消息id+速度
         LogUtils.d(TAG, " onMoonEvent:: type = " + type + " message = " + message + " peerHostname = " + peerHostname);
-        Gson gson = new Gson();
         switch (type){
             case Event.SEND_OFFLINE_FILE://本机发送离线文件
-                String messageID = peerHostname.split(",")[0];//该文件的唯一标记
-                String speedOffline = peerHostname.split(",")[1];
-
-                if (message.equals("错误")&&count!=2){
-                    String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-                    String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-
-                    String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                    Log.d(TAG, " onMoonEvent:: SEND_OFFLINE_FILE decOfflineServer = " + decOfflineServer);
-
-                    sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,type,filepath,decOfflineServer,messageID);// TODO: 2021/8/7 为什么加ran.txt 删除了？
-                    sendOfflineFile.start();// TODO: 2021/8/7  //有时候对方会收到2个重复文件，会不会是这里重复发的问题
-                    count++;
-                }else{
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE 我该显示100%了,"+count);
-                    //为了获取离线文件名和文件传输速率对peerHostname做了修改
-
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE messageID: " + messageID);
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE speedOffline: " + speedOffline);
-                    MsgListBean fileBean1 = null;
-                    int updatePostion = -1;
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE mMsgList!!!!!!" + mMsgList.toString());
-                    for (int i = 0; i < mMsgList.size(); i++) {
-                        fileBean1 = mMsgList.get(i);
-                        if ((fileBean1.getMessageID() != null) && (fileBean1.getMessageID().equals(messageID)) && (fileBean1.getFileProgress() != 100)) {
-                            fileBean1.setFileProgress(100);
-                            fileBean1.setSpeed(speedOffline);
-                            updatePostion = i;
-                            break;
-                        }
-                    }
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_FILE fileBean1:"+fileBean1);
-                    //文件进度和传输速度
-                    MyAsyncTask asyncTask1 = new MyAsyncTask(mAdapter.getViewList(), updatePostion, true);
-                    asyncTask1.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean1);
-                    mHelper.updateFileProgress2(messageID, 100);// TODO: 2021/8/10 替换filename为messageID 更新数据库
-
-
-                }
+                sendOffLineFile(message, peerHostname, type);
                 break;
             case Event.SEND_OFFLINE_TEXT://本机发送离线文本
-                String messageID4 = peerHostname;//该消息的标签
-                if (message.equals("错误")&&count!=2){
-                    Thread.sleep(5000);
-                    String textMessage = mEtContent.getText().toString();
-                    String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-//                    String remoteOnion = Constant.REMOTE_ONION_NAME;
-                    String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-                    LogUtils.d(TAG, " onMoonEvent:: SEND_OFFLINE_TEXT from = " + mUserBean.getOnionName() + " to =" + mContactsBean.getOrionId() + " text = " + textMessage);
-
-                    String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                    Log.d(TAG, " onMoonEvent:: SEND_OFFLINE_TEXT decOfflineServer = " + decOfflineServer);
-                    sendOfflineText sendOfflineText = new sendOfflineText(from,to,messageSet, decOfflineServer,messageID4);
-                    sendOfflineText.start();// TODO: 2021/8/10 这里可能导致发2次消息 
-                    count++; 
-                }else{
-//                    System.out.println("我该变颜色了");
-                    ackMatchOffline("1",messageID4);
-                }
-
+                 sendOffLineText(message, peerHostname);
             case Event.SEND_OFFLINE_PIC://本机发送离线图片
-//                if (message.equals("错误")&&count!=2){
-//                    String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-//                    String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-////                    sendOfflinePic2 sendOfflinePic = new sendOfflinePic2(from,to,"file",fileBytes,mServiceHelper.getSecond());
-////                    sendOfflinePic.start();
-//
-//                    count++;
-//                }else
-                    {
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC 我该显示100%了,"+count);
-                    //为了获取离线文件名和文件传输速率对peerHostname做了修改
-                    String messageID2 = peerHostname.split(",")[0];// TODO: 2021/8/9 得到该发送文件的标记
-                    String speedOffline2 = peerHostname.split(",")[1];
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC messageID: " + messageID2);
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC speedOffline: " + speedOffline2);
-                    MsgListBean fileBean1 = null;
-                    int updatePostion = -1;
-                    System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC mMsgList!!!!!!" + mMsgList.toString());
-                    for (int i = 0; i < mMsgList.size(); i++) {
-                        fileBean1 = mMsgList.get(i);
-                        if ((fileBean1.getMessageID() != null) && (fileBean1.getMessageID().equals(messageID2)) && (fileBean1.getFileProgress() != 100)) {
-                            fileBean1.setFileProgress(100);
-                            fileBean1.setSpeed(speedOffline2);
-                            updatePostion = i;
-                            break;
-                        }
-                    }
-
-
-
-
-                        System.out.println(" onMoonEvent:: SEND_OFFLINE_PIC fileBean1:"+fileBean1);
-                        //文件进度和传输速度
-                        MyAsyncTask asyncTask1 = new MyAsyncTask(mAdapter.getViewList(), updatePostion, true);
-                        asyncTask1.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean1);
-//                    mHelper.updateFileProgress(fileName, 100);
-
-                        String offlineMessageID = peerHostname.split(",")[0];//该文件的唯一标记
-
-                        mHelper.updateFileProgress2(offlineMessageID, 100);// TODO: 2021/8/10 替换filename为messageID 更新数据库
-
-                    }
-
-
+                sendOffLinePic(peerHostname);
                 break;
             case Event.GET_OFFLINE_LIST:
-                if(message==null)
-                    return;
-                    LogUtils.d(TAG + " onMoonEvent:: GET_OFFLINE_LIST ","bus");
-                    LogUtils.d(TAG, " nMoonEvent:: GET_OFFLINE_LIST message = " + message);
-                    dataJsonAll = new JSONObject(message);
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonMessage = " + dataJsonAll);
-                    JSONObject json = dataJsonAll.getJSONObject("file");
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonFile = " + json);
-                    JSONArray dataFileAll = json.getJSONArray("messages");
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonFileMessage = " + dataFileAll);
-                    for (int i =0;i<dataFileAll.length();i++){
-                        JSONObject infoFile = dataFileAll.getJSONObject(i);
-                        String Id = infoFile.getString("id");
-
-                        String name = infoFile.getString("abs");
-                        file_name = name;
-                        UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
-//                        String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName()));
-                        String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-                        LogUtils.d(TAG,"  onMoonEvent:: GET_OFFLINE_LIST 发文件的from?????" + from);
-
-                        String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                        Log.d(TAG, "  onMoonEvent:: GET_OFFLINE_LIST decOfflineServer = " + decOfflineServer);
-
-                        getOfflineFile getOfflineFile = new getOfflineFile(from,Id,"/sdcard/Android/data/com.ucas.chat/files/" + infoFile.getString("abs"),decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
-                        getOfflineFile.start();
-                        String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-
-                        sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
-                        sendSentMessage.start();
-                    }
-                    dataJsonAll = new JSONObject(message);
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonAllPic: " + dataJsonAll);
-                    JSONObject jsonPic = dataJsonAll.getJSONObject("pic");
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST jsonPic: " + jsonPic);
-                    JSONArray dataPicAll = jsonPic.getJSONArray("messages");
-                    LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataPicAll: " + dataPicAll);
-                    for (int i = 0; i<dataPicAll.length();i++){
-                        JSONObject infoPic = dataPicAll.getJSONObject(i);
-                        String Id = infoPic.getString("id");
-                        String name = infoPic.getString("abs");
-                        pic_name = name;
-
-                        UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
-                        String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-                        String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-
-                        String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                        Log.d(TAG, " onMoonEvent:: GET_OFFLINE_LIST  decOfflineServer = " + decOfflineServer);
-
-                        getOfflinePic getOfflinePic = new getOfflinePic(from,Id,"/sdcard/Android/data/com.ucas.chat/files/"+name,decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
-                        getOfflinePic.start();
-                        LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST from:!!!!!!!!!!!!!!!!!!" + from);
-                        LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST to:!!!!!!!!!!!!!" + to);
-//                        from = "25b7d8a11bf3fe39452593b121c0435e8a4ca0f246f6c3601fd7ff9340031c9a";
-//                        to = "19720eaf21365c54e86714548a825e10cf975dd408c25cc23cf1eb1eaeeea082";
-                        sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
-                        sendSentMessage.start();
-                    }
-//                }
-                LogUtils.d(TAG, " onMoonEvent:: GET_OFFLINE_LIST test!!!DataJsonAll: " + dataJsonAll );
+                getOffLineList(message);
                 break;
-
-
             case Event.START_COMMUNICATION_SUCCESS://接收到此Status，才可以以在线方式发送消息
-                LogUtils.d(TAG," onMoonEvent:: START_COMMUNICATION_SUCCESS 接收到此Status，才可以以在线方式发送消息");
-                mTvNickName.setTextColor(getColor(R.color.blue4));
-                mContactsBean.setOnlineStatus("1");//连接状态置1
-                SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
-                mTvOnLineState.setText(R.string.on_line);
-
-                mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为在线头像
-
+                startCommunicationSuccess();
                 break;
             case Event.SEND_PROTOCOL_FAILURE:
-                LogUtils.d(TAG," onMoonEvent:: SEND_PROTOCOL_FAI 对方离线");
-                mTvNickName.setTextColor(getColor(R.color.gray12));
-                mContactsBean.setOnlineStatus("0");
-                SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
-                mTvOnLineState.setText(R.string.off_line);
-                ToastUtils.showMessage(getContext(), getString(R.string.protocol_failure));
-
-                mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为离线头像
-
+                sendProtocolFailure();
                 break;
             case Event.PEER_HAS_RECEIVED_MESSAGE_SUCCESS:
                 LogUtils.d(TAG," onMoonEvent:: PEER_HAS_RECEIVED_MESSAGE_SUCCESS 更新发送文本的状态");
@@ -774,295 +592,478 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                 ToastUtils.showMessage(getContext(), "对方接受到消息失败");
                 LogUtils.d(TAG, " onMoonEvent:: 对方接受到消息失败" );
                 break;
-
             case Event.GET_OFFLINE_TEXT://出错//本机收到离线文本
-                if(message==null)
-                    return;
-
-                        JSONObject dataJson = new JSONObject(message);//https://www.dazhuanlan.com/szm897394125/topics/1335731
-                        LogUtils.d(TAG, " onMoonEvent:: GET_OFFLINE_TEXT dataJson : " + dataJson );
-                        JSONArray data = dataJson.getJSONArray("messages");
-                        LogUtils.d(TAG, " onMoonEvent:: GET_OFFLINE_TEXT data : " + data );
-//                        UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
-//                        String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName())); //M
-//                        String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-                        for (int i =0;i<data.length();i++){
-                            JSONObject info = data.getJSONObject(i);
-                            String message_content = info.getString("message_content");
-                            String time = info.getString("time");
-                            String messageID3 = info.getString("message_id");//该消息的唯一标签
-                            ContentValues values = new ContentValues();
-                            values.put(ChatContract.MsgListEntry.SEND_TIME, time+"");
-                            values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.text);
-                            values.put(ChatContract.MsgListEntry.TEXT_CONTENT, message_content);
-                            values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
-                            values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
-                            values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
-                            values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID3);//改消息标记
-                            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-                            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
-
-                            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                            Log.d(TAG, " onMoonEvent::  GET_OFFLINE_TEXT decOfflineServer = " + decOfflineServer);
-
-                            sendSentMessage sendSentMessage = new sendSentMessage(to, from, messageID3,message_content,decOfflineServer);
-                            sendSentMessage.start();
-                            mHelper.insertData(getContext(),values);
-                            MsgListBean bean1 = new MsgListBean(message_content,mContactsBean.getUserId() ,mUserBean.getUserId() , 1,messageID3,mContactsBean.getOrionId(),mContactsBean.getNickName());
-                            mMsgList.add(bean1);
-                            mAdapter.notifyDataSetChanged();
-                            msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
-                            LogUtils.d("接收","消息");
-                            Log.d(TAG, " onMoonEvent::  GET_OFFLINE_TEXT 接收 消息" );
-                        }
-                        notifyAdapter();
-
-
+                getOffLineText(message);
                 break;
              case Event.GET_OFFLINE_FILE://本机收到离线文件
-
-                     String messageID5 = RandomUtil.randomChar();// TODO: 2021/8/8 更新文件标记，用这个来唯一标记当前次的发送情况
-                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE" );
-                     ContentValues values = new ContentValues();
-                     values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
-                     values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.file);
-                     values.put(ChatContract.MsgListEntry.TEXT_CONTENT, getString(R.string.content_file));
-                     String pathFile = "/sdcard/Android/data/com.ucas.chat/files/" + peerHostname;// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
-                     values.put(ChatContract.MsgListEntry.FILE_PATH, pathFile);
-                     values.put(ChatContract.MsgListEntry.FILE_NAME, message);
-                     values.put(ChatContract.MsgListEntry.FILE_SIZE,  FileUtils.getFileSize(pathFile));
-                     values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
-                     values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
-                     values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
-                     values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID5);// TODO: 2021/8/10 这里后期处理，从服务器发来的解析出来
-                     mHelper.insertData(getContext(),values);
-
-                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE path = " + pathFile );
-                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE name = " + message );
-                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE fileSize = " +  FileUtils.getFileSize(pathFile) );
-                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE from = " + mContactsBean.getUserId() );
-                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE to = " + mUserBean.getUserId() );
-                     Log.d(TAG, " onMoonEvent::  GET_OFFLINE_FILE message_id = " + messageID5 );
-                     MsgListBean bean = new MsgListBean(pathFile, FileUtils.getFileName(pathFile), FileUtils.getFileSize(pathFile),0,
-                             "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID5,mContactsBean.getOrionId(),mContactsBean.getNickName());
-                     mMsgList.add(bean);
-                     mAdapter.notifyDataSetChanged();
-                     msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
-//                     notifyAdapter();
-//                 }
-
+                 getOffLineFile(message, peerHostname);
                 break;
-
             case Event.GET_OFFLINE_PIC://本机收到离线图片
-
-                String messageID6 = RandomUtil.randomChar();// TODO: 2021/8/8 更新文件标记，用这个来唯一标记当前次的发送情况
-                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC");
-                ContentValues values1 = new ContentValues();
-                values1.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
-                values1.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.image);
-                values1.put(ChatContract.MsgListEntry.TEXT_CONTENT, getString(R.string.content_im));
-                String path_pic = "/sdcard/Android/data/com.ucas.chat/files/" + peerHostname;//真实存储在手机里的图片// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
-                values1.put(ChatContract.MsgListEntry.FILE_PATH, path_pic);
-                values1.put(ChatContract.MsgListEntry.FILE_NAME, peerHostname);
-                values1.put(ChatContract.MsgListEntry.FILE_SIZE, FileUtils.getFileSize(path_pic));
-                values1.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
-                values1.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
-                values1.put(ChatContract.MsgListEntry.IS_ACKED, 1);
-                values1.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID6);// TODO: 2021/8/10 后期从服务器返回的消息中解析出
-                mHelper.insertData(getContext(),values1);
-
-                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC path = " + path_pic );
-                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC name = " + peerHostname );
-                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC fileSize = " +  FileUtils.getFileSize(path_pic) );
-                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC from = " + mContactsBean.getUserId() );
-                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC to = " + mUserBean.getUserId() );
-                Log.d(TAG, " onMoonEvent::  GET_OFFLINE_PIC message_id = " + messageID6 );
-
-                MsgListBean bean1 = new MsgListBean(path_pic, FileUtils.getFileName(path_pic), FileUtils.getFileSize(path_pic),0,
-                        "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID6,mContactsBean.getOrionId(),mContactsBean.getNickName());
-                mMsgList.add(bean1);
-                mAdapter.notifyDataSetChanged();
-                msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
+                getOffLinePic(peerHostname);
                 break;
-
             case Event.HAS_RECEIVED_MESSAGE://对方发来的文本消息
-                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 对方发来的文本消息 message = " + message);
-                MsgListBean msgListBean = gson.fromJson(message, MsgListBean.class);
-                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE 收消息msgListBean = " + msgListBean.toString());
-                String onlineStauts =mContactsBean.getOnlineStatus();
-                Log.d(TAG, " onMoonEvent::  HAS_RECEIVED_MESSAGE onlineStauts = " +onlineStauts);
-                if(onlineStauts.equals("0")){
-                    mTvNickName.setTextColor(getColor(R.color.blue4));
-                    mContactsBean.setOnlineStatus("1");
-                    SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
-                    mTvOnLineState.setText(R.string.on_line);
-
-                    mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为在线头像
-                }
-
-                mMsgList.add(msgListBean);
-                mAdapter.notifyDataSetChanged();
-                msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
+                hasReceivedMessage(message);
                 break;
-
-
              case Event.RECIEVE_ONLINE_FILE://收到文件的第一步，准备好环境，但未正式接收
-                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE 收到文件的第一步，准备好环境，但未正式接收");
-                 onlineStauts =mContactsBean.getOnlineStatus();
-                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE onlineStauts = " + onlineStauts);
-                 if(onlineStauts.equals("0")){//再次检测更新连接状态
-                     mTvNickName.setTextColor(getColor(R.color.blue4));
-                     mContactsBean.setOnlineStatus("1");
-                     SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
-                     mTvOnLineState.setText(R.string.on_line);
-
-                     mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为在线头像
-                 }
-
-                 String messageID7 = peerHostname;// TODO: 2021/8/8 更新文件标记，用这个来唯一标记这个文件
-                 Event.FileMetaMessage fileMetaMessage = gson.fromJson(message, Event.FileMetaMessage.class);
-                 String fileName =  fileMetaMessage.getFileName();//文件名
-                 long fileSize = fileMetaMessage.getTotalSize();
-//                 Date startTime = fileMetaMessage.getStartTime();//获取该文件接收开始时间
-
-                values = new ContentValues();
-                String filePath ="/sdcard/Android/data/com.ucas.chat/files/"+fileName;// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
-                values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
-                values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.file);
-                values.put(ChatContract.MsgListEntry.TEXT_CONTENT, getString(R.string.content_file));
-                values.put(ChatContract.MsgListEntry.FILE_PATH, filePath);
-                values.put(ChatContract.MsgListEntry.FILE_NAME, fileName);
-                values.put(ChatContract.MsgListEntry.FILE_SIZE, fileSize);
-                values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
-                values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
-                values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
-                values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID7);// TODO: 2021/8/10 后期从服务器返回的消息中解析出
-
-                 values.put(ChatContract.MsgListEntry.FRIEND_ORIONID, mContactsBean.getOrionId());
-                 values.put(ChatContract.MsgListEntry.FRIEND_NICKNAME, mContactsBean.getNickName());// TODO: 2022/3/28 null 的原因
-
-                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE path = " + filePath );
-                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE name = " + fileName );
-                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE fileSize = " +  fileSize);
-                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE from = " + mContactsBean.getUserId() );
-                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE to = " + mUserBean.getUserId() );
-                 Log.d(TAG, " onMoonEvent::  RECIEVE_ONLINE_FILE message_id = " + messageID7 );
-
-//                 values.put(ChatContract.MsgListEntry.MESSAGE_ID, startTime.getTime());//用这个时间做标记（发现 不行，这个时间是新生成的）
-                mHelper.insertData(getContext(),values);
-
-                 MsgListBean bean2 = new MsgListBean(filePath, fileName, (int)fileSize,0,
-                         "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID7,mContactsBean.getOrionId(),mContactsBean.getNickName());
-                 mMsgList.add(bean2);
-                 mAdapter.notifyDataSetChanged();
-                 msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
-//                notifyAdapter();
+                 receiveOffLineFile(message, peerHostname);
                 break;
-
-
             case Event.FILE_MESSAGE:// TODO: 2021/8/13  接收文件的每一个分片，问题在于怎么和上面的messageID7或下面的messageID8绑定(已解决)，然后用来更新文件进度等
-                Log.d(TAG, " onMoonEvent::  FILE_MESSAGE 接收文件的每一个分片" );
-                onlineStauts =mContactsBean.getOnlineStatus();
-                Log.d(TAG, " onMoonEvent::  FILE_MESSAGE onlineStauts = " + onlineStauts );
-                if(onlineStauts.equals("0")){
-                    mTvNickName.setTextColor(getColor(R.color.blue4));
-                    mContactsBean.setOnlineStatus("1");
-                    SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
-                    mTvOnLineState.setText(R.string.on_line);
+                fileMessage(message, peerHostname);
+                break;
+            case Event.CREATE_CONNECTION_SUCCESS:
+                createConnectionSuccess(message, peerHostname);
+                break;
+        }
+    }
 
-                    mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为在线头像
+    public void sendOffLineFile(String message, String peerHostname, String type){
+        Log.d(TAG, " sendOffLineFile message = " + message );
+        Log.d(TAG, " sendOffLineFile peerHostname = " + peerHostname );
+        Log.d(TAG, " sendOffLineFile type = " + type );
+        String messageID = peerHostname.split(",")[0];//该文件的唯一标记
+        String speedOffline = peerHostname.split(",")[1];
+
+        if (message.equals("错误")&&count!=2){
+            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
+            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+
+            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+            Log.d(TAG, " sendOffLineFile:: decOfflineServer = " + decOfflineServer);
+
+            sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,type,filepath,decOfflineServer,messageID);// TODO: 2021/8/7 为什么加ran.txt 删除了？
+            sendOfflineFile.start();// TODO: 2021/8/7  //有时候对方会收到2个重复文件，会不会是这里重复发的问题
+            count++;
+        }else{
+            System.out.println(" sendOffLineFile:: 我该显示100%了,"+count);
+            //为了获取离线文件名和文件传输速率对peerHostname做了修改
+
+            System.out.println(" sendOffLineFile:: messageID: " + messageID);
+            System.out.println(" sendOffLineFile:: speedOffline: " + speedOffline);
+            MsgListBean fileBean1 = null;
+            int updatePostion = -1;
+            System.out.println(" sendOffLineFile:: mMsgList!!!!!!" + mMsgList.toString());
+            for (int i = 0; i < mMsgList.size(); i++) {
+                fileBean1 = mMsgList.get(i);
+                if ((fileBean1.getMessageID() != null) && (fileBean1.getMessageID().equals(messageID)) && (fileBean1.getFileProgress() != 100)) {
+                    fileBean1.setFileProgress(100);
+                    fileBean1.setSpeed(speedOffline);
+                    updatePostion = i;
+                    break;
                 }
+            }
+            System.out.println(" sendOffLineFile:: fileBean1:"+fileBean1);
+            //文件进度和传输速度
+            MyAsyncTask asyncTask1 = new MyAsyncTask(mAdapter.getViewList(), updatePostion, true);
+            asyncTask1.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean1);
+            mHelper.updateFileProgress2(messageID, 100);// TODO: 2021/8/10 替换filename为messageID 更新数据库
+        }
+    }
 
-                String messageID8 = peerHostname;// TODO: 2021/8/8 更新文件标记，用这个来唯一标记这个文件
+    public void sendOffLineText(String message, String peerHostname){
+        Log.d(TAG, " sendOffLineText:: message = " + message);
+        Log.d(TAG, " sendOffLineText:: peerHostname = " + peerHostname);
+        String messageID4 = peerHostname;//该消息的标签
+        if (message.equals("错误")&&count!=2){
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            String textMessage = mEtContent.getText().toString();
+            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
+//                    String remoteOnion = Constant.REMOTE_ONION_NAME;
+            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+            LogUtils.d(TAG, " sendOffLineText:: from = " + mUserBean.getOnionName() + " to =" + mContactsBean.getOrionId() + " text = " + textMessage);
 
-                Event.FileMessage fileMessage = gson.fromJson(message, Event.FileMessage.class);
-                String name =  fileMessage.getFileName();
-                String percent = fileMessage.getFilePercent();
-                String speed = fileMessage.getFileSpeed();
-                if (percent.contains(".")){
-                    percent = percent.substring(0,percent.indexOf("."));
-                }
-                Log.d(TAG, " onMoonEvent:: FILE_MESSAGE name = " + name + " percent = " + percent + " speed = " + speed );
-                MsgListBean fileBean = null;
+            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+            Log.d(TAG, " sendOffLineText:: decOfflineServer = " + decOfflineServer);
+            sendOfflineText sendOfflineText = new sendOfflineText(from,to,messageSet, decOfflineServer,messageID4);
+            sendOfflineText.start();// TODO: 2021/8/10 这里可能导致发2次消息
+            count++;
+        }else{
+//                    System.out.println("我该变颜色了");
+            ackMatchOffline("1",messageID4);
+        }
+    }
+
+    public void sendOffLinePic(String peerHostname){
+        System.out.println(" sendOffLinePic:: 我该显示100%了,"+count);
+        //为了获取离线文件名和文件传输速率对peerHostname做了修改
+        String messageID2 = peerHostname.split(",")[0];// TODO: 2021/8/9 得到该发送文件的标记
+        String speedOffline2 = peerHostname.split(",")[1];
+        System.out.println(" sendOffLinePic:: messageID: " + messageID2);
+        System.out.println(" sendOffLinePic:: speedOffline: " + speedOffline2);
+        MsgListBean fileBean1 = null;
+        int updatePostion = -1;
+        System.out.println(" sendOffLinePic:: mMsgList!!!!!!" + mMsgList.toString());
+        for (int i = 0; i < mMsgList.size(); i++) {
+            fileBean1 = mMsgList.get(i);
+            if ((fileBean1.getMessageID() != null) && (fileBean1.getMessageID().equals(messageID2)) && (fileBean1.getFileProgress() != 100)) {
+                fileBean1.setFileProgress(100);
+                fileBean1.setSpeed(speedOffline2);
+                updatePostion = i;
+                break;
+            }
+        }
+        System.out.println(" sendOffLinePic:: fileBean1:"+fileBean1);
+        //文件进度和传输速度
+        MyAsyncTask asyncTask1 = new MyAsyncTask(mAdapter.getViewList(), updatePostion, true);
+        asyncTask1.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean1);
+
+        String offlineMessageID = peerHostname.split(",")[0];//该文件的唯一标记
+
+        mHelper.updateFileProgress2(offlineMessageID, 100);// TODO: 2021/8/10 替换filename为messageID 更新数据库
+    }
+
+    public void getOffLineList(String message) throws JSONException {
+        if(message==null)
+            return;
+        LogUtils.d(TAG + " getOffLineList:: ","bus");
+        LogUtils.d(TAG, " getOffLineList:: message = " + message);
+        dataJsonAll = new JSONObject(message);
+        LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonMessage = " + dataJsonAll);
+        JSONObject json = dataJsonAll.getJSONObject("file");
+        LogUtils.d(TAG," getOffLineList:: dataJsonFile = " + json);
+        JSONArray dataFileAll = json.getJSONArray("messages");
+        LogUtils.d(TAG," getOffLineList:: dataJsonFileMessage = " + dataFileAll);
+        for (int i =0;i<dataFileAll.length();i++){
+            JSONObject infoFile = dataFileAll.getJSONObject(i);
+            String Id = infoFile.getString("id");
+
+            String name = infoFile.getString("abs");
+            file_name = name;
+            UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
+//                        String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName()));
+            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
+            LogUtils.d(TAG,"  getOffLineList:: 发文件的from?????" + from);
+
+            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+            Log.d(TAG, "  getOffLineList:: decOfflineServer = " + decOfflineServer);
+
+            getOfflineFile getOfflineFile = new getOfflineFile(from,Id,"/sdcard/Android/data/com.ucas.chat/files/" + infoFile.getString("abs"),decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
+            getOfflineFile.start();
+            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+
+            sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
+            sendSentMessage.start();
+        }
+        dataJsonAll = new JSONObject(message);
+        LogUtils.d(TAG," getOffLineList:: dataJsonAllPic: " + dataJsonAll);
+        JSONObject jsonPic = dataJsonAll.getJSONObject("pic");
+        LogUtils.d(TAG," getOffLineList:: jsonPic: " + jsonPic);
+        JSONArray dataPicAll = jsonPic.getJSONArray("messages");
+        LogUtils.d(TAG," getOffLineList:: dataPicAll: " + dataPicAll);
+        for (int i = 0; i<dataPicAll.length();i++){
+            JSONObject infoPic = dataPicAll.getJSONObject(i);
+            String Id = infoPic.getString("id");
+            String name = infoPic.getString("abs");
+            pic_name = name;
+
+            UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
+            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
+            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+
+            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+            Log.d(TAG, " getOffLineList:: decOfflineServer = " + decOfflineServer);
+
+            getOfflinePic getOfflinePic = new getOfflinePic(from,Id,"/sdcard/Android/data/com.ucas.chat/files/"+name,decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
+            getOfflinePic.start();
+            LogUtils.d(TAG," getOffLineList:: from:!!!!!!!!!!!!!!!!!!" + from);
+            LogUtils.d(TAG," getOffLineList:: to:!!!!!!!!!!!!!" + to);
+            sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
+            sendSentMessage.start();
+        }
+        LogUtils.d(TAG, " getOffLineList:: test!!!DataJsonAll: " + dataJsonAll );
+    }
+
+    public void startCommunicationSuccess(){
+        LogUtils.d(TAG," startCommunicationSuccess:: 接收到此Status，才可以以在线方式发送消息");
+        mTvNickName.setTextColor(getColor(R.color.blue4));
+        mContactsBean.setOnlineStatus("1");//连接状态置1
+        SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
+        mTvOnLineState.setText(R.string.on_line);
+        mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为在线头像
+    }
+
+    public void sendProtocolFailure(){
+        LogUtils.d(TAG," sendProtocolFailure::对方离线");
+        mTvNickName.setTextColor(getColor(R.color.gray12));
+        mContactsBean.setOnlineStatus("0");
+        SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
+        mTvOnLineState.setText(R.string.off_line);
+        ToastUtils.showMessage(getContext(), getString(R.string.protocol_failure));
+
+        mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为离线头像
+
+    }
+
+    public void getOffLineText(String message) throws JSONException {
+        if(message==null)
+            return;
+
+        JSONObject dataJson = new JSONObject(message);//https://www.dazhuanlan.com/szm897394125/topics/1335731
+        LogUtils.d(TAG, " getOffLineText:: dataJson : " + dataJson );
+        JSONArray data = dataJson.getJSONArray("messages");
+        LogUtils.d(TAG, " getOffLineText:: data : " + data );
+        for (int i =0;i<data.length();i++){
+            JSONObject info = data.getJSONObject(i);
+            String message_content = info.getString("message_content");
+            String time = info.getString("time");
+            String messageID3 = info.getString("message_id");//该消息的唯一标签
+            ContentValues values = new ContentValues();
+            values.put(ChatContract.MsgListEntry.SEND_TIME, time+"");
+            values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.text);
+            values.put(ChatContract.MsgListEntry.TEXT_CONTENT, message_content);
+            values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
+            values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
+            values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
+            values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID3);//改消息标记
+            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
+            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+
+            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+            Log.d(TAG, " getOffLineText:: decOfflineServer = " + decOfflineServer);
+
+            sendSentMessage sendSentMessage = new sendSentMessage(to, from, messageID3,message_content,decOfflineServer);
+            sendSentMessage.start();
+            mHelper.insertData(getContext(),values);
+            MsgListBean bean1 = new MsgListBean(message_content,mContactsBean.getUserId() ,mUserBean.getUserId() , 1,messageID3,mContactsBean.getOrionId(),mContactsBean.getNickName());
+            mMsgList.add(bean1);
+            mAdapter.notifyDataSetChanged();
+            msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
+            LogUtils.d("接收","消息");
+            Log.d(TAG, " getOffLineText:: 接收 消息" );
+        }
+        notifyAdapter();
+    }
+
+    public void getOffLineFile(String message, String peerHostname){
+        String messageID5 = RandomUtil.randomChar();// TODO: 2021/8/8 更新文件标记，用这个来唯一标记当前次的发送情况
+        Log.d(TAG, " getOffLineFile:: " );
+        ContentValues values = new ContentValues();
+        values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
+        values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.file);
+        values.put(ChatContract.MsgListEntry.TEXT_CONTENT, getString(R.string.content_file));
+        String pathFile = "/sdcard/Android/data/com.ucas.chat/files/" + peerHostname;// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
+        values.put(ChatContract.MsgListEntry.FILE_PATH, pathFile);
+        values.put(ChatContract.MsgListEntry.FILE_NAME, message);
+        values.put(ChatContract.MsgListEntry.FILE_SIZE,  FileUtils.getFileSize(pathFile));
+        values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
+        values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
+        values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
+        values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID5);// TODO: 2021/8/10 这里后期处理，从服务器发来的解析出来
+        mHelper.insertData(getContext(),values);
+
+        Log.d(TAG, " getOffLineFile:: path = " + pathFile );
+        Log.d(TAG, " getOffLineFile:: name = " + message );
+        Log.d(TAG, " getOffLineFile:: fileSize = " +  FileUtils.getFileSize(pathFile) );
+        Log.d(TAG, " getOffLineFile:: from = " + mContactsBean.getUserId() );
+        Log.d(TAG, " getOffLineFile:: to = " + mUserBean.getUserId() );
+        Log.d(TAG, " getOffLineFile:: message_id = " + messageID5 );
+        MsgListBean bean = new MsgListBean(pathFile, FileUtils.getFileName(pathFile), FileUtils.getFileSize(pathFile),0,
+                "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID5,mContactsBean.getOrionId(),mContactsBean.getNickName());
+        mMsgList.add(bean);
+        mAdapter.notifyDataSetChanged();
+        msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
+    }
+
+    public void getOffLinePic(String peerHostname){
+        String messageID6 = RandomUtil.randomChar();// TODO: 2021/8/8 更新文件标记，用这个来唯一标记当前次的发送情况
+        Log.d(TAG, " getOffLinePic:: ");
+        ContentValues values1 = new ContentValues();
+        values1.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
+        values1.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.image);
+        values1.put(ChatContract.MsgListEntry.TEXT_CONTENT, getString(R.string.content_im));
+        String path_pic = "/sdcard/Android/data/com.ucas.chat/files/" + peerHostname;//真实存储在手机里的图片// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
+        values1.put(ChatContract.MsgListEntry.FILE_PATH, path_pic);
+        values1.put(ChatContract.MsgListEntry.FILE_NAME, peerHostname);
+        values1.put(ChatContract.MsgListEntry.FILE_SIZE, FileUtils.getFileSize(path_pic));
+        values1.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
+        values1.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
+        values1.put(ChatContract.MsgListEntry.IS_ACKED, 1);
+        values1.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID6);// TODO: 2021/8/10 后期从服务器返回的消息中解析出
+        mHelper.insertData(getContext(),values1);
+
+        Log.d(TAG, " getOffLinePic:: path = " + path_pic );
+        Log.d(TAG, " getOffLinePic:: name = " + peerHostname );
+        Log.d(TAG, " getOffLinePic:: fileSize = " +  FileUtils.getFileSize(path_pic) );
+        Log.d(TAG, " getOffLinePic:: from = " + mContactsBean.getUserId() );
+        Log.d(TAG, " getOffLinePic:: to = " + mUserBean.getUserId() );
+        Log.d(TAG, " getOffLinePic:: message_id = " + messageID6 );
+
+        MsgListBean bean1 = new MsgListBean(path_pic, FileUtils.getFileName(path_pic), FileUtils.getFileSize(path_pic),0,
+                "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID6,mContactsBean.getOrionId(),mContactsBean.getNickName());
+        mMsgList.add(bean1);
+        mAdapter.notifyDataSetChanged();
+        msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
+    }
+
+    public void hasReceivedMessage(String message){
+        Log.d(TAG, " hasReceivedMessage:: 对方发来的文本消息 message = " + message);
+        Gson gson = new Gson();
+        MsgListBean msgListBean = gson.fromJson(message, MsgListBean.class);
+        Log.d(TAG, " hasReceivedMessage:: 收消息msgListBean = " + msgListBean.toString());
+        String onlineStauts =mContactsBean.getOnlineStatus();
+        Log.d(TAG, " hasReceivedMessage:: onlineStauts = " +onlineStauts);
+        if(onlineStauts.equals("0")){
+            mTvNickName.setTextColor(getColor(R.color.blue4));
+            mContactsBean.setOnlineStatus("1");
+            SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
+            mTvOnLineState.setText(R.string.on_line);
+            mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为在线头像
+        }
+        mMsgList.add(msgListBean);
+        mAdapter.notifyDataSetChanged();
+        msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
+    }
+
+    public void receiveOffLineFile(String message, String peerHostname){
+        Gson gson = new Gson();
+        Log.d(TAG, " receiveOffLineFile:: 收到文件的第一步，准备好环境，但未正式接收");
+        String onlineStauts =mContactsBean.getOnlineStatus();
+        Log.d(TAG, " receiveOffLineFile:: onlineStauts = " + onlineStauts);
+        if(onlineStauts.equals("0")){//再次检测更新连接状态
+            mTvNickName.setTextColor(getColor(R.color.blue4));
+            mContactsBean.setOnlineStatus("1");
+            SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
+            mTvOnLineState.setText(R.string.on_line);
+
+            mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为在线头像
+        }
+
+        String messageID7 = peerHostname;// TODO: 2021/8/8 更新文件标记，用这个来唯一标记这个文件
+        Event.FileMetaMessage fileMetaMessage = gson.fromJson(message, Event.FileMetaMessage.class);
+        String fileName =  fileMetaMessage.getFileName();//文件名
+        long fileSize = fileMetaMessage.getTotalSize();
+        ContentValues values = new ContentValues();
+        String filePath ="/sdcard/Android/data/com.ucas.chat/files/"+fileName;// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
+        values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
+        values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.file);
+        values.put(ChatContract.MsgListEntry.TEXT_CONTENT, getString(R.string.content_file));
+        values.put(ChatContract.MsgListEntry.FILE_PATH, filePath);
+        values.put(ChatContract.MsgListEntry.FILE_NAME, fileName);
+        values.put(ChatContract.MsgListEntry.FILE_SIZE, fileSize);
+        values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
+        values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
+        values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
+        values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID7);// TODO: 2021/8/10 后期从服务器返回的消息中解析出
+
+        values.put(ChatContract.MsgListEntry.FRIEND_ORIONID, mContactsBean.getOrionId());
+        values.put(ChatContract.MsgListEntry.FRIEND_NICKNAME, mContactsBean.getNickName());// TODO: 2022/3/28 null 的原因
+
+        Log.d(TAG, " receiveOffLineFile::  path = " + filePath );
+        Log.d(TAG, " receiveOffLineFile::  name = " + fileName );
+        Log.d(TAG, " receiveOffLineFile::  fileSize = " +  fileSize);
+        Log.d(TAG, " receiveOffLineFile::  from = " + mContactsBean.getUserId() );
+        Log.d(TAG, " receiveOffLineFile::  to = " + mUserBean.getUserId() );
+        Log.d(TAG, " receiveOffLineFile::  message_id = " + messageID7 );
+
+        mHelper.insertData(getContext(),values);
+
+        MsgListBean bean2 = new MsgListBean(filePath, fileName, (int)fileSize,0,
+                "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID7,mContactsBean.getOrionId(),mContactsBean.getNickName());
+        mMsgList.add(bean2);
+        mAdapter.notifyDataSetChanged();
+        msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
+    }
+
+    public void fileMessage(String message, String peerHostname){
+        Log.d(TAG, " fileMessage:: 接收文件的每一个分片" );
+        Gson gson = new Gson();
+        String onlineStauts =mContactsBean.getOnlineStatus();
+        Log.d(TAG, " fileMessage:: onlineStauts = " + onlineStauts );
+        if(onlineStauts.equals("0")){
+            mTvNickName.setTextColor(getColor(R.color.blue4));
+            mContactsBean.setOnlineStatus("1");
+            SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
+            mTvOnLineState.setText(R.string.on_line);
+
+            mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为在线头像
+        }
+
+        String messageID8 = peerHostname;// TODO: 2021/8/8 更新文件标记，用这个来唯一标记这个文件
+
+        Event.FileMessage fileMessage = gson.fromJson(message, Event.FileMessage.class);
+        String name =  fileMessage.getFileName();
+        String percent = fileMessage.getFilePercent();
+        String speed = fileMessage.getFileSpeed();
+        if (percent.contains(".")){
+            percent = percent.substring(0,percent.indexOf("."));
+        }
+        Log.d(TAG, " fileMessage:: name = " + name + " percent = " + percent + " speed = " + speed );
+        MsgListBean fileBean = null;
 //                mHelper.updateFileProgress(name,Integer.parseInt(percent));//根据文件名字更新文件进度 有bug，会导致文件名一样的全部变
-                mHelper.updateFileProgress2(messageID8,Integer.parseInt(percent));// TODO: 2021/8/25 改为以消息id为更新数据库依据  是updateFileProgress2！
+        mHelper.updateFileProgress2(messageID8,Integer.parseInt(percent));// TODO: 2021/8/25 改为以消息id为更新数据库依据  是updateFileProgress2！
 
-                int updatePostion = -1;
-                for (int i=0; i<mMsgList.size(); i++){
-                    fileBean = mMsgList.get(i);// TODO: 2021/8/13 这里直接给fileBean赋值，万一没有合适的，有Bug? // TODO: 2021/8/10 这里后期得改为以messageID来查
-                    // TODO: 2021/8/25 增加消息id 为判断条件  去掉fileBean.getFileProgress() != 100 ，因为最后当为100时，这里一个也找不到，会导致下面执行if(fileBean==null)。 增加因为MsgTypeStateNew.image判断发照片的类型也复用了这里的代码
-                    if (fileBean.getMsgType() == MsgTypeStateNew.file ||fileBean.getMsgType() == MsgTypeStateNew.image ) {
-                        if (fileBean.getFileName().equals(name) && fileBean.getMessageID().equals(messageID8)) {
-                            fileBean.setFileProgress(Integer.parseInt(percent));// TODO: 2021/8/26 拍照图片也用这个
-                            fileBean.setSpeed(speed);
-                            updatePostion = i;
-                            Log.d(TAG, " onMoonEvent:: FILE_MESSAGE updatePostion = " + updatePostion);
+        int updatePostion = -1;
+        for (int i=0; i<mMsgList.size(); i++){
+            fileBean = mMsgList.get(i);// TODO: 2021/8/13 这里直接给fileBean赋值，万一没有合适的，有Bug? // TODO: 2021/8/10 这里后期得改为以messageID来查
+            // TODO: 2021/8/25 增加消息id 为判断条件  去掉fileBean.getFileProgress() != 100 ，因为最后当为100时，这里一个也找不到，会导致下面执行if(fileBean==null)。 增加因为MsgTypeStateNew.image判断发照片的类型也复用了这里的代码
+            if (fileBean.getMsgType() == MsgTypeStateNew.file ||fileBean.getMsgType() == MsgTypeStateNew.image ) {
+                if (fileBean.getFileName().equals(name) && fileBean.getMessageID().equals(messageID8)) {
+                    fileBean.setFileProgress(Integer.parseInt(percent));// TODO: 2021/8/26 拍照图片也用这个
+                    fileBean.setSpeed(speed);
+                    updatePostion = i;
+                    Log.d(TAG, " fileMessage:: updatePostion = " + updatePostion);
 //                            mAdapter.notifyDataSetChanged();// TODO: 2021/9/27 另一种更新界面的方法,但是全局刷新比较耗时
 
-                            if(fileBean.getMsgType()==MsgTypeStateNew.image && percent.equals("100") ){
-                                FileUtils.delectPicture(fileBean.getFilePath());// TODO: 2022/3/17 删除发送成功后的该照片
-                            }
-                            break;
-                        }else
-                            fileBean = null;//修复bug，最后都没有找到合适的，要变为null！
-                    }else
-                        fileBean = null;//修复bug，最后都没有找到合适的，要变为null！
-                }
-                boolean isSend;
+                    if(fileBean.getMsgType()==MsgTypeStateNew.image && percent.equals("100") ){
+                        FileUtils.delectPicture(fileBean.getFilePath());// TODO: 2022/3/17 删除发送成功后的该照片
+                    }
+                    break;
+                }else
+                    fileBean = null;//修复bug，最后都没有找到合适的，要变为null！
+            }else
+                fileBean = null;//修复bug，最后都没有找到合适的，要变为null！
+        }
+        boolean isSend;
 
-                if(fileBean==null){//没有找到的情况下。估计是Event.RECIEVE_ONLINE_FILE没有处理
-                    Log.d(TAG, " onMoonEvent:: FILE_MESSAGE fileBean == null");
-                    isSend=false;
-                    filePath ="/sdcard/Android/data/com.ucas.chat/files/"+name;// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
-                    fileBean= new MsgListBean(filePath, name, (int)0,0,
-                            "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID8,mContactsBean.getOrionId(),mContactsBean.getNickName());
-                    Log.d(TAG, " onMoonEvent:: FILE_MESSAGE fileBean = " + fileBean);
-                    mMsgList.add(fileBean);
-                    mAdapter.notifyDataSetChanged();
-                    msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
-                }else if (fileBean.getFrom().equals(mUserBean.getUserId())){
-                    Log.d(TAG, " onMoonEvent:: FILE_MESSAGE  isSend = true fileBean = " + fileBean);
-                    isSend = true;
-                }else {
-                    isSend = false;
-                    Log.d(TAG, " onMoonEvent:: FILE_MESSAGE  isSend = false fileBean = " + fileBean);
-                }
-                //文件进度和传输速度
-                MyAsyncTask asyncTask = new MyAsyncTask(mAdapter.getViewList(), updatePostion, isSend);
-                asyncTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean);// TODO: 2021/9/27
+        if(fileBean==null){//没有找到的情况下。估计是Event.RECIEVE_ONLINE_FILE没有处理
+            Log.d(TAG, " fileMessage:: fileBean == null");
+            isSend=false;
+            String filePath ="/sdcard/Android/data/com.ucas.chat/files/"+name;// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
+            fileBean= new MsgListBean(filePath, name, (int)0,0,
+                    "0",mContactsBean.getUserId(), mUserBean.getUserId() ,1,messageID8,mContactsBean.getOrionId(),mContactsBean.getNickName());
+            Log.d(TAG, " fileMessage:: fileBean = " + fileBean);
+            mMsgList.add(fileBean);
+            mAdapter.notifyDataSetChanged();
+            msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
+        }else if (fileBean.getFrom().equals(mUserBean.getUserId())){
+            Log.d(TAG, " fileMessage:: isSend = true fileBean = " + fileBean);
+            isSend = true;
+        }else {
+            isSend = false;
+            Log.d(TAG, " fileMessage:: isSend = false fileBean = " + fileBean);
+        }
+        //文件进度和传输速度
+        MyAsyncTask asyncTask = new MyAsyncTask(mAdapter.getViewList(), updatePostion, isSend);
+        asyncTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR, fileBean);// TODO: 2021/9/27
+    }
 
-//                mMsgList.get(updatePostion).setFileProgress(fileBean.getFileProgress());
-//                mAdapter.notifyDataSetChanged();// TODO: 2021/9/27 另一种更新界面的方法,但是全局刷新比较耗时
+    public void createConnectionSuccess(String message, String peerHostname){
 
-//                MyAsyncTask.setFl(msg_listview.getChildAt(updatePostion),fileBean);
+        Log.d(TAG,  " createConnectionSuccess:: message = " + message);
+        if (message.equals("success")){//连接好友服务器tor成功？
+            Log.d(TAG,  " createConnectionSuccess:: mContactsBean = " + mContactsBean.toString());
+            String orionId = mContactsBean.getOrionId();
+            TorManager.startHandShakeProcess(orionId);//再与朋友进行握手连接
+            //临时添加
+            //mTvOnLineState.setText(R.string.on_line);
+        }else {
+            //###########
+            mTvNickName.setTextColor(getColor(R.color.gray12));
+            mContactsBean.setOnlineStatus("0");
+            SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
+            mTvOnLineState.setText(R.string.off_line);
+            ServerMessageHandler handler = ServerMessageHandler.getInstance();
+            handler.setMySelfBean(mUserBean);
+            Log.d(TAG,  " createConnectionSuccess:: 转化前OfflineServer: " + mServiceHelper.getSecond());
+            Log.d(TAG,  " createConnectionSuccess:: peerHostname: " + peerHostname);
+            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+            Log.d(TAG,  " createConnectionSuccess:: decOfflineServer: " + decOfflineServer);
+            handler.processOfflineMessage(peerHostname,decOfflineServer, "messageID");// TODO: 2021/8/10 留后面改
 
-                break;
-
-            case Event.CREATE_CONNECTION_SUCCESS:
-                Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS message = " + message);
-                if (message.equals("success")){//连接好友服务器tor成功？
-                    Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS mContactsBean = " + mContactsBean.toString());
-                    String orionId = mContactsBean.getOrionId();
-                    TorManager.startHandShakeProcess(orionId);//再与朋友进行握手连接
-                    //临时添加
-                    //mTvOnLineState.setText(R.string.on_line);
-                }else {
-                    //###########
-                    mTvNickName.setTextColor(getColor(R.color.gray12));
-                    mContactsBean.setOnlineStatus("0");
-                    SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
-                    mTvOnLineState.setText(R.string.off_line);
-                    ServerMessageHandler handler = ServerMessageHandler.getInstance();
-                    handler.setMySelfBean(mUserBean);
-                    Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS:: 转化前OfflineServer: " + mServiceHelper.getSecond());
-                    Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS:: peerHostname: " + peerHostname);
-                    String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-                    Log.d(TAG,  " onMoonEvent:: CREATE_CONNECTION_SUCCESS:: decOfflineServer: " + decOfflineServer);
-                    handler.processOfflineMessage(peerHostname,decOfflineServer, "messageID");// TODO: 2021/8/10 留后面改
-
-                    mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为离线头像
-                }
-                break;
+            mAdapter.refreshAllHeadPicture();// TODO: 2021/8/27  //更新全部左边消息头像为离线头像
         }
     }
 
@@ -1192,7 +1193,6 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
        // notifyAdapter();
     }
 
-
     /**
      * 发送图片消息
      */
@@ -1223,9 +1223,6 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
         // notifyAdapter();
     }
-
-
-
 
     @SuppressLint("LongLogTag")
     private void notifyAdapter(){
