@@ -351,7 +351,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         mMsgList = mHelper.queryFriendChatRecord(mUserBean.getUserId(), mContactsBean.getOrionId());// TODO: 2022/3/23 mContactsBean.getUserId() 改为getOrionId，因为getOrionId是唯一的 //从数据库读取历史聊天
 
         Log.d(TAG,  " initContent:: mMsgList = " + mMsgList.toString());
-        mAdapter = new MessageListAdapter(getContext(), mMsgList, mContactsBean);//先将历史记录显示
+        mAdapter = new MessageListAdapter(this, mMsgList, mContactsBean);//先将历史记录显示
         msg_listview.setAdapter(mAdapter);
         initChatUi();
         msg_listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {

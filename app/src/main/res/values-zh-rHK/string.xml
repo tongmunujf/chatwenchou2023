@@ -70,4 +70,7 @@
     <string name="content_file">[文件]</string>
     <string name="content_im">[图片]</string>
     <string name="key_exhausted">密钥用尽</string>
+    <string name="sure">sure</string>
+    <string name="pw_error">密码错误</string>
+    <string name="file_path_error">文件路径不存在</string>
 </resources>

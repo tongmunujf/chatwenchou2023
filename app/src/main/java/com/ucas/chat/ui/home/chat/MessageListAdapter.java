@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ import com.ucas.chat.bean.session1.MsgTypeStateNew;
 import com.ucas.chat.db.MailListUserNameTool;
 import com.ucas.chat.db.MyInforTool;
 import com.ucas.chat.ui.listener.OnItemClickListener;
+import com.ucas.chat.ui.view.PassWordDialog;
 import com.ucas.chat.ui.view.RoundProgressBar;
 import com.ucas.chat.ui.view.chat.RViewHolder;
 import com.ucas.chat.utils.AesTools;
@@ -309,6 +311,7 @@ public class MessageListAdapter extends BaseAdapter {
             holder.msg_tv_file_size = convertView.findViewById(R.id.msg_tv_file_size);
             holder.msg_tv_speed = convertView.findViewById(R.id.msg_tv_speed);
             holder.progress_rate = convertView.findViewById(R.id.progress_rate);
+            holder.ll_text_receive = convertView.findViewById(R.id.ll_text_receive);
             convertView.setTag(holder);
         }else {
             holder = (FileLViewHolder)convertView.getTag();
@@ -332,8 +335,6 @@ public class MessageListAdapter extends BaseAdapter {
 
         }
 
-
-
         String onlineStatus=mBean.getOnlineStatus();
         if (onlineStatus.equals("0")) {
             holder.imageView.setImageResource(R.mipmap.touxiang_1);//显示对方离线状态
@@ -341,18 +342,23 @@ public class MessageListAdapter extends BaseAdapter {
             holder.imageView.setImageResource(R.mipmap.b1);// TODO: 2021/9/26 修复 convertView复用的问题
         }
 
-
         holder.msg_tv_file_name.setText(bean.getFileName());
         holder.msg_tv_file_size.setText(bean.getFileSize()+"");
         holder.progress_rate.setProgress(bean.getFileProgress());
-//        holder.msg_tv_speed.setText(bean.getSpeed() + " KB/s");
-//        if (bean.getFileProgress() == 100){
-////            holder.msg_tv_speed.setVisibility(View.GONE);
-//            holder.progress_rate.setVisibility(View.INVISIBLE);
-//        }
 
         convertView.setTag(R.id.msg_listview, position);//标记，用于MyAsyncTask更新时遍历
         mViewList.add(convertView);
+
+        holder.ll_text_receive.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                PassWordDialog passWordDialog = new PassWordDialog(mContext);
+                passWordDialog.setFileName(bean.getFileName());
+                passWordDialog.show();
+                return false;
+            }
+        });
+
         return convertView;
     }
 
@@ -553,6 +559,7 @@ public class MessageListAdapter extends BaseAdapter {
 
     class BaseViewHolder{// TODO: 2021/8/27 父类，用于抽离出上面各种ViewHolder的相同类型的
         public ImageView imageView;//头像都是一样的类型，便于全局更新头像
+        public LinearLayout ll_text_receive;
 
     }
 

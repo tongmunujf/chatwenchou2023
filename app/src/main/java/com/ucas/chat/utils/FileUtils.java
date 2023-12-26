@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.google.android.material.tabs.TabLayout;
+import com.ucas.chat.R;
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.tor.util.FilePathUtils;
 
@@ -18,10 +19,13 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -284,5 +288,61 @@ public class FileUtils {
     }
 
 
+    /**
+     * 复制文件 从一个位置 复制到 Sdcard另外的一个位置
+     * @param context
+     * @return
+     */
+    public static boolean copyFile(Context context, String fromFile, String toFile){
+        File source = new File(fromFile);
+        File dest = new File(toFile);
+        FileChannel inputChannel = null;
+        FileChannel outputChannel = null;
+
+        try {
+            inputChannel = new FileInputStream(source).getChannel();
+            outputChannel = new FileOutputStream(dest).getChannel();
+            outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
+            inputChannel.close();
+            outputChannel.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return true;
+
+    }
+
+    /**
+     * 删除文件 或 文件夹
+     * @param filePath
+     * @return
+     */
+    public static boolean deleteFile(String filePath){
+        if (TextUtils.isEmpty(filePath)){
+            return false;
+        }
+        File file = new File(filePath);
+        if (!file.exists()){
+            return false;
+        }
+        if (file.isFile()){
+            return file.delete();
+        }else {
+            if (file.isDirectory()){
+                File[] childFiles = file.listFiles();
+                if (childFiles == null || childFiles.length == 0){
+                    return file.delete();
+                }
+                //山粗文件夹内容
+                boolean result = true;
+                for (File item : file.listFiles()){
+                    result = result && item.delete();
+                }
+                return result && file.delete();
+            }
+        }
+        return false;
+    }
 
 }
