@@ -13,9 +13,9 @@ public class DecryImpl implements IDecry {
     @Override
     public byte[] decry(String iv,String keyFileName, byte[] decodeEntry) {
 
-       // byte[] key = "qazwsxedcrfvtgbyhnujmikol1234567".getBytes();
+  //     byte[] key = "qazwsxedcrfvtgbyhnujmikol1234567".getBytes();
 
-       int index=ServiceLoaderImpl.load(IKeyIndex.class).keyIndex(keyFileName);
+        int index=ServiceLoaderImpl.load(IKeyIndex.class).keyIndex(keyFileName);
         String key = ServiceLoaderImpl.getFileKeyLocation(keyFileName,index);
 
         Log.d(TAG, " JNI内部解密 decry:: index = " + index);

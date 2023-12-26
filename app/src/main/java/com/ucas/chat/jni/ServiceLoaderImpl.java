@@ -12,6 +12,34 @@ public class ServiceLoaderImpl {
         System.loadLibrary("native-lib");
     }
 
+    public static void setHeaderToBinFile(String filename){
+        byte[] dataToInsert = {0x00};
+        try {
+            RandomAccessFile file = new RandomAccessFile(filename, "rw");
+            long originalSize = file.length();
+            // 将文件指针移动到文件开头
+            file.seek(0);
+            // 写入要插入的数据
+            file.write(dataToInsert);
+            // 将文件指针移动到原始文件内容的开始位置
+            file.seek(dataToInsert.length);
+            // 创建一个字节数组来保存原始文件的内容
+            byte[] originalContent = new byte[(int) originalSize];
+            FileInputStream fis = new FileInputStream(filename);
+            fis.read(originalContent);
+
+            // 写入原始文件的内容
+            file.write(originalContent);
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
     public static <S> S load(Class<S> service) {
         try {
             return ServiceLoader.load(service).iterator().next();

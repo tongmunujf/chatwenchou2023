@@ -1,5 +1,8 @@
 package com.ucas.chat.jni.common;
 
+import android.util.Log;
+
+import com.google.android.material.tabs.TabLayout;
 import com.google.auto.service.AutoService;
 
 import java.io.FileInputStream;
@@ -9,11 +12,13 @@ public class KeyIndexImpl implements IKeyIndex {
     @Override
     public int keyIndex(String filename) {
         String value=  getFileHeader(filename);//获取前两个字节
+        Log.d("测试", "          value = " + value);
+        Log.d("测试", " parseInt value = " + Integer.parseInt(value,16));
         return Integer.parseInt(value,16);
     }
 
     private String getFileHeader(String filePath) {
-        String value = null;
+        String value = "0";
         try (FileInputStream is = new FileInputStream(filePath)) {
             byte[] b = new byte[1];
             is.read(b, 0, b.length);

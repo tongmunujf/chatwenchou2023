@@ -71,11 +71,12 @@ public class XORutil {
         data.flip();//不仅将position复位为0，同时也将limit的位置放置在了position之前所在的位置上
         data.clear();
 
-        ServiceLoaderImpl.setFileKeyLocation(FilePathUtils.SECRET_KEY_FILE,0);
+       // ServiceLoaderImpl.setFileKeyLocation(FilePathUtils.SECRET_KEY_FILE,0);
         fileIndex = JniEntryUtils.getKeyIndex();
+        Log.d(TAG, " 测试 xorFile2Byte:: fileIndex = " + fileIndex);
         fileIndex++;
 
-        Log.d(TAG, " xorFile2Byte:: keyIndex = " + fileIndex);
+        Log.d(TAG, " 测试 xorFile2Byte:: keyIndex = " + fileIndex);
         data.putInt(fileIndex);//最大是999999999
         data.position(0);
         data.get(byteFileIndex);
@@ -105,6 +106,8 @@ public class XORutil {
         if (friendStartXORIndex > myStartXORIndex){
             keyIndex = friendStartXORIndex;
         }
+        Log.d(TAG, " 测试 compareKeyIndex:: keyIndex = " + keyIndex);
+        JniEntryUtils.setFileKeyLocation(keyIndex);
         return keyIndex;
     }
 
@@ -135,24 +138,6 @@ public class XORutil {
             }
         }
         return null;
-    }
-
-
-    // TODO: 2021/10/6  可以删除recordXORs中的recordXOR和已用过的XORFile了
-    public static void deleteRecordXORandXORFile(CopyOnWriteArrayList<RecordXOR> recordXORs, String targetMessageID) {
-        RecordXOR targetRecordXOR=null;
-
-        Iterator<RecordXOR> iterator = recordXORs.iterator();
-        while (iterator.hasNext()){
-            RecordXOR recordXOR1 = iterator.next();
-            String messageID = recordXOR1.getMessageID();
-            if (messageID.equals(targetMessageID)){
-                targetRecordXOR = recordXOR1;
-                break;
-            }
-        }
-
-        recordXORs.remove(targetRecordXOR);//删除recordXORs里的
     }
 
     public static RecordXOR changecommonRecordXOR(RecordXOR commonRecordXOR,RecordXOR recordXOR){// TODO: 2021/10/24 比较尾指针，以靠最右的为准

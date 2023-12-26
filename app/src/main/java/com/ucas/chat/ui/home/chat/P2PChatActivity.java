@@ -216,7 +216,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
             LogUtils.d(TAG, "initData::  mContactsBean = " + mContactsBean.toString() );
             String onlineStatus = mContactsBean.getOnlineStatus();
             if(onlineStatus.equals("1")){
-                mTvNickName.setTextColor(getColor(R.color.blue4));
+                mTvNickName.setTextColor(getColor(R.color.red8));
                 mTvOnLineState.setText(R.string.on_line);
             }else{
                 mTvNickName.setTextColor(getColor(R.color.green3));
@@ -778,7 +778,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
     public void startCommunicationSuccess(){
         LogUtils.d(TAG," startCommunicationSuccess:: 接收到此Status，才可以以在线方式发送消息");
-        mTvNickName.setTextColor(getColor(R.color.blue4));
+        mTvNickName.setTextColor(getColor(R.color.purple));
         mContactsBean.setOnlineStatus("1");//连接状态置1
         SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
         mTvOnLineState.setText(R.string.on_line);
@@ -906,7 +906,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         String onlineStauts =mContactsBean.getOnlineStatus();
         Log.d(TAG, " hasReceivedMessage:: onlineStauts = " +onlineStauts);
         if(onlineStauts.equals("0")){
-            mTvNickName.setTextColor(getColor(R.color.blue4));
+            mTvNickName.setTextColor(getColor(R.color.orange));
             mContactsBean.setOnlineStatus("1");
             SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
             mTvOnLineState.setText(R.string.on_line);
@@ -923,7 +923,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         String onlineStauts =mContactsBean.getOnlineStatus();
         Log.d(TAG, " receiveOffLineFile:: onlineStauts = " + onlineStauts);
         if(onlineStauts.equals("0")){//再次检测更新连接状态
-            mTvNickName.setTextColor(getColor(R.color.blue4));
+            mTvNickName.setTextColor(getColor(R.color.orange));
             mContactsBean.setOnlineStatus("1");
             SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
             mTvOnLineState.setText(R.string.on_line);
@@ -973,7 +973,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         String onlineStauts =mContactsBean.getOnlineStatus();
         Log.d(TAG, " fileMessage:: onlineStauts = " + onlineStauts );
         if(onlineStauts.equals("0")){
-            mTvNickName.setTextColor(getColor(R.color.blue4));
+            mTvNickName.setTextColor(getColor(R.color.orange));
             mContactsBean.setOnlineStatus("1");
             SharedPreferencesUtil.setContactBeanSharedPreferences(getContext(), mContactsBean);
             mTvOnLineState.setText(R.string.on_line);

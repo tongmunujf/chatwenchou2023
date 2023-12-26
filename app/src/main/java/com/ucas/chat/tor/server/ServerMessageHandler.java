@@ -1262,8 +1262,6 @@ public class ServerMessageHandler {
 		} else {
 			System.out.println(
 					TAG + " receiveTextMessage:: 接收方处理消息 send DATA_ACK success to " + item.getOnionName());
-
-			XORutil.deleteRecordXORandXORFile(recordXORs,messageID);// TODO: 2021/10/6  可以删除recordXORs中的recordXOR和已用过的XORFile了
 		}
 	}
 
@@ -1560,7 +1558,6 @@ public class ServerMessageHandler {
 		intent.putExtra("result",messageID);// TODO: 2021/8/24 这里应该改为以消息id验证。因为 message不唯一
 		intent.setComponent(new ComponentName(Constant.PACKAGE,Constant.TOR_BROAD_CAST_PATH));
 		context.sendBroadcast(intent);
-		XORutil.deleteRecordXORandXORFile(recordXORs,messageID);// TODO: 2021/10/6 可以删除recordXORs中的recordXOR和已用过的XORFile了
 	}
 
 	private void resend(FileTask fileTask, ConnectionStatusItem statusItem,String messageID ) {// TODO: 2021/8/25 增加消息id

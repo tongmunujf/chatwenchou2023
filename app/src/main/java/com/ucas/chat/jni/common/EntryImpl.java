@@ -15,7 +15,8 @@ public class EntryImpl implements IEntry {
         byte[] decodeEntry=ServiceLoaderImpl.padding(encode);
         byte[] ivEntry=ServiceLoaderImpl.padding(iv);
 
-        //byte[] key = "qazwsxedcrfvtgbyhnujmikol1234567".getBytes();
+    //    byte[] key = "qazwsxedcrfvtgbyhnujmikol1234567".getBytes();
+
         int index=ServiceLoaderImpl.load(IKeyIndex.class).keyIndex(keyFileName);
         String key = ServiceLoaderImpl.getFileKeyLocation(keyFileName,index);
         Log.d(TAG, " JNI内部加密 entry:: index = " + index);

@@ -28,6 +28,9 @@
     <color name="black1">#1D1D1D</color>
     <color name="black6">#666666</color>
 
+    <color name="purple">#8A2BE2</color>
+    <color name="orange">#ffaa00</color>
+
     <!--遮盖层颜色-->
 
     <!--快速索引bar颜色-->

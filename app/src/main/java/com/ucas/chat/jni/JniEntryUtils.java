@@ -22,6 +22,11 @@ public class JniEntryUtils {
         return index;
     }
 
+    public static void setFileKeyLocation(int index){
+        Log.d(TAG, " 测试 setFileKeyLocation:: index = " + index);
+        ServiceLoaderImpl.setFileKeyLocation(FilePathUtils.SECRET_KEY_FILE, index);
+    }
+
     public static boolean keyFileIsExhausted(){
         boolean isExhausted = false;
         int index = getKeyIndex();
