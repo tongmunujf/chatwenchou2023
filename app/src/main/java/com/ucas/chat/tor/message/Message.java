@@ -2,6 +2,7 @@ package com.ucas.chat.tor.message;
 
 import android.util.Log;
 
+import com.ucas.chat.jni.JniEntryUtils;
 import com.ucas.chat.tor.util.AESCrypto;
 import com.ucas.chat.tor.util.Constant;
 import com.ucas.chat.tor.util.RSACrypto;
@@ -114,8 +115,10 @@ public abstract class Message {
 //		System.out.println("Message.createDataMessageExternalPaylod.header :\n" + RSACrypto.bytesToHex(header));
 
 // TODO: 2021/10/5 增加xor文件的使用信息
-		byte[] startFileNameAndIndex = XORutil.xorFile2Byte(recordXOR.getStartFileName(),recordXOR.getStartFileIndex());//按设计的大小合并文件名和位置
-		byte[] endFileNameAndIndex = XORutil.xorFile2Byte(recordXOR.getEndFileName(),recordXOR.getEndFileIndex());//按设计的大小合并文件名和位置
+		int fileIndex = JniEntryUtils.getKeyIndex();
+		Log.d("Message", " createDataMessageExternalPaylod:: 测试 fileIndex = " + fileIndex);
+		byte[] startFileNameAndIndex = XORutil.xorFile2Byte(1,fileIndex);//按设计的大小合并文件名和位置
+		byte[] endFileNameAndIndex = XORutil.xorFile2Byte(1,fileIndex);//按设计的大小合并文件名和位置
 
 		header = Message.byteMerger(header,startFileNameAndIndex);//application-id(byte)	时间戳(byte)	message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)	startXORFileName(byte)	startXORIndex(byte)
 		header = Message.byteMerger(header,endFileNameAndIndex);//message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)	startXORFileName(byte)	startXORIndex(byte)	endXORFileName(byte)	endXORIndex(byte)

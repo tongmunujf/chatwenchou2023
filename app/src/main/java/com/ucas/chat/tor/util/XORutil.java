@@ -54,7 +54,6 @@ public class XORutil {
 
 
     public static byte[] xorFile2Byte(int fileName ,int fileIndex ){//要使用xor开始或结束的文件的信息转化为byte数组，即合并文件名和位置
-        fileName = 1;
         ByteBuffer data = ByteBuffer.allocate(40);//https://blog.csdn.net/mrliuzhao/article/details/89453082
         byte[] byteFileName = new byte[Constant.BYTE_STARTXORFILENAME_LENGTH];//文件名。开始和结束的文件名长度一样，下同理
         byte[] byteFileIndex = new byte[Constant.BYTE_STARTXORINDEX_LENGTH];//位置
@@ -67,14 +66,10 @@ public class XORutil {
         data.get(byteFileName);
         System.out.println(Arrays.toString(byteFileName));
 
-
         data.flip();//不仅将position复位为0，同时也将limit的位置放置在了position之前所在的位置上
         data.clear();
 
-       // ServiceLoaderImpl.setFileKeyLocation(FilePathUtils.SECRET_KEY_FILE,0);
-        fileIndex = JniEntryUtils.getKeyIndex();
-        Log.d(TAG, " 测试 xorFile2Byte:: fileIndex = " + fileIndex);
-        fileIndex++;
+        JniEntryUtils.setFileKeyLocation(fileIndex);
 
         Log.d(TAG, " 测试 xorFile2Byte:: keyIndex = " + fileIndex);
         data.putInt(fileIndex);//最大是999999999
@@ -101,7 +96,7 @@ public class XORutil {
 
 
     public static int compareKeyIndex(int friendStartXORFileName ,int friendStartXORIndex,int myStartXORFileName,int myStartXORIndex ){
-        Log.d(TAG, " compareKeyIndex:: friendStartXORIndex = " + friendStartXORIndex + " myStartXORIndex = " + myStartXORIndex);
+        Log.d(TAG, " 测试 compareKeyIndex:: friendStartXORIndex = " + friendStartXORIndex + " myStartXORIndex = " + myStartXORIndex);
         int keyIndex = myStartXORIndex;
         if (friendStartXORIndex > myStartXORIndex){
             keyIndex = friendStartXORIndex;

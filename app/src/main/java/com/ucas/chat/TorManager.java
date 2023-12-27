@@ -210,13 +210,13 @@ public class TorManager {
             sendSize = textMessage.getBytes("utf-8").length;
             Log.d(TAG, " interface_send_text:: tsendSize = " +  sendSize);
             //boolean isSend = judgeEnoughXOR(context,sendSize);
-            boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
-
-            if(isExhausted){
-                //Toast.makeText(context, getContext().getText(R.string.key_exhausted), Toast.LENGTH_LONG).show();
-                Log.d(TAG," interface_send_text:: key.bin用尽");
-                return false;// TODO: 2021/10/28 不够长度就不发送
-            }
+//            boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
+//
+//            if(isExhausted){
+//                //Toast.makeText(context, getContext().getText(R.string.key_exhausted), Toast.LENGTH_LONG).show();
+//                Log.d(TAG," interface_send_text:: key.bin用尽");
+//                return false;// TODO: 2021/10/28 不够长度就不发送
+//            }
 
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -241,10 +241,10 @@ public class TorManager {
             int sendSize = fileInputStream.available();//文本转为byte;
             fileInputStream.close();
            // boolean isSend = judgeEnoughXOR(context,sendSize);
-            boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
-
-            if(isExhausted)
-                return false;// TODO: 2021/10/28 不够长度就不发送
+//            boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
+//
+//            if(isExhausted)
+//                return false;// TODO: 2021/10/28 不够长度就不发送
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -268,9 +268,9 @@ public class TorManager {
         int sendSize = bitmapBytes.length;//文本转为byte;
         Log.d(TAG, " handleByteMessageSend:: 在线发送图片 sendSize = " + sendSize);
        // boolean isSend = judgeEnoughXOR(context,sendSize);
-        boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
-        if(isExhausted)
-            return false;// TODO: 2021/10/28 不够长度就不发送
+//        boolean isExhausted = JniEntryUtils.keyFileIsExhausted();
+//        if(isExhausted)
+//            return false;// TODO: 2021/10/28 不够长度就不发送
 
         ServerMessageHandler handler = ServerMessageHandler.getInstance();
         handler.handleByteMessageSend( fileFullPath,bitmapBytes, remoteOnion, Constant.REMOTE_ONION_PORT,messageID);// TODO: 2021/8/26 增加消息id。

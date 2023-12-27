@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.ucas.chat.bean.contact.ConstantValue;
+import com.ucas.chat.jni.JniEntryUtils;
 import com.ucas.chat.tor.util.AESCrypto;
 import com.ucas.chat.tor.util.Constant;
 import com.ucas.chat.tor.util.RSACrypto;
@@ -69,8 +70,11 @@ public class HandShakeMessage extends Message {
 		payload = Message.byteMerger(header, myOnionHash);//application-id(byte)	时间戳(byte)	message-number(byte)	message-type(byte)	payload-length(byte)	external-hash(byte)		onion_hash(byte)
 
 		RecordXOR recordStartXOR = XORutil.getStartXOR(context);// TODO: 2021/10/3  开始要用的xor文件信息
-		Log.i(TAG + " createSessionRequestMessage:: 握手xor文件名我发",""+recordStartXOR);//好友的文件
-		byte[] startFileNameAndIndex = XORutil.xorFile2Byte(recordStartXOR.getStartFileName(),recordStartXOR.getStartFileIndex());//按设计的大小合并文件名和位置
+
+		int fileIndex = JniEntryUtils.getKeyIndex();
+		fileIndex++;
+		Log.d(TAG, " 测试 createSessionRequestMessage:: fileIndex = " + fileIndex);
+		byte[] startFileNameAndIndex = XORutil.xorFile2Byte(1, fileIndex);//按设计的大小合并文件名和位置
 
 		payload = Message.byteMerger(payload,startFileNameAndIndex);// TODO: 2021/10/4 加上startFileNameAndIndex
 

@@ -18,8 +18,8 @@ public class DecryImpl implements IDecry {
         int index=ServiceLoaderImpl.load(IKeyIndex.class).keyIndex(keyFileName);
         String key = ServiceLoaderImpl.getFileKeyLocation(keyFileName,index);
 
-        Log.d(TAG, " JNI内部解密 decry:: index = " + index);
-        Log.d(TAG, " JNI内部解密 decry:: key = " + key);
+        Log.d(TAG, " 测试 JNI内部解密 decry:: index = " + index);
+        Log.d(TAG, " 测试 JNI内部解密 decry:: key = " + key);
 
         byte[] ivDecry=ServiceLoaderImpl.padding(iv);
         byte[] en= ServiceLoaderImpl.decry_lokiccc_byte(decodeEntry, key.getBytes(), ivDecry);

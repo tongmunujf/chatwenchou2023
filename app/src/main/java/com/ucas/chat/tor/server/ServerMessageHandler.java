@@ -779,6 +779,7 @@ public class ServerMessageHandler {
 			byte[] startXORFileName = Message.parseFirstHandShakeStartXORFileName(externalPayload);// TODO: 2021/10/4  对方发来要我确认的第一次握手的开始xor文件名
 			byte[] startXORIndex = Message.parseFirstHandShakeStartXORIndex(externalPayload);//解析开始位置
 
+			//friendStartXORIndex = 10
 			int friendStartXORFileName = Integer.parseInt(AESCrypto.bytesToHex(startXORFileName),16);//恢复原样,好友当前能用的开始文件名
 			int friendStartXORIndex = Integer.parseInt(AESCrypto.bytesToHex(startXORIndex),16);//好友当前能用的开始文件的（距离文件尾的）位置
 			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件名他",""+friendStartXORFileName);//好友的文件
@@ -807,8 +808,9 @@ public class ServerMessageHandler {
 
 			System.out.println(TAG + " handShakeMessageHandle:: Recieve SESSION_REQUEST");
 			updateSocketStatus(item, 0, null);//更新连接状态
-			
-			byte[] startFileNameAndIndex = XORutil.xorFile2Byte(commonStartXORFileName,commonStartXORIndex);//按设计的大小合并文件名和位置
+			int fileIndex = JniEntryUtils.getKeyIndex();
+			Log.d(TAG, " handShakeMessageHandle:: 测试 fileIndex = " + fileIndex);
+			byte[] startFileNameAndIndex = XORutil.xorFile2Byte(1,fileIndex);//按设计的大小合并文件名和位置
 
 			byte[] finalPayload = handShakeMessage.createSessionAuthMessage("c",startFileNameAndIndex);// TODO: 2021/10/4 增加xor字段 //创建会话身份验证消息 ，2
 			if (!this.sendMessage(item.getSocket(), finalPayload)) {//发送2的
@@ -827,9 +829,9 @@ public class ServerMessageHandler {
 			byte[] startXORIndex = Message.parseStartXORIndex(externalPayload);//解析开始位置
 			int startXORFileNameInt = Integer.parseInt(AESCrypto.bytesToHex(startXORFileName),16);//恢复原样,当前能用的开始文件名
 			int startXORIndexInt = Integer.parseInt(AESCrypto.bytesToHex(startXORIndex),16);//当前能用的开始文件的（距离文件尾的）位置
-
-			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件名解析",""+startXORFileNameInt);
-			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件位置解析",""+startXORIndexInt);
+			JniEntryUtils.setFileKeyLocation(startXORIndexInt);
+			Log.i(TAG + " handShakeMessageHandle:: 测试 握手xor文件名解析",""+startXORFileNameInt);
+			Log.i(TAG + " handShakeMessageHandle:: 测试 握手xor文件位置解析",""+startXORIndexInt);
 
 			commonRecordXOR.setStartFileName(startXORFileNameInt);
 			commonRecordXOR.setStartFileIndex(startXORIndexInt);

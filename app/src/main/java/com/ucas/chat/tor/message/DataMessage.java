@@ -1,5 +1,8 @@
 package com.ucas.chat.tor.message;
 
+import android.util.Log;
+
+import com.ucas.chat.jni.JniEntryUtils;
 import com.ucas.chat.tor.util.AESCrypto;
 import com.ucas.chat.tor.util.Constant;
 import com.ucas.chat.tor.util.RecordXOR;
@@ -79,8 +82,10 @@ public class DataMessage extends Message {
 		byte[] dataACK = Message.byteMerger(a2, messageHash);//ack_type		receive-piece-number		ok,这是小写	file_id_hash
 
 // TODO: 2021/10/5 增加xor文件的使用信息
-		byte[] startFileNameAndIndex = XORutil.xorFile2Byte(recordXOR.getStartFileName(),recordXOR.getStartFileIndex());//按设计的大小合并文件名和位置
-		byte[] endFileNameAndIndex = XORutil.xorFile2Byte(recordXOR.getEndFileName(),recordXOR.getEndFileIndex());//按设计的大小合并文件名和位置
+		int fileIndex = JniEntryUtils.getKeyIndex();
+		Log.d("DataMessage", " buildACKDataMessage:: 测试 fileIndex = " + fileIndex);
+		byte[] startFileNameAndIndex = XORutil.xorFile2Byte(1,fileIndex);//按设计的大小合并文件名和位置
+		byte[] endFileNameAndIndex = XORutil.xorFile2Byte(1,fileIndex);//按设计的大小合并文件名和位置
 
 		dataACK = Message.byteMerger(dataACK,startFileNameAndIndex);//application-id(byte)	时间戳(byte)	message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)	startXORFileName(byte)	startXORIndex(byte)
 		dataACK = Message.byteMerger(dataACK,endFileNameAndIndex);//message-number(byte)	message-type(byte)	payload-length(byte)	internal-payload		external-hash(byte)	startXORFileName(byte)	startXORIndex(byte)	endXORFileName(byte)	endXORIndex(byte)
