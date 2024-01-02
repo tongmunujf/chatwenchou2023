@@ -61,16 +61,8 @@ public class AddressBookTool {
             String filename = DigestUtils.sha256Hex(decryptRemoteOnionName)+"_public_key";
             LogUtils.d(TAG," insertAddressBookBean:: filename = " + filename);
 
-           // remotePublicKey = FileUtils.copy_file(filename);
             remotePublicKey = FileUtil.readFileFromSdcardChatUser(filename);
             LogUtils.d(TAG, " insertAddressBookBean:: xxx_public_key.txt remotePublicKey: " + remotePublicKey);
-
-//            String SStr = copy_file(filename);
-//            String SStr1 = SStr.replaceAll("-----BEGIN PUBLIC KEY-----\r\n","");
-//            remotePublicKey = SStr1.replaceAll("-----END PUBLIC KEY-----\r\n","");
-//            LogUtils.d(TAG," insertAddressBookBean:: remotePublicKey = " + remotePublicKey);
-
-//
 
             AddressBookBean bean = new AddressBookBean(nickName,gender,headImagePath,remoteOnionName,remotePublicKey.trim(),
                     remaks);
