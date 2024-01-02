@@ -601,7 +601,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
             case Event.GET_OFFLINE_PIC://本机收到离线图片
                 getOffLinePic(peerHostname);
                 break;
-            case Event.HAS_RECEIVED_MESSAGE://对方发来的文本消息
+            case Event.HAS_RECEIVED_MESSAGE://接收对方文本消息
                 hasReceivedMessage(message);
                 break;
              case Event.RECIEVE_ONLINE_FILE://收到文件的第一步，准备好环境，但未正式接收
@@ -1115,30 +1115,31 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
     private void sendTextMessage(int sendmodel,String messageID ) {
         String textMessage = mEtContent.getText().toString();
         mEtContent.getText().clear();
-        LogUtils.d(TAG, " sendTextMessage:: senModel = " + sendmodel);
-        LogUtils.d(TAG, " sendTextMessage:: messageID = " + messageID);
+        LogUtils.d(TAG, " sendTextMessage:: 未加密senModel = " + sendmodel);
+        LogUtils.d(TAG, " sendTextMessage:: 未加密messageID = " + messageID);
 
-        LogUtils.d(TAG, " sendTextMessage:: from userId = " + mUserBean.getUserId());
-        LogUtils.d(TAG, " sendTextMessage:: to userId = " + mContactsBean.getUserId());
-        LogUtils.d(TAG, " sendTextMessage:: orionId = " + mContactsBean.getOrionId());
-        LogUtils.d(TAG, " sendTextMessage:: nickName = " + mContactsBean.getNickName());
+        LogUtils.d(TAG, " sendTextMessage:: 未加密from userId = " + mUserBean.getUserId());
+        LogUtils.d(TAG, " sendTextMessage:: 未加密to userId = " + mContactsBean.getUserId());
+        LogUtils.d(TAG, " sendTextMessage:: 未加密orionId = " + mContactsBean.getOrionId());
+        LogUtils.d(TAG, " sendTextMessage:: 未加密nickName = " + mContactsBean.getNickName());
+        LogUtils.d(TAG, " sendTextMessage:: 未加密后 message = " + textMessage);
 
 
         String fromUserId = AesTools.getEncryptContent(mUserBean.getUserId(), AesTools.AesKeyTypeEnum.COMMON_KEY);
         String toUserId = AesTools.getEncryptContent(mContactsBean.getUserId(), AesTools.AesKeyTypeEnum.COMMON_KEY);
         String orionId = AesTools.getEncryptContent(mContactsBean.getOrionId(), AesTools.AesKeyTypeEnum.COMMON_KEY);
         String nickName = AesTools.getEncryptContent(mContactsBean.getNickName(), AesTools.AesKeyTypeEnum.COMMON_KEY);
-       // String message = AesTools.getEncryptContent(textMessage, AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        String message = AesTools.getEncryptContent(textMessage, AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
         LogUtils.d(TAG, " sendTextMessage:: 加密后 from userId = " + fromUserId);
         LogUtils.d(TAG, " sendTextMessage:: 加密后 to userId = " + toUserId);
         LogUtils.d(TAG, " sendTextMessage:: 加密后 orionId = " + orionId);
         LogUtils.d(TAG, " sendTextMessage:: 加密后 nickName = " + nickName);
-        LogUtils.d(TAG, " sendTextMessage:: 未加密后 message = " + textMessage);
+        LogUtils.d(TAG, " sendTextMessage:: 加密后 message = " + message);
 
         ContentValues values = new ContentValues();
         values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
         values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.text);
-        values.put(ChatContract.MsgListEntry.TEXT_CONTENT, textMessage);
+        values.put(ChatContract.MsgListEntry.TEXT_CONTENT, message);
         values.put(ChatContract.MsgListEntry.FROM, fromUserId);
         values.put(ChatContract.MsgListEntry.TO, toUserId);
         values.put(ChatContract.MsgListEntry.IS_ACKED, 0);
@@ -1151,7 +1152,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         mHelper.insertData(getContext(),values);
 
         //MsgListBean bean = new MsgListBean(textMessage, mUserBean.getUserId(), mContactsBean.getUserId(), 0,messageID,mContactsBean.getOrionId(),mContactsBean.getNickName());
-        MsgListBean bean = new MsgListBean(textMessage, fromUserId, toUserId, 0, messageID, orionId, nickName);
+        MsgListBean bean = new MsgListBean(message, fromUserId, toUserId, 0, messageID, orionId, nickName);
         LogUtils.d(TAG, " sendTextMessage:: 加密消息MsgListBean = " +bean.toString() );
         mMsgList.add(bean);
         mAdapter.notifyDataSetChanged();

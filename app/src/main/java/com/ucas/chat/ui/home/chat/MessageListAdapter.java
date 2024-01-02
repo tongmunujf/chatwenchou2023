@@ -223,14 +223,13 @@ public class MessageListAdapter extends BaseAdapter {
         LogUtils.d(TAG, " handleGetTextL:: message = " + bean.getTextContent());
         String message = null;
 
-//        message = AesTools.getDecryptContent(bean.getTextContent(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
-//        LogUtils.d(TAG, " handleGetTextL:: 解密message = " + message);
-//        if (message == null || message.isEmpty()){
-//            //对没有进行加密的聊天内容进行兼容
-//            message = bean.getTextContent();
-//        }
-
-        message = bean.getTextContent();
+        message = AesTools.getDecryptContent(bean.getTextContent(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        LogUtils.d(TAG, " handleGetTextL:: 解密message = " + message);
+        if (message == null || message.isEmpty()){
+            //对没有进行加密的聊天内容进行兼容
+            message = bean.getTextContent();
+            LogUtils.d(TAG, " handleGetTextL:: dddddd 解密message = " + message);
+        }
         LogUtils.d(TAG, " handleGetTextL:: message = " + message);
         holder.tv_chat_msg.setText(message);
 
@@ -272,14 +271,14 @@ public class MessageListAdapter extends BaseAdapter {
         LogUtils.d(TAG, " handleGetTextR:: 加密message = " + bean.getTextContent());
         String message = null;
 
-//        message = AesTools.getDecryptContent(bean.getTextContent(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
-//        LogUtils.d(TAG, " handleGetTextR:: 解密message = " + message);
-//        if (message == null || message.isEmpty()){
-//            //对没有进行加密的聊天内容进行兼容
-//            message = bean.getTextContent();
-//        }
+        message = AesTools.getDecryptContent(bean.getTextContent(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+       LogUtils.d(TAG, " handleGetTextR:: 解密message = " + message);
+        if (message == null || message.isEmpty()){
+            //对没有进行加密的聊天内容进行兼容
+            message = bean.getTextContent();
+            LogUtils.d(TAG, " handleGetTextR:: message = " + message);
+        }
 
-        message = bean.getTextContent();
         LogUtils.d(TAG, " handleGetTextL:: message = " + message);
         holder.tv_chat_msg.setText(message);
 

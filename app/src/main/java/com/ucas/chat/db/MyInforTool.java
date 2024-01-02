@@ -81,22 +81,4 @@ public class MyInforTool {
                 ONIONNAME,RSA_PUBLIC_KEY,RSA_PRIVATE_KEY);// TODO: 2021/7/16  RSA_PRIVATE_KEY,RSA_PUBLIC_KEY改为RSA_PUBLIC_KEY,RSA_PRIVATE_KEY
         return bean;
     }
-
-    /**
-     * 加密数据
-     * @param value
-     * @return
-     */
-    public String getEncryptValue(String value){
-        String key = "08c08c24f1f2a444";
-        String result = null;
-        Log.e("AesUtils", " getEncryptValue:: key = " + key);
-        try {
-            result = AesUtils.encrypt(key, value);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Log.e("AesUtils", " getEncryptValue:: " + value + " 加密后——》" + result);
-        return result;
-    }
 }
