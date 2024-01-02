@@ -1,12 +1,21 @@
 package com.ucas.chat.utils;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
+import com.ucas.chat.R;
 import com.ucas.chat.bean.ImageSize;
+import com.ucas.chat.bean.contact.ConstantValue;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.ui.login.PhotoActivity;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Target;
 
 /**
  * @author huangrui
@@ -14,7 +23,7 @@ import java.io.IOException;
  * @desc
  */
 public class BitmapUtil {
-
+    public static final String TAG = ConstantValue.TAG_CHAT + "BitmapUtil";
 
 
      public static ImageSize getImageSize(Bitmap bitmap) {
@@ -79,8 +88,73 @@ public class BitmapUtil {
     }
 
 
+    /**
+     * 文件路径是否存在
+     * @param fileName
+     * @return
+     */
+    public static String filePathIsExists(String fileName){
+         String path = FilePathUtils.RECIEVE_FILE_PATH + fileName;
+         File file = new File(path);
+         if (file.exists()){
+             Log.d(TAG, " filePathIsExists:: path = " + path);
+             return path;
+         }else {
+             path = FilePathUtils.TARGET_FILE_PATH + fileName;
+             file = new File(path);
+         }
+         if (file.exists()){
+             Log.d(TAG, " filePathIsExists:: path = " + path);
+             return path;
+         }
+        Log.d(TAG, " filePathIsExists:: 图片路径不存在");
+         return null;
+    }
 
+    /**
+     * 文件是否为图片
+     * @param path
+     * @return
+     */
+    public static boolean isPicFile(String path){
+         boolean isPic = false;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+        if (options.outWidth != -1 && options.outHeight != -1) {
+            // This is an image file.
+            isPic = true;
+        }
+        return isPic;
+    }
 
+    /**
+     * 接收图片，进行预览
+     * @param context
+     * @param fileName
+     */
+    public static void picturePreview(Context context, String fileName){
+        String path = FilePathUtils.RECIEVE_FILE_PATH + fileName;
+        File file = new File(path);
+        if (file.exists()){
+            showPhoto(context, fileName);
+            return;
+        }else {
+            path = FilePathUtils.TARGET_FILE_PATH + fileName;
+        }
+        file = new File(path);
+        if (file.exists()){
+           showPhoto(context, fileName);
+        }else {
+            ToastUtils.showMessage(context, context.getString(R.string.file_path_error));
+        }
+    }
+
+    private static void showPhoto(Context context, String fileName){
+        Intent intent = new Intent(context, PhotoActivity.class);
+        intent.putExtra("PIC_NAME", fileName);
+        context.startActivity(intent);
+    }
 
 
 }

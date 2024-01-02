@@ -25,11 +25,14 @@ import com.ucas.chat.bean.litepal.ContactsBean;
 import com.ucas.chat.bean.session1.MsgTypeStateNew;
 import com.ucas.chat.db.MailListUserNameTool;
 import com.ucas.chat.db.MyInforTool;
+import com.ucas.chat.tor.util.FilePathUtils;
 import com.ucas.chat.ui.listener.OnItemClickListener;
+import com.ucas.chat.ui.login.PhotoActivity;
 import com.ucas.chat.ui.view.PassWordDialog;
 import com.ucas.chat.ui.view.RoundProgressBar;
 import com.ucas.chat.ui.view.chat.RViewHolder;
 import com.ucas.chat.utils.AesTools;
+import com.ucas.chat.utils.BitmapUtil;
 import com.ucas.chat.utils.LogUtils;
 import com.ucas.chat.utils.SharedPreferencesUtil;
 
@@ -348,6 +351,17 @@ public class MessageListAdapter extends BaseAdapter {
 
         convertView.setTag(R.id.msg_listview, position);//标记，用于MyAsyncTask更新时遍历
         mViewList.add(convertView);
+
+        holder.ll_text_receive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String fileName = bean.getFileName();
+                String filePath = BitmapUtil.filePathIsExists(fileName);
+                if (BitmapUtil.isPicFile(filePath)){
+                    BitmapUtil.picturePreview(mContext, fileName);
+                }
+            }
+        });
 
         holder.ll_text_receive.setOnLongClickListener(new View.OnLongClickListener() {
             @Override

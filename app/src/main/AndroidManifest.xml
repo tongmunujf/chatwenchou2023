@@ -49,6 +49,7 @@
                     android:scheme="scheme" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.login.PhotoActivity"/>
         <activity android:name=".ui.home.HomeActivity" />
         <activity android:name=".ui.register.RegisterActivity" />
         <activity android:name=".ui.home.set.SettingActivity" />
