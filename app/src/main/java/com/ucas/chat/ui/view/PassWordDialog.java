@@ -1,10 +1,7 @@
 package com.ucas.chat.ui.view;
 
-import static com.ucas.chat.MyApplication.getContext;
-
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -17,14 +14,10 @@ import com.ucas.chat.R;
 import com.ucas.chat.bean.MyInforBean;
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.db.MySelfInfoHelper;
-import com.ucas.chat.progressdisplay.DialogAdapter;
 import com.ucas.chat.tor.util.FilePathUtils;
 import com.ucas.chat.utils.AesTools;
 import com.ucas.chat.utils.FileUtils;
-import com.ucas.chat.utils.TextUtils;
 import com.ucas.chat.utils.ToastUtils;
-
-import java.io.File;
 
 public class PassWordDialog extends Dialog{
     private static String TAG = ConstantValue.TAG_CHAT + "PassWordDialog";
@@ -38,6 +31,8 @@ public class PassWordDialog extends Dialog{
 
     private String mFromFilePath;
     private String mToFilePath;
+
+    private String mFileName;
 
     public PassWordDialog(@NonNull Context context) {
         super(context);
@@ -55,9 +50,10 @@ public class PassWordDialog extends Dialog{
     }
 
     public void setFileName(String fileName){
+        this.mFileName = fileName;
         this.mFromFilePath = FilePathUtils.RECIEVE_FILE_PATH + fileName;
         this.mToFilePath = FilePathUtils.TARGET_FILE_PATH + fileName;
-        Log.d(TAG, " setFileName:: fileName = " + fileName);
+        Log.d(TAG, " setFileName:: fileName = " +  this.mFileName);
         Log.d(TAG, " setFileName:: mFromFilePath = " + this.mFromFilePath);
     }
 
@@ -89,6 +85,7 @@ public class PassWordDialog extends Dialog{
                 if (mPassword.equals(inputPassword)){
                     FileUtils.copyFile(mContext, mFromFilePath ,mToFilePath);
                     dismiss();
+                    showCountDialog(mContext);
                 }else {
                     ToastUtils.showMessage(mContext,mContext.getString(R.string.pw_error));
                 }
@@ -96,6 +93,11 @@ public class PassWordDialog extends Dialog{
         });
     }
 
+    private void showCountDialog(Context context){
+        CountDownDialog countDownDialog = new CountDownDialog(context);
+        countDownDialog.setFileName(mFileName);
+        countDownDialog.show();
+    }
 
     private void getPassword(){
         mySelfInfoHelper= MySelfInfoHelper.getInstance(getContext());

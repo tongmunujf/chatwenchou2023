@@ -73,4 +73,5 @@
     <string name="sure">sure</string>
     <string name="pw_error">Password error</string>
     <string name="file_path_error">The file path does not exist</string>
+    <string name="wait">Please wait...</string>
 </resources>
