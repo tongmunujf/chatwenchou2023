@@ -100,9 +100,13 @@ public class PassWordDialog extends Dialog{
     }
 
     private void getPassword(){
+        Log.d(TAG, " getPassword::");
         mySelfInfoHelper= MySelfInfoHelper.getInstance(getContext());
+        Log.d(TAG, " getPassword:: 1111");
         myInforBean=mySelfInfoHelper.queryAll();
+        Log.d(TAG, " getPassword:: 2222");
         mPassword = AesTools.getDecryptContent(myInforBean.getPassword(), AesTools.AesKeyTypeEnum.COMMON_KEY);
+        Log.d(TAG, " getPassword:: 333");
         Log.d(TAG, " getPassword:: mPassword = " +mPassword);
     }
 

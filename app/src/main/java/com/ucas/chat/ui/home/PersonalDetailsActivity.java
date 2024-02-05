@@ -19,6 +19,8 @@ import com.ucas.chat.db.ChatContract;
 import com.ucas.chat.db.MailListUserNameTool;
 import com.ucas.chat.db.MailListSQLiteHelper;
 import com.ucas.chat.db.news.MsgListSQLiteHelper;
+import com.ucas.chat.tor.server.ServerMessageHandler;
+import com.ucas.chat.tor.util.Constant;
 import com.ucas.chat.ui.home.chat.P2PChatActivity;
 import com.ucas.chat.ui.view.dialog.InputDialog;
 import com.ucas.chat.utils.LogUtils;
@@ -145,12 +147,4 @@ public class PersonalDetailsActivity extends BaseActivity {
         Toast.makeText(this,"history message deleted successfully",Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * 更新SharedPreferences中的备注
-     */
-//    private void updateSharedPreferences(String name, String nickName){
-//        int index = MailListUserNameTool.getIndex(getContext(), name);
-//        String key = MailListUserNameTool.getShareKey(index);
-//        SharedPreferencesUtil.setStringSharedPreferences(getContext(),ConstantValue.USER_NICKNAME_SHARE_NAME, key,nickName);
-//    }
 }

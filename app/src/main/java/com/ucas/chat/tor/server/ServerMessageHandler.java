@@ -122,21 +122,10 @@ public class ServerMessageHandler {
 	}
 
 	private ServerMessageHandler() {
-
-
-//		ClientTransport textClient = new ClientTransport(this.mailList.get(Constant.REMOTE_ONION_NAME),
-//				Constant.CLIENT_PRIVATE_KEY, 5, Constant.SOCKET_PURPOSE_TEXT);
-//		textClient.start();
-//		ClientTransport fileClient = new ClientTransport(this.mailList.get(Constant.REMOTE_ONION_NAME),
-//				Constant.CLIENT_PRIVATE_KEY, 5, Constant.SOCKET_PURPOSE_FILE);
-//		fileClient.start();
-//		createConnection(Constant.REMOTE_ONION_NAME,Constant.SOCKET_PURPOSE_TEXT);
-//		createConnection(Constant.REMOTE_ONION_NAME,Constant.SOCKET_PURPOSE_FILE);
 	}
 
 	public void init(Context context) {
-		this.context = context;
-//		this.initMailList();
+		this.context = context;;
 		ServerTransport server = new ServerTransport(Constant.REMOTE_ONION_PORT, 10, Constant.CLIENT_PRIVATE_KEY);
 		server.start();
 
@@ -144,24 +133,8 @@ public class ServerMessageHandler {
 		writer.start();
 		Reader reader = new Reader();
 		reader.start();
-//		reader = new Reader();
-//		reader.start();
-//		reader = new Reader();
-//		reader.start();
 		StatusCheckerTransport selfChecker = new StatusCheckerTransport(mySelfBean.getOnionName(),Constant.REMOTE_ONION_PORT,Constant.CONNECT_RETRY_COUNT);
 		selfChecker.start();
-//		reader = new Reader();
-//		reader.start();
-//		reader = new Reader();
-//		reader.start();
-//		reader = new Reader();
-//		reader.start();
-//		reader = new Reader();
-//		reader.start();
-//		reader = new Reader();
-//		reader.start();
-
-
 	}
 
 	public void setLocalPort(int localPort) {
@@ -199,8 +172,6 @@ public class ServerMessageHandler {
 	}
 
 	public void createConnectionAsyc(String onionName, int purpose){
-
-		//onionName = liqf2ad7xgi4ewixwvk6qxf5bsevaq7qojvfzu74ruwusvc4ullfonyd.onion(b) , purpose = 0
 		System.out.println(TAG + " createConnectionAsyc:: onionName = " + onionName + " , purpose = " + purpose);
 		ConnectionStatusItem item = this.getConnectionStatusItemByOnionName(onionName, purpose);
 		if(item==null){
@@ -236,11 +207,7 @@ public class ServerMessageHandler {
 		}else{
 			System.out.println(TAG + " startHandShakeProcess:: item is null " + purpose);
 		}
-//		if (result == 1) {
-
-
 		return true;
-
 	}
 
 
@@ -331,10 +298,6 @@ public class ServerMessageHandler {
 							+ purpose + ", need create connection");
 					createConnectionAsyc(onionName, purpose);
 					flag=1;
-//					if (!this.createConnection(onionName, purpose)) {
-//						// create connection failed for max times, offline process
-//						this.processOfficeMessage(onionName);
-//					}
 				}
 			} else {
 				System.out.println("ServerMessageHandler deleteConnection  socket " + socket + " already delte ");
@@ -406,11 +369,6 @@ public class ServerMessageHandler {
 				System.out.println(TAG + " ServerMessageHandler.connect.ssocket:" + socket.getInetAddress());
 				System.out.println(TAG + " ServerMessageHandler.connect.ssocket:" + socket.getInetAddress()
 						+ socket.getLocalSocketAddress());
-//				if(socket.getInetAddress()==null) {
-//					count = count + 1;
-//					socket.close();
-//					continue;
-//				}
 				ConnectionStatusItem statusItem = new ConnectionStatusItem(mailItem.getOnionName(),
 						mailItem.getOnionHash(), socket, 0, null);
 				statusItem.setPurpose(purpose);
@@ -773,6 +731,7 @@ public class ServerMessageHandler {
 		int messageType = Integer.parseInt(AESCrypto.bytesToHex(byteMessageType), 16);
 		byte[] internalPayload = Message.parseExternalPaylod(externalPayload);
 
+		Log.d(TAG, "  handShakeMessageHandle:: messageType = " + messageType);
 
 		if (Constant.SESSION_REQUEST == messageType) {//类型1
 
@@ -781,21 +740,15 @@ public class ServerMessageHandler {
 
 			//friendStartXORIndex = 10
 			int friendStartXORFileName = Integer.parseInt(AESCrypto.bytesToHex(startXORFileName),16);//恢复原样,好友当前能用的开始文件名
-			int friendStartXORIndex = Integer.parseInt(AESCrypto.bytesToHex(startXORIndex),16);//好友当前能用的开始文件的（距离文件尾的）位置
-			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件名他",""+friendStartXORFileName);//好友的文件
-			Log.i(TAG + "handShakeMessageHandle:: 握手xor文件位置他",""+friendStartXORIndex);//好友的位置
+			int friendStartXORIndex = Integer.parseInt(AESCrypto.bytesToHex(startXORIndex),16);//好友当前能用的开始文件的（距离文件尾的）位置置
 
 			RecordXOR myRecordStartXOR = XORutil.getStartXOR( context);//获取自己当前能用的开始文件和位置
 			int myStartXORFileName = myRecordStartXOR.getStartFileName();//自己的文件
 			int myStartXORIndex = myRecordStartXOR.getStartFileIndex();//自己的位置
-			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件名我",""+myStartXORFileName);
-			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件位置我",""+myStartXORIndex);
 
 			int commonStartXORFileName = XORutil.commonStartXORFileName(friendStartXORFileName,myStartXORFileName);// TODO: 2021/10/4 共同的开始文件
 
 			int commonStartXORIndex = XORutil.compareKeyIndex(friendStartXORFileName , friendStartXORIndex, myStartXORFileName, myStartXORIndex);//获取共同开始的位置
-			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件名共同",""+commonStartXORFileName);
-			Log.i(TAG + " handShakeMessageHandle:: 握手xor文件位置共同",""+commonStartXORIndex);
 
 			commonRecordXOR.setStartFileName(commonStartXORFileName);
 			commonRecordXOR.setStartFileIndex(commonStartXORIndex);
@@ -809,7 +762,7 @@ public class ServerMessageHandler {
 			System.out.println(TAG + " handShakeMessageHandle:: Recieve SESSION_REQUEST");
 			updateSocketStatus(item, 0, null);//更新连接状态
 			int fileIndex = JniEntryUtils.getKeyIndex();
-			Log.d(TAG, " handShakeMessageHandle:: 测试 fileIndex = " + fileIndex);
+			Log.d(TAG, " handShakeMessageHandle:: fileIndex = " + fileIndex);
 			byte[] startFileNameAndIndex = XORutil.xorFile2Byte(1,fileIndex);//按设计的大小合并文件名和位置
 
 			byte[] finalPayload = handShakeMessage.createSessionAuthMessage("c",startFileNameAndIndex);// TODO: 2021/10/4 增加xor字段 //创建会话身份验证消息 ，2
@@ -1957,8 +1910,6 @@ public class ServerMessageHandler {
 
 
 			if(mailItem!=null)
-				//临时修改
-				//EventBus.getDefault().post(new Event(Event.CREATE_CONNECTION_SUCCESS, "success", this.mailItem.getOnionName()));
 			    EventBus.getDefault().post(new Event(Event.CREATE_CONNECTION_SUCCESS, "fail", this.mailItem.getOnionName()));
 			return status;
 		}
@@ -2224,6 +2175,7 @@ public class ServerMessageHandler {
 			
 			if(this.connectionStatus ==1&&status==1){
 				sendnewBroadcast("network connection succeeded");//网络连接成功
+
 				return;// TODO: 2022/4/12 新旧状态都是在线1，不需要执行下面耗时的连接好友的操作了
 			}
 
@@ -2287,17 +2239,9 @@ public class ServerMessageHandler {
 						tryResendAll();
 						sendnewBroadcast("tryResendAll");
 						System.out.println(TAG + " StatusCheckerTransport run::  网络tryResendAll完成");
-
-
 					}
 				}).start();
-
-
-
-
 			}
-
-
 		}
 
 		private void closeSocket() {
@@ -2357,7 +2301,6 @@ public class ServerMessageHandler {
 
 	public void sendnewBroadcast(String message){
 		LogUtils.d(TAG, " sendnewBroadcast:: message = " + message);
-
 		Intent intent = new Intent(); // TODO: 2021/7/20 安卓8以后的静态广播都需要 intent.setComponent(new ComponentName())才能让接收器收到广播
 
 		intent.setAction(STATUSCHANGE_ACTION);
@@ -2369,8 +2312,6 @@ public class ServerMessageHandler {
 		intent.setComponent(new ComponentName(OrbotServiceAction.PACKAGE,
 				"com.ucas.chat.ui.home.NewsFragment$ProgressReceiver"));
 		context.sendBroadcast(intent);//要2次才行
-
-
 	}
 
 

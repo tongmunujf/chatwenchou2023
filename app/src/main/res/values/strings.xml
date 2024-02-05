@@ -62,6 +62,7 @@
     <string name="protocol_failure">Failed to connect friends</string>
     <string name="wait_login">Login may take some time, please be patient</string>
     <string name="off_line">off line</string>
+    <string name="check_friend_status">connecting...</string>
     <string name="content_file">[File]</string>
     <string name="content_im">[Image]</string>
 

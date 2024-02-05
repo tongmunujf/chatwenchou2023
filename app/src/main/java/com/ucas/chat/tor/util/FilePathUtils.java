@@ -17,13 +17,10 @@ public class FilePathUtils {
     public final static String v3Dirpath =  "/data/data/com.ucas.chat/files/hidden_service_replace";
     public final static String BASE_PATH_DATA = "/data/data/com.ucas.chat";
 
-    //Jni加密解密 key.bin文件路径
     public static final String SECRET_KEY_FILE = "/sdcard/Download/key.bin";
 
-    //接收的文件另存为路径
     public static final String TARGET_FILE_PATH = "/sdcard/Download/";
 
     public final static String BIN_FILE_PATH = BASE_PATH_DATA + "/files/binFile";
-    //jni加密文件接收路径
     public final static String RECIEVE_FILE_PATH = "/data/data/com.ucas.chat/files/ReceiveFile/";
 }

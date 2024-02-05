@@ -22,6 +22,9 @@ import com.ucas.chat.tor.util.FilePathUtils;
 import com.ucas.chat.ui.view.TouchImageView;
 import com.ucas.chat.utils.AesTools;
 import com.ucas.chat.utils.LogUtils;
+import com.ucas.chat.utils.ToastUtils;
+
+import java.io.File;
 
 public class PhotoActivity extends BaseActivity {
     public static final String TAG = ConstantValue.TAG_CHAT + "PhotoActivity";
@@ -42,13 +45,22 @@ public class PhotoActivity extends BaseActivity {
         }
 
         String picPath = FilePathUtils.RECIEVE_FILE_PATH + pic_name;
+        File file = new File(picPath);
+        if (!file.exists()){
+            picPath =  FilePathUtils.TARGET_FILE_PATH + pic_name;
+        }
 
-        Bitmap bm = BitmapFactory.decodeFile(picPath);
-        //Bitmap bm = BitmapFactory.decodeFile("/sdcard/Chat/PIC1.jpg");
-        Drawable drawable = new BitmapDrawable(getResources(), bm);
-        mTouchImageView.setImageDrawable(drawable);
-        mTouchImageView.setMaxZoom(4f);
+        file = new File(picPath);
 
+        if (file.exists()){
+            Bitmap bm = BitmapFactory.decodeFile(picPath);
+            //Bitmap bm = BitmapFactory.decodeFile("/sdcard/Chat/PIC1.jpg");
+            Drawable drawable = new BitmapDrawable(getResources(), bm);
+            mTouchImageView.setImageDrawable(drawable);
+            mTouchImageView.setMaxZoom(4f);
+        }else {
+            ToastUtils.showMessage(this,getString(R.string.file_path_error));
+        }
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

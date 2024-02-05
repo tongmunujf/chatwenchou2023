@@ -171,9 +171,6 @@ public class TorManager {
     }
 
     public static void initMessageHandler(Context context, String orionId){
-        ServerMessageHandler messageHandler =ServerMessageHandler.getInstance();
-//        messageHandler.init(context);
-//        orionId=Constant.REMOTE_ONION_NAME;
         connectFriend(orionId);
     }
 

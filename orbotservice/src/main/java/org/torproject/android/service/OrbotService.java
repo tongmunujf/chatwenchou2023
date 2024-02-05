@@ -158,7 +158,7 @@ public class OrbotService extends VpnService implements TorServiceConstants, Orb
 
 
     public static String getOinonHostname() {
-        Log.d("getOinonHostname", "begin work.....");
+        Log.d(" OrbotService:: getOinonHostname", "begin work.....");
         String line = null;
         File fileOnionHostname = new File(v3Dirpath, "hidden_service_replace/hostname");
         File filePubliceKey = new File(v3Dirpath, "hidden_service_replace/hs_ed25519_public_key");
@@ -168,13 +168,13 @@ public class OrbotService extends VpnService implements TorServiceConstants, Orb
             if (fileSercretKey.exists()) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(fileSercretKey));
                 line = bufferedReader.readLine();
-                Log.d("fileSercretKey", line);
+                Log.d(" OrbotService:: fileSercretKey", line);
                 bufferedReader.close();
             }else{
-                System.out.println("文件不存在");
+                System.out.println(" OrbotService:: 文件不存在");
             }
         } catch (FileNotFoundException e) {
-            System.out.println("文件不存在");
+            System.out.println(" OrbotService:: 文件不存在");
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -183,13 +183,13 @@ public class OrbotService extends VpnService implements TorServiceConstants, Orb
             if (filePubliceKey.exists()) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(filePubliceKey));
                 line = bufferedReader.readLine();
-                Log.d("filePubliceKey", line);
+                Log.d(" OrbotService:: filePubliceKey", line);
                 bufferedReader.close();
             }else{
-                System.out.println("文件不存在");
+                System.out.println(" OrbotService:: 文件不存在");
             }
         } catch (FileNotFoundException e) {
-            System.out.println("文件不存在");
+            System.out.println(" OrbotService:: 文件不存在");
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -198,13 +198,13 @@ public class OrbotService extends VpnService implements TorServiceConstants, Orb
             if (fileOnionHostname.exists()) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(fileOnionHostname));
                 line = bufferedReader.readLine();
-                Log.d("fileOnionHostname", line);
+                Log.d(" OrbotService:: fileOnionHostname", line);
                 bufferedReader.close();
             }else{
-                System.out.println("文件不存在");
+                System.out.println(" OrbotService:: 文件不存在");
             }
         } catch (FileNotFoundException e) {
-            System.out.println("文件不存在");
+            System.out.println(" OrbotService:: 文件不存在");
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -348,11 +348,11 @@ public class OrbotService extends VpnService implements TorServiceConstants, Orb
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         showToolbarNotification("", NOTIFY_ID, R.drawable.ic_stat_tor);
-        System.out.println("onStartCommand:"+intent);
+        System.out.println(" OrbotService:: onStartCommand:"+intent);
         if (intent != null)
             exec(new IncomingIntentRouter(intent));
         else
-            Log.d(OrbotConstants.TAG, "Got null onStartCommand() intent");
+            Log.d(OrbotConstants.TAG, " Got null onStartCommand() intent");
 
         return Service.START_REDELIVER_INTENT;
     }

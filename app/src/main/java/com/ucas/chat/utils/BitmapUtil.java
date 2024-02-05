@@ -151,6 +151,7 @@ public class BitmapUtil {
     }
 
     private static void showPhoto(Context context, String fileName){
+        Log.d(TAG, " showPhoto:: fileName = " + fileName);
         Intent intent = new Intent(context, PhotoActivity.class);
         intent.putExtra("PIC_NAME", fileName);
         context.startActivity(intent);

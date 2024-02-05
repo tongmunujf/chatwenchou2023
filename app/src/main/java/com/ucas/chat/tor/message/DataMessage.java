@@ -43,13 +43,6 @@ public class DataMessage extends Message {
 		ACKMessage message = new ACKMessage(messageType,recievePieceNumber,ss,messageHash);
 		
 		return message;
-//		if (ss.equals(Constant.DATA_ACK_CONTENT)) {
-//			return new String(messageHash);
-//		} else {
-//			System.out.println("DataMessage parseDataMessage ackok check failed");
-//			return null;
-//		}
-
 	}
 /**
  * 

@@ -67,6 +67,7 @@
     <string name="protocol_failure">好友连接失败</string>
     <string name="wait_login">登录可能需要花点时间，请耐心等待</string>
     <string name="off_line">离线</string>
+    <string name="check_friend_status">连接中...</string>
     <string name="content_file">[文件]</string>
     <string name="content_im">[图片]</string>
     <string name="key_exhausted">密钥用尽</string>

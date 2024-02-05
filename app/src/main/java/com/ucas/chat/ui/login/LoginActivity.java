@@ -57,6 +57,7 @@ import com.ucas.chat.db.NodeHelper;
 import com.ucas.chat.db.ServiceInfoHelper;
 import com.ucas.chat.db.ServiceInfoTool;
 import com.ucas.chat.eventbus.Event;
+import com.ucas.chat.jni.JniEntryUtils;
 import com.ucas.chat.tor.util.Constant;
 import com.ucas.chat.tor.util.FilePathUtils;
 import com.ucas.chat.tor.util.FileUtil;
@@ -144,6 +145,8 @@ public class LoginActivity extends BaseActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_login);
 
+        TorManager.stopTor(getContext());
+
         KeyHelper keyHelper = KeyHelper.getInstance(getContext());
         ArrayList<KeyInforBean> keyList =keyHelper.queryAll();
         LogUtils.d(TAG, " keyList = " + keyList.toString());
@@ -167,8 +170,7 @@ public class LoginActivity extends BaseActivity {
         mTool = MailListUserNameTool.getInstance();
         mMailList = mTool.initMailList();
 
-        mEdUserName.setText("testB");// TODO: 2021/8/5
-        mEdPassWord.setText("testB");
+        mEdPassWord.setText("123");
 
         //#######
         mySelfInfoHelper= MySelfInfoHelper.getInstance(getContext());
@@ -214,6 +216,8 @@ public class LoginActivity extends BaseActivity {
         FileUtils.copy_file_from_sdcard(getContext());
         EventBus.getDefault().register(this);
         FileUtil.createReceiveFileFolder();
+
+     //JniEntryUtils.setFileKeyLocation(1);
     }
 
     private void initClick() {
@@ -374,8 +378,6 @@ public class LoginActivity extends BaseActivity {
                 if (num_restart_tor == 1){//这个判断会影响从掩护界面跳转到HomeActivity界面的
                     System.out.println("网络开始");
                     com.ucas.chat.TorManager.interface_start_listen(getContext());
-
-
                 }
                 LogUtils.d(TAG, " onMoonEvent:: mName: " + mName);
                 LogUtils.d(TAG, " onMoonEvent:: mPassword: " + mPassword);

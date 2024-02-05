@@ -102,30 +102,6 @@ public class sendOfflinePic2 extends Thread  {
                 out.write(strBuf.toString().getBytes());
             }
             if (picByte != null) {
-//                Iterator iter = fileMap.entrySet().iterator();
-//                while (iter.hasNext()) {
-//                    Map.Entry entry = (Map.Entry) iter.next();
-//                    String inputName = (String) entry.getKey();
-//                    String inputValue = (String) entry.getValue();
-//                    if (inputValue == null) {
-//                        continue;
-//                    }
-//                    File file = new File(inputValue);
-//                    filename = file.getName();
-                    //没有传入文件类型，同时根据文件获取不到类型，默认采用application/octet-stream
-//                    contentType = new MimetypesFileTypeMap().getContentType(file);
-                    //contentType非空采用filename匹配默认的图片类型
-//                    if (!"".equals(contentType)) {
-//                        if (filename.endsWith(".png")) {
-//                            contentType = "image/png";
-//                        } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg") || filename.endsWith(".jpe")) {
-//                            contentType = "image/jpeg";
-//                        } else if (filename.endsWith(".gif")) {
-//                            contentType = "image/gif";
-//                        } else if (filename.endsWith(".ico")) {
-//                            contentType = "image/image/x-icon";
-//                        }
-//                    }
                     if (contentType == null || "".equals(contentType)) {
                         contentType = "application/octet-stream";
                     }
@@ -135,14 +111,6 @@ public class sendOfflinePic2 extends Thread  {
                     strBuf.append("Content-Type:" + contentType + "\r\n\r\n");
                     out.write(strBuf.toString().getBytes());
                     Log.d(TAG, " formUpload:: 发图片信息 = " + strBuf.toString());
-//                    DataInputStream in = new DataInputStream(new FileInputStream(file));
-//                    int bytes = 0;
-//                    byte[] bufferOut = new byte[2048];
-//                    while ((bytes = in.read(bufferOut)) != -1) {
-                        out.write(picByte, 0, picByte.length);//发文件
-//                    }
-//                    in.close();
-//                }
             }
             byte[] endData = ("\r\n--" + BOUNDARY + "--\r\n").getBytes();
             out.write(endData);
@@ -216,26 +184,7 @@ public class sendOfflinePic2 extends Thread  {
         String url = "http://"+onion_name+"/receive_message/";
         Log.d(TAG, " sendPic:: 请求地址url = " + url);
         String fileHash = null;
-//        File file = new File(filePath);
         long fileLength =  picByte.length;
-//        try {
-//            DataInputStream in = new DataInputStream(new FileInputStream(file));
-//            DataInputStream ins = new DataInputStream(new FileInputStream(file));
-//            int num = 0;
-//            int bytes;
-//            byte[] bufferOut = new byte[3060];
-//            //从in里读向bufferOut写
-//            while ((bytes = in.read(bufferOut)) != -1) {
-//                num+=bytes;
-//            }
-//            byte[] fileContent = new byte[num];
-//            ins.read(fileContent);//一次性读完所有
-//            System.out.println("文件哈希："+fileHash);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         fileHash = DigestUtils.sha256Hex(picByte);
         Map<String, String> textMap = new HashMap<String, String>();
         textMap.put("from_id", from);
@@ -243,9 +192,6 @@ public class sendOfflinePic2 extends Thread  {
         textMap.put("type", type);
         textMap.put("timestamp", get_UTCTime());
         textMap.put("hash", fileHash);
-        //设置file的name，路径
-//        Map<String, String> fileMap = new HashMap<String, String>();
-//        fileMap.put("message", filePath);
         String contentType = "";
         String ret = formUpload(url, textMap, picByte, contentType,fileLength,randomString);
         return ret;
