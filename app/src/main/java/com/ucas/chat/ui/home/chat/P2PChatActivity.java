@@ -51,7 +51,9 @@ import com.ucas.chat.jni.ServiceLoaderImpl;
 import com.ucas.chat.jni.common.IDecry;
 import com.ucas.chat.jni.common.IEntry;
 import com.ucas.chat.tor.server.ServerMessageHandler;
+import com.ucas.chat.tor.util.FilePathUtils;
 import com.ucas.chat.ui.camera.MyCameraActivity;
+import com.ucas.chat.ui.camera.ShowMultiImageActivity;
 import com.ucas.chat.ui.camera.adapter.DataPictureActivity;
 import com.ucas.chat.ui.home.InterfaceOffline.getOfflineFile;
 import com.ucas.chat.ui.home.InterfaceOffline.getOfflineList;
@@ -191,11 +193,11 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         mRlPhoto = findViewById(R.id.rlPhoto);
         mRlVideo = findViewById(R.id.rlVideo);
         mRlCamera = findViewById(R.id.rlCamera);
-
+        EventBus.getDefault().register(this);
         initData();
         initContent();
         initListener();
-        EventBus.getDefault().register(this);
+
     }
 
     private void initMessageHandler(){
@@ -520,7 +522,12 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                     String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
                     Log.d(TAG, " onClick:: send_offline_text decOfflineServer = " + decOfflineServer);
 
-                    sendOfflineText sendOfflineText = new sendOfflineText(to, from, textMessage, decOfflineServer, messageID);
+                    String enTextMessage = AesTools.getEncryptContent(textMessage, AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+                    String deTextMessage = AesTools.getDecryptContent(enTextMessage, AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+                    Log.d(TAG, " onClick:: send_offline_text deTextMessage = " + deTextMessage);
+
+
+                    sendOfflineText sendOfflineText = new sendOfflineText(to, from, enTextMessage, decOfflineServer, messageID);
                     sendOfflineText.start();
                 }
 
@@ -721,59 +728,90 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         LogUtils.d(TAG + " getOffLineList:: ","bus");
         LogUtils.d(TAG, " getOffLineList:: message = " + message);
         dataJsonAll = new JSONObject(message);
-        LogUtils.d(TAG," onMoonEvent:: GET_OFFLINE_LIST dataJsonMessage = " + dataJsonAll);
-        JSONObject json = dataJsonAll.getJSONObject("file");
-        LogUtils.d(TAG," getOffLineList:: dataJsonFile = " + json);
-        JSONArray dataFileAll = json.getJSONArray("messages");
-        LogUtils.d(TAG," getOffLineList:: dataJsonFileMessage = " + dataFileAll);
-        for (int i =0;i<dataFileAll.length();i++){
-            JSONObject infoFile = dataFileAll.getJSONObject(i);
-            String Id = infoFile.getString("id");
+        LogUtils.d(TAG, " getOffLineList:: dataJsonAll = " + dataJsonAll);
 
-            String name = infoFile.getString("abs");
-            file_name = name;
-            UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
-//                        String from = DigestUtils.sha256Hex(MailListUserNameTool.getOrionId(P2PChatActivity.this,bean.getUserName()));
-            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-            LogUtils.d(TAG,"  getOffLineList:: 发文件的from?????" + from);
+        JSONObject jsonFile = dataJsonAll.getJSONObject("file");
+        getOffLineFileList(jsonFile);
 
-            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-            Log.d(TAG, "  getOffLineList:: decOfflineServer = " + decOfflineServer);
+//        JSONObject jsonPic = dataJsonAll.getJSONObject("pic");
+//        getOffLinePicList(jsonPic);
 
-            getOfflineFile getOfflineFile = new getOfflineFile(from,Id,"/sdcard/Android/data/com.ucas.chat/files/" + infoFile.getString("abs"),decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
-            getOfflineFile.start();
-            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+       // dataJsonAll = new JSONObject(message);
+    }
 
-            sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
-            sendSentMessage.start();
+    public void getOffLinePicList(JSONObject jsonPic){
+        LogUtils.d(TAG," getOffLinePicList:: jsonPic: " + jsonPic);
+        try {
+            JSONArray jsonPicMessages = jsonPic.getJSONArray("messages");
+            LogUtils.d(TAG," getOffLinePicList:: jsonPicMessages: " + jsonPicMessages);
+            for (int i = 0; i<jsonPicMessages.length();i++){
+                JSONObject infoPic = jsonPicMessages.getJSONObject(i);
+                String Id = infoPic.getString("id");
+                String name = infoPic.getString("abs");
+                pic_name = name;
+
+                UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
+                String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
+                String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+
+                String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                Log.d(TAG, " getOffLinePicList:: decOfflineServer = " + decOfflineServer);
+
+                getOfflinePic getOfflinePic = new getOfflinePic(from,Id,"/sdcard/Android/data/com.ucas.chat/files/"+name,decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
+                getOfflinePic.start();
+                LogUtils.d(TAG," getOffLinePicList:: from:!!!!!!!!!!!!!!!!!!" + from);
+                LogUtils.d(TAG," getOffLinePicList:: to:!!!!!!!!!!!!!" + to);
+
+                sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
+                sendSentMessage.start();
+            }
+        }catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-        dataJsonAll = new JSONObject(message);
-        LogUtils.d(TAG," getOffLineList:: dataJsonAllPic: " + dataJsonAll);
-        JSONObject jsonPic = dataJsonAll.getJSONObject("pic");
-        LogUtils.d(TAG," getOffLineList:: jsonPic: " + jsonPic);
-        JSONArray dataPicAll = jsonPic.getJSONArray("messages");
-        LogUtils.d(TAG," getOffLineList:: dataPicAll: " + dataPicAll);
-        for (int i = 0; i<dataPicAll.length();i++){
-            JSONObject infoPic = dataPicAll.getJSONObject(i);
-            String Id = infoPic.getString("id");
-            String name = infoPic.getString("abs");
-            pic_name = name;
+    }
 
-            UserBean bean= SharedPreferencesUtil.getUserBeanSharedPreferences(P2PChatActivity.this);
-            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+    public void getOffLineFileList(JSONObject jsonFile){
+        LogUtils.d(TAG," getOffLineFileList:: jsonFile: " + jsonFile);
+        JSONArray jsonFileMessages = null;
+        try {
+            jsonFileMessages = jsonFile.getJSONArray("messages");
+            LogUtils.d(TAG," getOffLineFileList:: jsonFileMessages = " + jsonFileMessages);
+            for (int i =0; i<jsonFileMessages.length(); i++){
+                JSONObject infoFile = jsonFileMessages.getJSONObject(i);
+                String Id = infoFile.getString("id");
 
-            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
-            Log.d(TAG, " getOffLineList:: decOfflineServer = " + decOfflineServer);
+                String name = infoFile.getString("abs");
+                file_name = name;;
+                String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
+                LogUtils.d(TAG," getOffLineFileList:: 发文件的from?????" + from);
 
-            getOfflinePic getOfflinePic = new getOfflinePic(from,Id,"/sdcard/Android/data/com.ucas.chat/files/"+name,decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
-            getOfflinePic.start();
-            LogUtils.d(TAG," getOffLineList:: from:!!!!!!!!!!!!!!!!!!" + from);
-            LogUtils.d(TAG," getOffLineList:: to:!!!!!!!!!!!!!" + to);
-            sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
-            sendSentMessage.start();
+                String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+                Log.d(TAG, " getOffLineFileList:: decOfflineServer = " + decOfflineServer);
+
+
+
+                if (name.endsWith(".mp4") || name.endsWith(".mp3") || name.endsWith(".png") || name.endsWith(".jpg") ||
+                        name.endsWith(".peg") || name.endsWith(".jpj") || name.endsWith(".ico") || name.endsWith(".gif") ){
+                    String picTempPath = FilePathUtils.TEMP_FILE + name;
+                    LogUtils.d(TAG," getOffLineFileList:: picTempPath = " + picTempPath);
+                    getOfflinePic getOfflinePic = new getOfflinePic(from,Id,picTempPath,decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
+                    getOfflinePic.start();
+                }else {
+                    String filePath = "/sdcard/Android/data/com.ucas.chat/files/" + name;
+                    LogUtils.d(TAG," getOffLineFileList:: filePath = " + filePath);
+                    getOfflineFile getOfflineFile = new getOfflineFile(from,Id,filePath,decOfflineServer,name);// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data，提示没读取权限！改成这个可以了
+                    getOfflineFile.start();
+                }
+                Log.d(TAG, " getOffLineFileList:: mContactsBean.getOrionId() = " + mContactsBean.getOrionId());
+                String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+                sendSentMessage sendSentMessage = new sendSentMessage(to, from, Id,name,decOfflineServer);
+                sendSentMessage.start();
+//
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-        LogUtils.d(TAG, " getOffLineList:: test!!!DataJsonAll: " + dataJsonAll );
+
     }
 
     public void startCommunicationSuccess(){
@@ -797,6 +835,18 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
     }
 
+    public boolean isInsertData(String messageId){
+        Log.d(TAG,  " isInsertData:: 服务器 messageId = " + messageId);
+        List<MsgListBean> allList = mHelper.queryAll();
+        Log.d(TAG,  " isInsertData:: 数据库 allList.size = " + allList.size());
+        for (MsgListBean bean: allList) {
+            Log.d(TAG,  " isInsertData:: 数据库 messageId = " + bean.getMessageID());
+            if (messageId.equals(bean.getMessageID())){
+                return false;
+            }
+        }
+        return true;
+    }
     public void getOffLineText(String message) throws JSONException {
         if(message==null)
             return;
@@ -810,25 +860,33 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
             String message_content = info.getString("message_content");
             String time = info.getString("time");
             String messageID3 = info.getString("message_id");//该消息的唯一标签
-            ContentValues values = new ContentValues();
-            values.put(ChatContract.MsgListEntry.SEND_TIME, time+"");
-            values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.text);
-            values.put(ChatContract.MsgListEntry.TEXT_CONTENT, message_content);
-            values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
-            values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
-            values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
-            values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID3);//改消息标记
-            String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
-            String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+            boolean isInsert = isInsertData(messageID3);
+            Log.d(TAG, " getOffLineText:: isInsert : " + isInsert + " 插入的数据 messageID为：" + messageID3);
+            if (isInsert){
+                ContentValues values = new ContentValues();
+                values.put(ChatContract.MsgListEntry.SEND_TIME, time+"");
+                values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.text);
+                values.put(ChatContract.MsgListEntry.TEXT_CONTENT, message_content);
+                values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
+                values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
+                values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
+                values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID3);//改消息标记
+                String from = DigestUtils.sha256Hex(mUserBean.getOnionName()); //M
+                String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+                mHelper.insertData(getContext(),values);
+                MsgListBean bean1 = new MsgListBean(message_content,mContactsBean.getUserId() ,mUserBean.getUserId() , 1,messageID3,mContactsBean.getOrionId(),mContactsBean.getNickName());
+                mMsgList.add(bean1);
+            }
+
 
             String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
             Log.d(TAG, " getOffLineText:: decOfflineServer = " + decOfflineServer);
 
-            sendSentMessage sendSentMessage = new sendSentMessage(to, from, messageID3,message_content,decOfflineServer);
-            sendSentMessage.start();
-            mHelper.insertData(getContext(),values);
-            MsgListBean bean1 = new MsgListBean(message_content,mContactsBean.getUserId() ,mUserBean.getUserId() , 1,messageID3,mContactsBean.getOrionId(),mContactsBean.getNickName());
-            mMsgList.add(bean1);
+//            sendSentMessage sendSentMessage = new sendSentMessage(to, from, messageID3,message_content,decOfflineServer);
+//            sendSentMessage.start();
+//            mHelper.insertData(getContext(),values);
+//            MsgListBean bean1 = new MsgListBean(message_content,mContactsBean.getUserId() ,mUserBean.getUserId() , 1,messageID3,mContactsBean.getOrionId(),mContactsBean.getNickName());
+//            mMsgList.add(bean1);
             mAdapter.notifyDataSetChanged();
             msg_listview.smoothScrollToPosition(mAdapter.getCount() - 1);
             LogUtils.d("接收","消息");
@@ -839,23 +897,26 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
     public void getOffLineFile(String message, String peerHostname){
         String messageID5 = RandomUtil.randomChar();// TODO: 2021/8/8 更新文件标记，用这个来唯一标记当前次的发送情况
-        Log.d(TAG, " getOffLineFile:: " );
         ContentValues values = new ContentValues();
         values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
         values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.file);
         values.put(ChatContract.MsgListEntry.TEXT_CONTENT, getString(R.string.content_file));
         String pathFile = "/sdcard/Android/data/com.ucas.chat/files/" + peerHostname;// TODO: 2021/8/23 安卓11不给用/mnt/sdcard/Android/data/XOR，提示没读取权限！改成这个可以了
-        values.put(ChatContract.MsgListEntry.FILE_PATH, pathFile);
+        //values.put(ChatContract.MsgListEntry.FILE_PATH, pathFile);
+        values.put(ChatContract.MsgListEntry.FILE_PATH, AesTools.getEncryptContent(pathFile,AesTools.AesKeyTypeEnum.MESSAGE_TYPE));
         values.put(ChatContract.MsgListEntry.FILE_NAME, message);
-        values.put(ChatContract.MsgListEntry.FILE_SIZE,  FileUtils.getFileSize(pathFile));
+        String size = FileUtils.getFileSize(pathFile) + "";
+        values.put(ChatContract.MsgListEntry.FILE_SIZE,  AesTools.getEncryptContent(size,AesTools.AesKeyTypeEnum.MESSAGE_TYPE));
+        values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
+        values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
         values.put(ChatContract.MsgListEntry.FROM, mContactsBean.getUserId());
         values.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
         values.put(ChatContract.MsgListEntry.IS_ACKED, 1);
         values.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID5);// TODO: 2021/8/10 这里后期处理，从服务器发来的解析出来
-        mHelper.insertData(getContext(),values);
-
+       // mHelper.insertData(getContext(),values);
+        Log.d(TAG, " getOffLineFile:: message = " + message);
+        Log.d(TAG, " getOffLineFile:: peerHostname = " + peerHostname );
         Log.d(TAG, " getOffLineFile:: path = " + pathFile );
-        Log.d(TAG, " getOffLineFile:: name = " + message );
         Log.d(TAG, " getOffLineFile:: fileSize = " +  FileUtils.getFileSize(pathFile) );
         Log.d(TAG, " getOffLineFile:: from = " + mContactsBean.getUserId() );
         Log.d(TAG, " getOffLineFile:: to = " + mUserBean.getUserId() );
@@ -882,7 +943,8 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         values1.put(ChatContract.MsgListEntry.TO, mUserBean.getUserId());
         values1.put(ChatContract.MsgListEntry.IS_ACKED, 1);
         values1.put(ChatContract.MsgListEntry.MESSAGE_ID, messageID6);// TODO: 2021/8/10 后期从服务器返回的消息中解析出
-        mHelper.insertData(getContext(),values1);
+
+       //mHelper.insertData(getContext(),values1);
 
         Log.d(TAG, " getOffLinePic:: path = " + path_pic );
         Log.d(TAG, " getOffLinePic:: name = " + peerHostname );
@@ -957,7 +1019,6 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
         Log.d(TAG, " receiveOffLineFile::  from = " + mContactsBean.getUserId() );
         Log.d(TAG, " receiveOffLineFile::  to = " + mUserBean.getUserId() );
         Log.d(TAG, " receiveOffLineFile::  message_id = " + messageID7 );
-
         mHelper.insertData(getContext(),values);
 
         MsgListBean bean2 = new MsgListBean(filePath, fileName, (int)fileSize,0,
@@ -1047,8 +1108,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
             Log.d(TAG,  " createConnectionSuccess:: mContactsBean = " + mContactsBean.toString());
             String orionId = mContactsBean.getOrionId();
             TorManager.startHandShakeProcess(orionId);//再与朋友进行握手连接
-            //临时添加
-            //mTvOnLineState.setText(R.string.on_line);
+            mTvOnLineState.setText(R.string.on_line);
         }else {
             //###########
             mTvNickName.setTextColor(getColor(R.color.gray12));
@@ -1197,7 +1257,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
     /**
      * 发送图片消息
      */
-    private void sendPicture(Bitmap bitmap,String messageID,String picturePath){// TODO: 2022/3/17 增加照片的路径，用于发送完成后的删除 
+    private void sendPicture(Bitmap bitmap,String messageID,String picturePath){// TODO: 2022/3/17 增加照片的路径，用于发送完成后的删除
         ContentValues values = new ContentValues();
         values.put(ChatContract.MsgListEntry.SEND_TIME, TimeUtils.currentTimeMillis()+"");
         values.put(ChatContract.MsgListEntry.CHAT_TYPE, MsgTypeStateNew.image);//写死为图片类型
@@ -1241,6 +1301,9 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);//注意data会不会为空
+        Log.d(TAG, " onActivityResult:: requestCode = " + requestCode);
+        Log.d(TAG, " onActivityResult:: resultCode = " + resultCode);
+
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_CODE_FILE:
@@ -1351,8 +1414,6 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
                                     }
                                 }.start();
-
-//                                TorManager.interface_send_text(Arrays.toString(bitmapBytes).substring(0,400), mContactsBean.getOrionId(), getContext(),messageID);
                             }else {
                                 System.out.println("onActivityResult:: 离线发图片");
                                 String from = DigestUtils.sha256Hex(mUserBean.getOnionName());
@@ -1397,7 +1458,7 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
                         String onlineStatus=mContactsBean.getOnlineStatus();//状态
                         if(onlineStatus.equals("1")){//在线发送
-                            System.out.println("在线发图片");
+                            Log.d(TAG, " onActivityResult:: 发送在线图片 ");
 
                             final String  messageIDfinal=  picturePath;
 
@@ -1406,9 +1467,9 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
 
                                 @Override
                                 public void run() {
-//                                    TorManager.handleFileMessageSend(fileList.get(i),mContactsBean.getOrionId());
+
                                     boolean success = TorManager.handleByteMessageSend(messageIDfinal,picByte,mContactsBean.getOrionId(), finalMessageID,getApplication());// TODO: 2021/8/26 增加消息id。
-//                                    TorManager.interface_send_text(Arrays.toString(picByte).substring(0,50), mContactsBean.getOrionId(), getContext());
+//
                                     if (!success){// TODO: 2021/10/29  //发送不够异或材料
 
                                         Message message =Message.obtain();
@@ -1422,42 +1483,56 @@ public class P2PChatActivity extends BaseActivity implements RecordButton.OnReco
                             }.start();
 
                         }else {
-                            System.out.println("离线发图片");
+                            Log.d(TAG, " onActivityResult:: 发送离线图片 ");
                             String from = DigestUtils.sha256Hex(mUserBean.getOnionName());
                             String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
 
                             String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
                             Log.d(TAG, " onActivityResult:: 发送离线图片 decOfflineServer = " + decOfflineServer);
 
-                            sendOfflinePic2 sendOfflinePic = new sendOfflinePic2(from,to,"pic",picByte,decOfflineServer,messageID);
-                            sendOfflinePic.start();
+                            Log.d(TAG, " onActivityResult:: 发送离线图片 picturePath = " + picturePath);
 
-
-                            FileUtils.delectPicture(picturePath);// TODO: 2022/3/17 删除发送成功后的该照片
-
-
-
-
-//                            sendOfflineText sendOfflineText = new sendOfflineText(to,from,Arrays.toString(picByte),mServiceHelper.getSecond());
-//                            sendOfflineText.start();
-
+                            String picPath = data.getStringExtra(DataPictureActivity.DATA_PIC_PATH);
+                            String showMultilmagePath = data.getStringExtra(ShowMultiImageActivity.PIC_PATH);
+                            String dataPicPath = picPath == null ? showMultilmagePath : picPath;
+                            Log.d(TAG, " onActivityResult::  离线发图片 dataPicPath = " + dataPicPath);
+                            if(!dataPicPath.isEmpty()){
+                                sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"file", dataPicPath , decOfflineServer,messageID);//jpg可以发
+                                sendOfflineFile.start();
+                            }else {
+                                sendOfflinePic2 sendOfflinePic = new sendOfflinePic2(from,to,"file",picByte,decOfflineServer,messageID);
+                                sendOfflinePic.start();
+                            }
                         }
 
-
-
                     }
-
-
                     break;
                 case REQUEST_CODE_VEDIO:
                     // 视频选择结果回调
                     List<LocalMedia> selectListVideo = PictureSelector.obtainMultipleResult(data);
                     for (LocalMedia media : selectListVideo) {
-                       // sendMessage(mChatHandler.createVideoMessage(media.getPath()));
                     }
                     break;
             }
         }
+
+    }
+
+    /**
+     * 直接从Picture列表中发送图片
+     */
+    public void sendPicFromImageList(String picPath){
+        Log.d(TAG, " sendPicFromImageList:: picPath = " + picPath);
+        String messageID = RandomUtil.randomChar();
+        Bitmap bitmap = BitmapFactory.decodeFile(picPath);
+        sendPicture(bitmap,messageID,picPath);//在界面显示发送情况
+        String from = DigestUtils.sha256Hex(mUserBean.getOnionName());
+        String to = DigestUtils.sha256Hex(mContactsBean.getOrionId());
+
+            String decOfflineServer = AesTools.getDecryptContent(mServiceHelper.getSecond(),AesTools.AesKeyTypeEnum.COMMON_KEY);
+            Log.d(TAG, " sendPicFromImageList:: 发送离线图片 decOfflineServer = " + decOfflineServer);
+            sendOfflineFile sendOfflineFile = new sendOfflineFile(from,to,"file", picPath, decOfflineServer,messageID);//jpg可以发
+            sendOfflineFile.start();
 
     }
 

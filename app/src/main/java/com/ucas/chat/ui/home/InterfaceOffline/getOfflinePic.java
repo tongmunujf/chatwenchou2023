@@ -4,6 +4,9 @@ import android.util.Log;
 
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.utils.AesTools;
+import com.ucas.chat.utils.FileUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -44,25 +47,41 @@ public class getOfflinePic extends Thread{
             httpUrlConn.setRequestProperty("content-type", "application/x-www-form-urlencoded");
             //2.传入参数部分
             // 得到请求的输出流对象
-            out = new OutputStreamWriter(httpUrlConn.getOutputStream(), "UTF-8");
-            // 把数据写入请求的Body，参数形式跟在地址栏的一样
-            out.write(body);
-            out.flush();
-            out.close();
+            try {
+                out = new OutputStreamWriter(httpUrlConn.getOutputStream(), "UTF-8");
+                // 把数据写入请求的Body，参数形式跟在地址栏的一样
+                out.write(body);
+                out.flush();
+                out.close();
+            } catch (Exception e) {
+                Log.d(TAG, " send_post:: httpUrlConn.getOutputStream() 错误 = " + e.toString());
+            }
             //3.获取数据
             // 将返回的输入流转换成字符串
-            Log.d(TAG, " formUpload:: 错误码ResponseCode = " + httpUrlConn.getResponseCode());
+            Log.d(TAG, " formUpload:: ResponseCode = " + httpUrlConn.getResponseCode());
             if (httpUrlConn.getResponseCode() == 200) {
                 InputStream inputStream = httpUrlConn.getInputStream();
                 byte[] buf = new byte[4096];
                 int readLen = 0;
-                OutputStream outputStream = new FileOutputStream(filePath);
+                //OutputStream outputStream = new FileOutputStream(filePath);
+                Log.d(TAG, " formUpload:: filePath = " + filePath);
+                OutputStream outputStream = null;
+                try {
+                     outputStream = new FileOutputStream(filePath);
+                }catch (FileNotFoundException e){
+                    Log.d(TAG, " formUpload:: FileNotFoundException e = " + e.toString());
+                }
+
                 while ((readLen = inputStream.read(buf)) != -1) {
                     outputStream.write(buf,0,readLen);
                 }
+                Log.d(TAG, " formUpload:: outputStream = " + outputStream.toString());
                 inputStream.close();
                 outputStream.close();
                 buffer.append("success");
+
+                //TODO 看需求是否在此处解密
+                FileUtils.cipherBytesToFile(filePath);
             } else {
                 Log.d(TAG, " formUpload:: 发生错误 = " + httpUrlConn.getResponseMessage());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(httpUrlConn.getErrorStream()));

@@ -47,11 +47,16 @@ public class getOfflineText extends Thread {
             httpUrlConn.setRequestProperty("content-type", "application/x-www-form-urlencoded");
             //2.传入参数部分
             // 得到请求的输出流对象
-            out = new OutputStreamWriter(httpUrlConn.getOutputStream(), "UTF-8");// TODO: 2021/8/25 直接在这里出错！
-            // 把数据写入请求的Body，参数形式跟在地址栏的一样
-            out.write(body);
-            out.flush();
-            out.close();
+            try {
+                out = new OutputStreamWriter(httpUrlConn.getOutputStream(), "UTF-8");// TODO: 2021/8/25 直接在这里出错！
+                // 把数据写入请求的Body，参数形式跟在地址栏的一样
+                out.write(body);
+                out.flush();
+                out.close();
+            }catch (IOException e){
+                Log.d(TAG, " send_post:: httpUrlConn.getOutputStream错误 " + e.toString());
+            }
+
 //            System.out.println("header:" + httpUrlConn.getHeaderFields());
             //3.获取数据
             // 将返回的输入流转换成字符串

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
+import com.ucas.chat.utils.AesTools;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -26,6 +27,11 @@ public class getOfflineFile extends Thread{
     private String onion_name;
     private String name;
     public getOfflineFile(String id,String messageID,String filePath,String onion_name,String name){
+        Log.d(TAG, " getOfflineFile:: id = " + id);
+        Log.d(TAG, " getOfflineFile:: messageID = " + messageID);
+        Log.d(TAG, " getOfflineFile:: filePath = " + filePath);
+        Log.d(TAG, " getOfflineFile:: onion_name = " + onion_name);
+        Log.d(TAG, " getOfflineFile:: name = " + name);
         this.id = id;
         this.messageID = messageID;
         this.filePath = filePath;
@@ -70,9 +76,16 @@ public class getOfflineFile extends Thread{
                 BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
                 while ((result = bufferedReader.readLine()) != null) {
                     buffer.append(result);
-                    bw.write(result);
-                    bw.newLine();
+//                    bw.write(result);
+//                    bw.newLine();
                 }
+                Log.d(TAG, " send_post:: 获取服务端下发的加密内容 buffer = " + buffer.toString());
+
+                String  decryptBuffer = AesTools.getDecryptContent(buffer.toString(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+                Log.d(TAG, " send_post:: 获取的解密decryptBuffer = " + decryptBuffer);
+                bw.write(decryptBuffer.toString());
+                bw.newLine();
+
                 inputStream.close();
                 if(bufferedReader!=null){
                     bufferedReader.close();

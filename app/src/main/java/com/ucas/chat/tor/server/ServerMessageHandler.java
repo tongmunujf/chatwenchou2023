@@ -1199,7 +1199,7 @@ public class ServerMessageHandler {
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		byte[] sharedKey = statusItem.getShareKey();

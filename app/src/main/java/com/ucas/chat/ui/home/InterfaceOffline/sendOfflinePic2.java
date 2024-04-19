@@ -81,7 +81,12 @@ public class sendOfflinePic2 extends Thread  {
             conn.setRequestProperty("Connection", "Keep-Alive");
             // conn.setRequestProperty("User-Agent","Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-CN; rv:1.9.2.6)");
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-            OutputStream out = new DataOutputStream(conn.getOutputStream());
+            OutputStream out = null;
+            try {
+                out = new DataOutputStream(conn.getOutputStream());
+            }catch (IOException e){
+                Log.d(TAG, " formUpload:: conn.getOutputStream 错误" + e.toString());
+            }
             // text
             if (textMap != null) {
                 StringBuffer strBuf = new StringBuffer();
@@ -105,6 +110,7 @@ public class sendOfflinePic2 extends Thread  {
                     if (contentType == null || "".equals(contentType)) {
                         contentType = "application/octet-stream";
                     }
+                Log.d(TAG, " formUpload:: contentType = " + contentType);
                     StringBuffer strBuf = new StringBuffer();
                     strBuf.append("\r\n").append("--").append(BOUNDARY).append("\r\n");
                     strBuf.append("Content-Disposition: form-data; name=\"" + "message" + "\"; filename=\"" + "filename.jpg" + "\"\r\n");
@@ -150,20 +156,26 @@ public class sendOfflinePic2 extends Thread  {
             }
         }
         long end = System.currentTimeMillis()/1000;
-        long speed = fileLength/(end-start);
-        if(speed>1024){
-            speed = speed/1024;
-            Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
-            Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
-            Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
-            Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
-            EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_PIC, res, messageID+","+speed+" KB/s"));
-        }else{
-            Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
-            Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
-            Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
-            Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
-            EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_PIC, res, messageID+","+speed+" b/s"));
+        Log.d(TAG, " formUpload:: end = " + end);
+        Log.d(TAG, " formUpload:: start = " + start);
+        try {
+            long speed = fileLength/(end-start);
+            if(speed>1024){
+                speed = speed/1024;
+                Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
+                Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
+                Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
+                Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
+                EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_PIC, res, messageID+","+speed+" KB/s"));
+            }else{
+                Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
+                Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
+                Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
+                Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
+                EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_PIC, res, messageID+","+speed+" b/s"));
+            }
+        }catch (ArithmeticException e){
+            Log.e(TAG,  "formUpload:: 运算错误 e = " + e.toString());
         }
         return res;
     }

@@ -258,38 +258,38 @@ public class MsgListSQLiteHelper extends SQLiteOpenHelper {
         List<MsgListBean> allChatRecordList = queryAll();
         List<MsgListBean> friendChatRecordList = new ArrayList<>();
 
-        for (int i=0; i<allChatRecordList.size(); i++){
-            MsgListBean bean = allChatRecordList.get(i);
-            Log.d(TAG, " queryFriendChatRecord:: MsgListBean = " + bean.toString());
-            Log.d(TAG, " queryFriendChatRecord:: msg = " + bean.getTextContent()+"\t"+ bean.getFileName());
-            Log.d(TAG, " queryFriendChatRecord:: fromUserId = " + fromUserId);
-            Log.d(TAG, " queryFriendChatRecord:: orionId = " + orionId);
-            //fromId加密的
-            Log.d(TAG, " queryFriendChatRecord:: fromId = " + bean.getFrom()+"\t"+ " toId = " + bean.getTo());
-            Log.d(TAG, " queryFriendChatRecord:: 转换前friendOrionId = " + bean.getFriendOrionid());
-
-            String fromId = AesTools.getDecryptContent(bean.getFrom(), AesTools.AesKeyTypeEnum.COMMON_KEY);
-            if (fromId == null || fromId.isEmpty()){
-                fromId = bean.getFrom();
-            }
-            Log.d(TAG, " queryFriendChatRecord:: 转换后fromId = " + fromId);
-
-            String friendOrionId = AesTools.getDecryptContent(bean.getFriendOrionid(), AesTools.AesKeyTypeEnum.COMMON_KEY);
-            if (friendOrionId == null || friendOrionId.isEmpty()){
-                friendOrionId = bean.getFriendOrionid();
-            }
-            Log.d(TAG, " queryFriendChatRecord:: 转换后friendOrionId = " + friendOrionId);
-
-
-
-
-            if ((fromUserId.equals(fromId) && orionId.equals(friendOrionId) ||
-                    (orionId.equals(friendOrionId) && fromUserId.equals(bean.getTo())))){// TODO: 2022/3/23 全部改成 Orionid来对比
-                Log.d(TAG, " queryFriendChatRecord:: add " );
-                friendChatRecordList.add(bean);
-            }
-        }
-        return friendChatRecordList;
+//        for (int i=0; i<allChatRecordList.size(); i++){
+//            MsgListBean bean = allChatRecordList.get(i);
+//            Log.d(TAG, " queryFriendChatRecord:: MsgListBean = " + bean.toString());
+//            Log.d(TAG, " queryFriendChatRecord:: msg = " + bean.getTextContent()+"\t"+ bean.getFileName());
+//            Log.d(TAG, " queryFriendChatRecord:: fromUserId = " + fromUserId);
+//            Log.d(TAG, " queryFriendChatRecord:: orionId = " + orionId);
+//            //fromId加密的
+//            Log.d(TAG, " queryFriendChatRecord:: fromId = " + bean.getFrom()+"\t"+ " toId = " + bean.getTo());
+//            Log.d(TAG, " queryFriendChatRecord:: 转换前friendOrionId = " + bean.getFriendOrionid());
+//
+//            String fromId = AesTools.getDecryptContent(bean.getFrom(), AesTools.AesKeyTypeEnum.COMMON_KEY);
+//            if (fromId == null || fromId.isEmpty()){
+//                fromId = bean.getFrom();
+//            }
+//            Log.d(TAG, " queryFriendChatRecord:: 转换后fromId = " + fromId);
+//
+//            String friendOrionId = AesTools.getDecryptContent(bean.getFriendOrionid(), AesTools.AesKeyTypeEnum.COMMON_KEY);
+//            if (friendOrionId == null || friendOrionId.isEmpty()){
+//                friendOrionId = bean.getFriendOrionid();
+//            }
+//            Log.d(TAG, " queryFriendChatRecord:: 转换后friendOrionId = " + friendOrionId);
+//
+//
+//
+//
+//            if ((fromUserId.equals(fromId) && orionId.equals(friendOrionId) ||
+//                    (orionId.equals(friendOrionId) && fromUserId.equals(bean.getTo())))){// TODO: 2022/3/23 全部改成 Orionid来对比
+//                Log.d(TAG, " queryFriendChatRecord:: add " );
+//                friendChatRecordList.add(bean);
+//            }
+//        }
+        return allChatRecordList;
     }
 
 

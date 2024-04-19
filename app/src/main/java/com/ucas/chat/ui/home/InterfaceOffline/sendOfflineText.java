@@ -42,7 +42,7 @@ public class sendOfflineText extends Thread {
         BufferedReader bufferedReader = null;
         StringBuffer buffer = new StringBuffer();
         Proxy proxy1 = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 9050));
-        System.out.println(TAG + " 请求地址：" + url);
+        Log.d(TAG, " send_post:: 请求地址 = " + url);
         try {
             // http协议传输
             HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection(proxy1);
@@ -95,7 +95,10 @@ public class sendOfflineText extends Thread {
      * 发送离线文本消息
      */
     public static String send_offline_text_message(String from_id, String to_id,  String message,String onion_name,String messageID ) {
-        String result = null; 
+        Log.d(TAG, " send_offline_text_message:: from_id = " + from_id);
+        Log.d(TAG, " send_offline_text_message:: to_id = " + to_id);
+        Log.d(TAG, " send_offline_text_message:: message = " + message);
+        String result = null;
         try {
             String body = "from_id=" + URLEncoder.encode(from_id, "UTF-8") +
                     "&to_id=" + URLEncoder.encode(to_id, "UTF-8") +

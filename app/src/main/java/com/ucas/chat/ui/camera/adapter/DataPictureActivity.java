@@ -36,6 +36,9 @@ import java.util.List;
 public class DataPictureActivity extends AppCompatActivity implements PictureListAdapter.DetailClickListener,PictureListAdapter.ItemClickListener {
 
 
+    public final static int DATA_PIC_OK = 1001;
+    public final static String DATA_PIC_PATH = "pic_path_from_data_picture";
+
     private RecyclerView recyclerView ;
 
     private PictureListAdapter pictureListAdapter;
@@ -204,6 +207,7 @@ public class DataPictureActivity extends AppCompatActivity implements PictureLis
 
                 PictureParam pictureParam = pictureList.get(positionClick);
                 Bitmap bitmap = pictureParam.getBitmap();
+                // /data/user/0/com.ucas.chat/files/pictures/97874a8b-64b8-41b4-a327-e18def249aa6.jpg
                 String picturePath = pictureParam.getPicturePath();
 
 
@@ -214,6 +218,7 @@ public class DataPictureActivity extends AppCompatActivity implements PictureLis
 
                 Intent intent = new Intent();
                 intent.putExtra("flag", 3);
+                intent.putExtra(DATA_PIC_PATH,picturePath);
                 intent.putExtra("new_camera_data", dataBitmap);
                 intent.putExtra("newcamerapicturePath", RandomUtil.randomChar()+".jpg");// TODO: 2022/3/16 把图片路径也传过去
 

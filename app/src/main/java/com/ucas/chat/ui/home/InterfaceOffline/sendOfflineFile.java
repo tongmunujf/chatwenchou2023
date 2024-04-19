@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.ucas.chat.bean.contact.ConstantValue;
 import com.ucas.chat.eventbus.Event;
+import com.ucas.chat.tor.util.FilePathUtils;
+import com.ucas.chat.utils.FileUtils;
 
 import org.apaches.commons.codec.digest.DigestUtils;
 import org.greenrobot.eventbus.EventBus;
@@ -32,6 +34,7 @@ public class sendOfflineFile extends Thread {
     private String from,to,type,filePath,onion_name;
     private String messageID;
     public sendOfflineFile(String from,String to,String type,String filePath,String onion_name,String messageID){
+        Log.d(TAG, " sendOfflineFile:: filePath = " + filePath);
         this.from = from;
         this.to = to;
         this.type = type;
@@ -62,8 +65,8 @@ public class sendOfflineFile extends Thread {
             URL url = new URL(urlStr);
             Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 9050));
             conn = (HttpURLConnection) url.openConnection(proxy);
-            conn.setConnectTimeout(60000);
-            conn.setReadTimeout(60000);
+            conn.setConnectTimeout(2*60000);
+            conn.setReadTimeout(2*60000);
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setUseCaches(false);
@@ -71,7 +74,12 @@ public class sendOfflineFile extends Thread {
             conn.setRequestProperty("Connection", "Keep-Alive");
             // conn.setRequestProperty("User-Agent","Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-CN; rv:1.9.2.6)");
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-            OutputStream out = new DataOutputStream(conn.getOutputStream());
+            OutputStream out = null;
+            try {
+                out = new DataOutputStream(conn.getOutputStream());
+            }catch (IOException e){
+                Log.d(TAG, " formUpload:: conn.getOutputStream 错误" + e.toString());
+            }
             // text
             if (textMap != null) {
                 StringBuffer strBuf = new StringBuffer();
@@ -94,12 +102,15 @@ public class sendOfflineFile extends Thread {
                 while (iter.hasNext()) {
                     Map.Entry entry = (Map.Entry) iter.next();
                     String inputName = (String) entry.getKey();
+                    //inputValue：文件路径
                     String inputValue = (String) entry.getValue();
                     if (inputValue == null) {
                         continue;
                     }
                     File file = new File(inputValue);
                     filename = file.getName();
+                    Log.d(TAG, " formUpload:: 文件路径inputValue = " + inputValue);
+                    Log.d(TAG, " formUpload:: filename = " + filename);
                     //没有传入文件类型，同时根据文件获取不到类型，默认采用application/octet-stream
 //                    contentType = new MimetypesFileTypeMap().getContentType(file);
                     //contentType非空采用filename匹配默认的图片类型
@@ -117,12 +128,18 @@ public class sendOfflineFile extends Thread {
                     if (contentType == null || "".equals(contentType)) {
                         contentType = "application/octet-stream";
                     }
+                    Log.d(TAG, " formUpload:: contentType = " + contentType);
                     StringBuffer strBuf = new StringBuffer();
                     strBuf.append("\r\n").append("--").append(BOUNDARY).append("\r\n");
                     strBuf.append("Content-Disposition: form-data; name=\"" + inputName + "\"; filename=\"" + filename + "\"\r\n");
                     strBuf.append("Content-Type:" + contentType + "\r\n\r\n");
                     out.write(strBuf.toString().getBytes());
-                    DataInputStream in = new DataInputStream(new FileInputStream(file));
+                    DataInputStream in = null;
+                    try {
+                        in = new DataInputStream(new FileInputStream(file));
+                    } catch (FileNotFoundException e) {
+                        Log.e(TAG,"  formUpload:: new FileInputStream(file)错误 = " + e.toString());
+                    }
                     int bytes = 0;
                     byte[] bufferOut = new byte[2048];
                     while ((bytes = in.read(bufferOut)) != -1) {
@@ -161,29 +178,45 @@ public class sendOfflineFile extends Thread {
 
             }
         } catch (Exception e) {
-            Log.d(TAG, " formUpload:: 发送POST请求出错 = " + urlStr);
+            Log.e(TAG, " formUpload:: 发送POST请求出错 = " + urlStr);
             e.printStackTrace();
         } finally {
             if (conn != null) {
                 conn.disconnect();
             }
+            String tempDecryptPath = FilePathUtils.TEMP_FILE + filename;
+            Log.d(TAG, " formUpload:: tempDecryptPath = " + tempDecryptPath);
+            File tempDecryptFile = new File(tempDecryptPath);
+            if (tempDecryptFile.exists()){
+                tempDecryptFile.delete();
+            }
         }
         long end = System.currentTimeMillis()/1000;
-        long speed = fileLength/(end-start);
-        if(speed>1024){
-            speed = speed/1024;
-            Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
-            Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
-            Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
-            Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
-            EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_FILE, res, messageID+","+speed+" KB/s"));// TODO: 2021/8/10 替换 filename为messageID
-        }else{
-            Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
-            Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
-            Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
-            Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
-            EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_FILE, res, messageID+","+speed+" b/s"));
+        Log.d(TAG, " formUpload:: end = " + end);
+        Log.d(TAG, " formUpload:: start = " + start);
+        try {
+            long speed = fileLength/(end-start);
+
+            if(speed>1024){
+                speed = speed/1024;
+                Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
+                Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
+                Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
+                Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
+                EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_FILE, res, messageID+","+speed+" KB/s"));// TODO: 2021/8/10 替换 filename为messageID
+            }else{
+                Log.d(TAG, " formUpload:: 文件大小fileLength = " + fileLength);
+                Log.d(TAG, " formUpload:: 文件发送开始时间 = " + start);
+                Log.d(TAG, " formUpload:: 文件发送结束时间 = " + end);
+                Log.d(TAG, " formUpload:: 文件传输速率 = " + speed);
+                EventBus.getDefault().post(new Event(Event.SEND_OFFLINE_FILE, res, messageID+","+speed+" b/s"));
+            }
+        }catch (ArithmeticException e){
+            Log.e(TAG,  "formUpload:: 运算错误 e = " + e.toString());
         }
+
+        //TODO 删除临时生成的密文件
+
         return res;
     }
 
@@ -208,11 +241,26 @@ public class sendOfflineFile extends Thread {
         String url = "http://"+onion_name+"/receive_message/";
         Log.d(TAG, " sendPic:: 请求地址url = " + url);
         String fileHash = null;
+
         File file = new File(filePath);
         long fileLength =  file.length();
+        String name = file.getName();
+        String tempDecryptFilePath = "";
+        Log.d(TAG, " sendPic:: fileName = " + name);
+        if (name.endsWith(".mp4") || name.endsWith(".mp3") || name.endsWith(".png") || name.endsWith(".jpg") ||
+                name.endsWith(".peg") || name.endsWith(".jpj") || name.endsWith(".ico") || name.endsWith(".gif") ){
+            //把filePath的内容加密写入到本地备份
+            tempDecryptFilePath = FileUtils.writeBytesCiphertextToFile(filePath);
+            Log.d(TAG, "sendPic:: 发送流文件");
+        }else {
+             tempDecryptFilePath = FileUtils.writeCiphertextToFile(filePath);
+            Log.d(TAG, "sendPic:: 发送文本文件");
+        }
+        Log.d(TAG, " sendPic:: tempDecryptFilePath = " + tempDecryptFilePath);
+        File decryptFile = new File(tempDecryptFilePath);
         try {
-            DataInputStream in = new DataInputStream(new FileInputStream(file));
-            DataInputStream ins = new DataInputStream(new FileInputStream(file));
+            DataInputStream in = new DataInputStream(new FileInputStream(decryptFile));
+            DataInputStream ins = new DataInputStream(new FileInputStream(decryptFile));
             int num = 0;
             int bytes;
             byte[] bufferOut = new byte[3060];
@@ -223,7 +271,7 @@ public class sendOfflineFile extends Thread {
             byte[] fileContent = new byte[num];
             ins.read(fileContent);//一次性读完所有
             fileHash = DigestUtils.sha256Hex(fileContent);
-//            System.out.println("文件哈希："+fileHash);
+            Log.d(TAG, " sendPic:: 密文fileHash = " + fileHash);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -237,7 +285,7 @@ public class sendOfflineFile extends Thread {
         textMap.put("hash", fileHash);
         //设置file的name，路径
         Map<String, String> fileMap = new HashMap<String, String>();
-        fileMap.put("message", filePath);
+        fileMap.put("message", tempDecryptFilePath);
         String contentType = "";
         String ret = formUpload(url, textMap, fileMap, contentType,fileLength,messageID);
         return ret;

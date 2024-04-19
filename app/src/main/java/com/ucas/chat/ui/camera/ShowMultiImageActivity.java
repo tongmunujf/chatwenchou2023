@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class ShowMultiImageActivity extends AppCompatActivity {
-    private static final String TAG = "ShowMultiImageActivity";
+    private static final String TAG = "Chat:ShowMultiImageActivity";
 
     RecyclerView recyclerView;
     ArrayList<byte[]> byteList;
@@ -55,6 +55,10 @@ public class ShowMultiImageActivity extends AppCompatActivity {
 
     private Button takeAgain, finish, saveButton;
     private LinearLayout linearLayout;  // takeAgain,finish的父控件
+    private final static int FINISH_SUCCESS = 3;
+    private final static int FINISH_FAIL = 4;
+    public final static String PIC_PATH = "pic_path";
+    private String mPath;
 
 
 
@@ -78,10 +82,12 @@ public class ShowMultiImageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, " onCreate::");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_show_multi_image);
         takeAgain = (Button) findViewById(R.id.take_photo_again);
         finish = (Button) findViewById(R.id.finish);
+        //finish.setVisibility(View.INVISIBLE);
         saveButton = findViewById(R.id.save);
 
         linearLayout = (LinearLayout) findViewById(R.id.linear_layout);
@@ -123,10 +129,7 @@ public class ShowMultiImageActivity extends AppCompatActivity {
         finish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.putExtra("flag", 2);
-                setResult(RESULT_OK, intent);
-                finish();
+                sendPicture();
             }
         });
         takeAgain.setOnClickListener(new View.OnClickListener() {
@@ -187,13 +190,22 @@ public class ShowMultiImageActivity extends AppCompatActivity {
                 case 1:
                     Toast.makeText(ShowMultiImageActivity.this, "Saved successfully", Toast.LENGTH_LONG).show();
                     break;
+                case FINISH_FAIL:
                 case 2:
                     Toast.makeText(ShowMultiImageActivity.this, "Saved failed！", Toast.LENGTH_LONG).show();
+                    break;
+                case FINISH_SUCCESS:
+                   Intent intent = new Intent();
+                    intent.putExtra(PIC_PATH, mPath);
+                   intent.putExtra("flag", 2);
+                   setResult(RESULT_OK, intent);
+                   finish();
+                   break;
             }
         }
     };
 
-    public static boolean saveBitmap(Context context, byte[] data ) {// TODO: 2021/10/27 保存图片，加上图片id
+    public boolean saveBitmap(Context context, byte[] data ) {// TODO: 2021/10/27 保存图片，加上图片id
 
 
         String savePath;
@@ -208,22 +220,7 @@ public class ShowMultiImageActivity extends AppCompatActivity {
                 filePic.getParentFile().mkdirs();
                 filePic.createNewFile();
             }
-//            FileOutputStream fos = new FileOutputStream(filePic);
-//
-//            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//            mBitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
-//
-//
-//            fos.write(byteArrayOutputStream.toByteArray());
-//
-//
-//            fos.flush();
-//            fos.close();
-
-
-
-
-
+            mPath = filePic.getPath();
             RandomAccessFile raf = null;
             raf = new RandomAccessFile(filePic, "rw");
             raf.write(data, 0, data.length);
@@ -275,6 +272,28 @@ public class ShowMultiImageActivity extends AppCompatActivity {
         intent.putExtra("flag", 1);// TODO: 2022/3/16 重新拍 
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private void sendPicture(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                byte[] data = byteList.get(byteList.size() - 1);
+                boolean savesuccess = saveBitmap(ShowMultiImageActivity.this, data);
+                Log.d(TAG, " sendPicture:: savesuccess = " + savesuccess);
+                Log.d(TAG, " sendPicture:: path = " + mPath);
+                Message msg2 = new Message();
+                if (savesuccess) {
+                    msg2.what = FINISH_SUCCESS;
+                    handler.sendMessage(msg2);
+                } else{
+                    msg2.what = FINISH_FAIL;
+                    handler.sendMessage(msg2);
+                }
+            }
+        }).start();
+
     }
 
     @Override

@@ -39,7 +39,7 @@ import static com.ucas.chat.ui.home.chat.P2PChatActivity.REQUEST_CODE_IMAGE;
 
 public class MyCameraActivity extends AppCompatActivity {
 
-    private static final String TAG = "MyCameraActivity";
+    private static final String TAG = "Chat:MyCameraActivity";
     private static final String NEWCAMERADATA ="new_camera_data";//重新进行拍照的新照片
     private static final String OLDCAMERADATA ="old_camera_data";//选择已有的旧照片
     private ScreenListener screenListener;
@@ -63,6 +63,7 @@ public class MyCameraActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, " onCreate::");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_my_camera);
 
@@ -240,6 +241,9 @@ public class MyCameraActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 int flag = data.getIntExtra("flag", -1);
+                String path = data.getStringExtra(ShowMultiImageActivity.PIC_PATH);
+                Log.d(TAG, " onActivityResult:: flag = " + flag);
+                Log.d(TAG, " onActivityResult:: path = " + path);
                 switch (flag) {
                     case 1:// TODO: 2022/3/16 重新拍
                         jpegData = null;
@@ -248,6 +252,7 @@ public class MyCameraActivity extends AppCompatActivity {
                         break;
                     case 2:// TODO: 2022/3/16 发送拍好照的这张
                         Intent intent = new Intent();
+                        intent.putExtra(ShowMultiImageActivity.PIC_PATH, path);
                         intent.putExtra(NEWCAMERADATA, jpegData);
                         System.out.println("MyCameraActivity最后的照片"+ Arrays.toString(jpegData));
                         setResult(RESULT_OK, intent);

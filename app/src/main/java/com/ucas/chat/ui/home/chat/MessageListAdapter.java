@@ -231,7 +231,13 @@ public class MessageListAdapter extends BaseAdapter {
             LogUtils.d(TAG, " handleGetTextL:: dddddd 解密message = " + message);
         }
         LogUtils.d(TAG, " handleGetTextL:: message = " + message);
-        holder.tv_chat_msg.setText(message);
+
+        String deMessage = AesTools.getDecryptContent(message, AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        if (deMessage == null || deMessage.isEmpty()){
+            //对没有进行加密的聊天内容进行兼容
+            deMessage = message;
+        }
+        holder.tv_chat_msg.setText(deMessage);
 
         String onlineStatus=mBean.getOnlineStatus();
         if (onlineStatus.equals("0")) {
@@ -280,7 +286,13 @@ public class MessageListAdapter extends BaseAdapter {
         }
 
         LogUtils.d(TAG, " handleGetTextL:: message = " + message);
-        holder.tv_chat_msg.setText(message);
+
+        String deMessage = AesTools.getDecryptContent(message, AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        if (deMessage == null || deMessage.isEmpty()){
+            //对没有进行加密的聊天内容进行兼容
+            deMessage = message;
+        }
+        holder.tv_chat_msg.setText(deMessage);
 
         Log.i("asffwdw1",holder.tv_chat_msg.getCurrentTextColor()+"");//检测文字的颜色
 
@@ -324,7 +336,14 @@ public class MessageListAdapter extends BaseAdapter {
         MsgListBean bean = mMessageList.get(position);
         LogUtils.d(TAG, " handleGetFileL:: bean = " + bean.toString());
 
-        String last_third = bean.getFilePath().substring(bean.getFilePath().length()-3,bean.getFilePath().length());// TODO: 2022/3/29 图片预览
+        String filePath = AesTools.getDecryptContent(bean.getFilePath(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        LogUtils.d(TAG, " handleGetFileL:: bean.getFilePath() = " + bean.getFilePath());
+        LogUtils.d(TAG, " handleGetFileL:: 解密filePath = " + filePath);
+        if (filePath == null || filePath.isEmpty()){
+            //对没有进行加密的聊天内容进行兼容
+            filePath = bean.getFilePath();
+        }
+        String last_third = bean.getFilePath().substring(filePath.length()-3,filePath.length());// TODO: 2022/3/29 图片预览
         LogUtils.d("last_third", last_third);
         if (last_third.equals("png")||last_third.equals("peg")||last_third.equals("jpj")||last_third.equals("ico")||last_third.equals("jpg")) {
 
@@ -344,8 +363,20 @@ public class MessageListAdapter extends BaseAdapter {
             holder.imageView.setImageResource(R.mipmap.b1);// TODO: 2021/9/26 修复 convertView复用的问题
         }
 
-        holder.msg_tv_file_name.setText(bean.getFileName());
-        holder.msg_tv_file_size.setText(bean.getFileSize()+"");
+        String fileName = AesTools.getDecryptContent(bean.getFileName(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        if (fileName == null || fileName.isEmpty()){
+            fileName = bean.getFileName();
+        }
+        Log.d(TAG, " handleGetFileL:: fileName = " + fileName);
+        holder.msg_tv_file_name.setText(fileName);
+
+        String fileSize = AesTools.getDecryptContent(bean.getFileName(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        if (fileSize == null || fileSize.isEmpty()){
+            fileSize = bean.getFileSize() + "";
+        }
+        Log.d(TAG, " handleGetFileL:: fileSize = " + fileSize);
+        holder.msg_tv_file_size.setText(fileSize);
+
         holder.progress_rate.setProgress(bean.getFileProgress());
 
         convertView.setTag(R.id.msg_listview, position);//标记，用于MyAsyncTask更新时遍历
@@ -398,7 +429,13 @@ public class MessageListAdapter extends BaseAdapter {
         LogUtils.d(TAG, " handleGetFileR:: bean = " + bean.toString());
         holder.rc_msg_iv_file_type_image.setImageResource(R.mipmap.rc_file_icon_file);//因为会复用上一消息的设计，这里要还原
 
-        String last_third = bean.getFilePath().substring(bean.getFilePath().length()-3,bean.getFilePath().length());// TODO: 2022/3/29 图片预览
+        String filePath = AesTools.getDecryptContent(bean.getFilePath(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        LogUtils.d(TAG, " handleGetFileR:: 解密filePath = " + filePath);
+        if (filePath == null || filePath.isEmpty()){
+            filePath = bean.getFilePath();
+        }
+        String last_third = bean.getFilePath().substring(filePath.length()-3,filePath.length());
+
         LogUtils.d("last_third", last_third);
         if (last_third.equals("png")||last_third.equals("peg")||last_third.equals("jpj")||last_third.equals("ico")||last_third.equals("jpg")) {
 
@@ -411,10 +448,21 @@ public class MessageListAdapter extends BaseAdapter {
 
         }
 
+        String fileName = AesTools.getDecryptContent(bean.getFileName(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
+        if (fileName == null || fileName.isEmpty()){
+            fileName = bean.getFileName();
+        }
+        Log.d(TAG, " handleGetFileR:: fileName = " + fileName);
+        holder.msg_tv_file_name.setText(fileName);
 
+        String fileSize = AesTools.getDecryptContent(bean.getFileName(), AesTools.AesKeyTypeEnum.MESSAGE_TYPE);
 
-        holder.msg_tv_file_name.setText(bean.getFileName());
-        holder.msg_tv_file_size.setText(bean.getFileSize()+"");
+        if (fileSize == null || fileSize.isEmpty()){
+            fileSize = bean.getFileSize() + "";
+        }
+        Log.d(TAG, " handleGetFileL:: fileSize = " + fileSize);
+        holder.msg_tv_file_size.setText(fileSize);
+
         holder.msg_tv_speed.setText(bean.getSpeed() + " KB/s");
         holder.progress_rate.setProgress(bean.getFileProgress());
         if (bean.getFileProgress() == 100){

@@ -83,6 +83,9 @@ public class PassWordDialog extends Dialog{
                 String inputPassword = mEditText.getText().toString().trim();
                 Log.d(TAG, " onClick:: inputPassword = " + inputPassword);
                 if (mPassword.equals(inputPassword)){
+                    //TODO 文件解密，复制到Sdcard/Download
+
+
                     FileUtils.copyFile(mContext, mFromFilePath ,mToFilePath);
                     dismiss();
                     showCountDialog(mContext);
